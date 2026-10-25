@@ -18,27 +18,32 @@ An interactive, web-based 3D industrial drone explainer, real-world flight simul
 - **Inside X-Ray Mode**: Renders a translucent composite canopy revealing the internal STM32H7 flight controller, dual IMUs, 4-in-1 ESC, capacitor bank, and solid-state battery cells.
 - **Interactive Component Hotspots**: Deep technical specs for Chassis, Avionics, Motors, Propellers, Battery, and LiDAR.
 
-### 2. ✈️ 6-DOF Real-World Airspace Flight Simulator
-- **Expansive Real-World Airspace**: Procedural sculpted terrain with rolling mountains, a 520-meter active runway with painted thresholds, airport terminal, control tower with rotating radar dish, 36 downtown glass skyscrapers, 220+ 3D trees, wind turbines, and flyable 3D cloud banks.
-- **Smooth 6-DOF Flight Dynamics**: Direct heading-based velocity vectors, bank tilting, yaw turns, and an automatic barometric altitude-hold spring-damper.
-- **Clean Full-Screen View**: Sidebars automatically collapse during flight into an aerospace telemetry OSD bar (Airspeed, Altitude, Battery, Health).
+### 2. ✈️ 5,000-Meter Tactical Battlefield Airspace
+- **Expansive 5km Airspace Across 5 Sectors**:
+  - **Sector 1 (Center): Alpha Military Airbase**: 1,200-meter dual runway, parallel taxiways, 4 massive aircraft hangars, SAM missile defense battery, control tower with radar dish, and twin helipads.
+  - **Sector 2 (East): Cyber Megalopolis Skyline**: 80+ skyscrapers (up to 260m high) with skybridges, illuminated rooftop helipads with coins, and red aviation hazard beacons.
+  - **Sector 3 (South): Industrial Petrochemical Complex**: 4 hyperbolic cooling towers, 8 spherical fuel storage tanks, 6 flare stacks with flame effects, and pipeline corridors.
+  - **Sector 4 (West): Naval Harbor & Aircraft Carrier**: Deep ocean basin with a 320-meter Aircraft Carrier battleship (flight deck with catapult lines & island command tower), escort frigates, and an offshore deep-sea platform with helipad.
+  - **Sector 5 (North): Alpine Mountain Ridgeline**: Towering mountain passes (up to 240m elevation), flight canyons, 12 giant wind turbines, and 500+ trees.
+- **Battlefield Perimeter Warning**: Airspace containment zone (2,400m radius) with "LEAVING COMBAT AIRSPACE — TURN BACK" warning banner and countdown.
 
-### 3. ⚔️ Aerial Combat Arena & Real-Time Multiplayer
+### 3. 🎯 Modern Combat Aiming, Hitmarkers & Weapon Controls (PUBG / Call of Duty Style)
+- **Pointer-Locked Mouse Aiming & 3D Flight**: Click anywhere on canvas to engage pointer lock; mouse movement directly steers heading (yaw) and elevation (pitch) with smooth aerodynamic bank.
+- **ADS Precision Sniper Scope Mode**: Hold Right-Click (or tap mobile `SCOPE` button) to smoothly zoom in from 75° to 42° FOV, displaying a high-contrast holographic optic with digital rangefinder (`RNG: 140M`) and elevation crosshairs.
+- **Predictive Lead Indicator Pip**: Real-time HUD trajectory computer calculates moving target lead based on projectile velocity (`time = dist / 165m/s`), displaying a dynamic pulsing lead pip. Aiming at the lead pip guarantees direct hits!
+- **Tactical 3D Target Lock-on Box**: Automatically tracks the primary enemy in your crosshair with an authentic CoD lock-on bracket, target ID, rangefinder, and live health bar.
+- **Smart Laser Convergence & Anti-Tunneling Raycast**: Dual wing lasers smoothly converge towards the target lead point when inside the aim cone (~36°). Bullet collision uses swept line-segment distance with a generous 6.2m hitbox, eliminating projectile tunneling.
+- **Call of Duty Hitmarkers & Audio Feedback**:
+  - **White `X` Hitmarker**: Flashes with a sharp, satisfying metallic tick sound on every registered hit.
+  - **Floating Damage Numbers**: `24` and `🔥 95 CRIT` numbers erupt in 3D from impacted targets.
+  - **Red Skull Kill Confirmation**: `☠️ TARGET DESTROYED +150` banner with heavy bass destruction thud.
+- **Continuous Full-Auto Laser Cannon**: Holding Left-Click fires a rapid continuous dual laser stream at ~8.7 rounds/second.
 - **Real-Time WebRTC P2P Multiplayer (PeerJS)**:
   - **Invite Link Sharing**: Generate unique room codes (e.g. `SKY-842`) and copy an instant shareable URL (`https://drone-explainer.vercel.app/?room=SKY-842`).
   - **Auto-Join Link Detection**: Friends opening the invite link automatically join the airspace and connect to your flight formation.
   - **3D Remote Drone Synchronization**: High-frequency (~25Hz) smooth position/rotation interpolation, spinning propellers, and synchronized weapon fire.
-  - **3D Overhead Nametags**: Floating illuminated HUD callsign and dynamic health badges (`⚡ Ace-1 [100%]`).
-  - **Tactical Radar Tracking**: Friends appear on the minimap as illuminated cyan blips with callsign labels.
+  - **3D Overhead Nametags & Radar**: Floating illuminated HUD callsign and dynamic health badges (`⚡ Ace-1 [100%]`) and cyan radar blips.
   - **Co-op Swarm & PvP Dogfighting**: Team up against rogue AI drone waves or battle your friends in an intense aerial dogfight with laser and missile hit detection.
-- **Match Deployment Modal**:
-  - **Play Online with Friends**: Live session management, 1-click invite link copy, and pilot callsign customization.
-  - **Single Player (Solo Ace)**: Take on the hostile rogue swarm solo.
-- **Audio & Radio Controls**:
-  - Master Sound & Weapon FX (`ON` / `OFF`) via procedural Web Audio synthesizer.
-  - Tactical Radio Chatter & killfeed alerts (`ON` / `OFF`).
-- **Swarm Threat Levels**: Cadet (3 enemies), Veteran (5 enemies), or Incursion (8 enemies).
-- **Weapons & Armory**: Dual Pulse Lasers, Homing Missiles with exhaust trails, EMP blast wave, and magnetic coin collection (+50 / +150 combo popups).
 
 ### 4. 📹 Camera Director & Angle Controls Dock
 - **8 Dynamic Camera Modes**:
@@ -59,12 +64,13 @@ An interactive, web-based 3D industrial drone explainer, real-world flight simul
 
 | Action | Keyboard | Touch / Mouse Controls |
 | :--- | :--- | :--- |
-| **Cruise / Move** | <kbd>W</kbd> <kbd>S</kbd> | Left Virtual Joystick |
-| **Strafe / Turn** | <kbd>A</kbd> <kbd>D</kbd> | Left Virtual Joystick |
-| **Yaw / Heading** | <kbd>Q</kbd> <kbd>E</kbd> | Right Virtual Joystick |
+| **Aim & Steer** | Mouse (Pointer Lock) / <kbd>Q</kbd> <kbd>E</kbd> | Move Mouse / Right Thumbstick |
+| **Throttle Forward / Airbrake** | <kbd>W</kbd> <kbd>S</kbd> | Left Virtual Joystick |
+| **Bank / Strafe** | <kbd>A</kbd> <kbd>D</kbd> | Left Virtual Joystick |
 | **Climb / Descend** | <kbd>SPACE</kbd> / <kbd>SHIFT</kbd> | Dedicated `▲` / `▼` Altitude Buttons |
-| **Dual Pulse Lasers** | **Left-Click** or <kbd>F</kbd> | `LASER` Action Button |
-| **Homing Missiles** | **Right-Click** or <kbd>M</kbd> | `MISSILE` Action Button |
+| **Continuous Auto-Lasers** | **Left-Click (Hold)** or <kbd>F</kbd> | `LASER` Action Button |
+| **ADS Precision Sniper Scope** | **Right-Click (Hold)** | `🎯 SCOPE` Action Button |
+| **Homing Missiles** | **Middle-Click** or <kbd>M</kbd> / <kbd>E</kbd> | `MISSILE` Action Button |
 | **Cycle Camera Mode** | <kbd>C</kbd> | `📹 CAM` Button / OSD Dropdown |
 | **Flip Camera 180°** | <kbd>V</kbd> | Camera Director Flip Button |
 | **Direct Camera Modes** | Keys <kbd>1</kbd> – <kbd>8</kbd> | Camera Director Mode Chips |

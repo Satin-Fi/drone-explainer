@@ -635,6 +635,358 @@
     transform: translate(-50%, -50%) scale(1.15);
   }
 
+  /* ── AAA MODERN COMBAT RETICLE, TARGETING & HITMARKERS (PUBG / CoD Style) ── */
+  #combat-reticle-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 40;
+    display: none;
+  }
+  body.in-flight #combat-reticle-container {
+    display: block;
+  }
+
+  /* Center Dynamic Crosshair */
+  .reticle-crosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    pointer-events: none;
+    transition: transform 0.08s ease-out, width 0.12s ease-out, height 0.12s ease-out;
+  }
+  .reticle-crosshair.firing {
+    width: 46px;
+    height: 46px;
+  }
+  .reticle-crosshair.ads {
+    width: 18px;
+    height: 18px;
+  }
+  .reticle-post {
+    position: absolute;
+    background: rgba(0, 229, 255, 0.9);
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.7);
+    border-radius: 1px;
+  }
+  .reticle-post.top { top: 0; left: 50%; transform: translateX(-50%); width: 2px; height: 9px; }
+  .reticle-post.bottom { bottom: 0; left: 50%; transform: translateX(-50%); width: 2px; height: 9px; }
+  .reticle-post.left { left: 0; top: 50%; transform: translateY(-50%); width: 9px; height: 2px; }
+  .reticle-post.right { right: 0; top: 50%; transform: translateY(-50%); width: 9px; height: 2px; }
+  .reticle-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 3.5px;
+    height: 3.5px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 6px #00e5ff;
+  }
+
+  /* Dynamic Lead Indicator Pip */
+  #reticle-lead-pip {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    display: none;
+    z-index: 45;
+  }
+  .lead-ring {
+    position: absolute;
+    inset: 0;
+    border: 1.5px dashed rgba(0, 229, 255, 0.85);
+    border-radius: 50%;
+    animation: rotatePip 3s linear infinite;
+  }
+  @keyframes rotatePip {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .lead-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #00e5ff;
+    box-shadow: 0 0 8px #00e5ff;
+  }
+  .lead-label {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    letter-spacing: 0.08em;
+  }
+  #reticle-lead-pip.locked .lead-ring {
+    border-color: #fbbf24;
+    border-style: solid;
+    box-shadow: 0 0 14px rgba(251, 191, 36, 0.9);
+  }
+  #reticle-lead-pip.locked .lead-dot {
+    background: #fbbf24;
+    box-shadow: 0 0 10px #fbbf24;
+  }
+  #reticle-lead-pip.locked .lead-label {
+    color: #fbbf24;
+  }
+
+  /* 3D-to-2D HUD Target Bounding Box */
+  #hud-target-box {
+    position: absolute;
+    width: 68px;
+    height: 68px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    display: none;
+    z-index: 42;
+  }
+  .t-bracket {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: rgba(239, 68, 68, 0.9);
+    border-style: solid;
+  }
+  .t-bracket.tl { top: 0; left: 0; border-width: 2px 0 0 2px; }
+  .t-bracket.tr { top: 0; right: 0; border-width: 2px 2px 0 0; }
+  .t-bracket.bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+  .t-bracket.br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+  .t-info {
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: #f87171;
+    white-space: nowrap;
+    text-shadow: 0 0 6px rgba(0,0,0,0.8);
+  }
+  .t-hp-bar {
+    position: absolute;
+    top: -8px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  #t-hp-fill {
+    width: 100%;
+    height: 100%;
+    background: #ef4444;
+    transition: width 0.1s linear;
+  }
+
+  /* Call of Duty Style Hitmarker (White X) */
+  #cod-hitmarker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.6);
+    width: 44px;
+    height: 44px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.04s, transform 0.06s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 100;
+  }
+  #cod-hitmarker.active {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  .hm-tick {
+    position: absolute;
+    width: 9px;
+    height: 2px;
+    background: #ffffff;
+    box-shadow: 0 0 6px #ffffff;
+    border-radius: 1px;
+  }
+  .hm-tick.t1 { top: 9px; left: 9px; transform: rotate(45deg); }
+  .hm-tick.t2 { top: 9px; right: 9px; transform: rotate(-45deg); }
+  .hm-tick.t3 { bottom: 9px; left: 9px; transform: rotate(-45deg); }
+  .hm-tick.t4 { bottom: 9px; right: 9px; transform: rotate(45deg); }
+
+  /* Call of Duty Kill Confirmation Marker */
+  #cod-killmarker {
+    position: absolute;
+    top: 36%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 110;
+  }
+  #cod-killmarker.active {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  .kill-skull { font-size: 2.4rem; filter: drop-shadow(0 0 16px rgba(239,68,68,0.9)); }
+  .kill-banner-text {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #ef4444;
+    letter-spacing: 0.12em;
+    text-shadow: 0 0 12px rgba(239,68,68,0.8);
+    background: rgba(15, 23, 42, 0.9);
+    padding: 4px 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(239,68,68,0.5);
+  }
+
+  /* Call of Duty / PUBG ADS Sniper Scope Overlay */
+  #ads-scope-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 35;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #ads-scope-overlay.active {
+    opacity: 1;
+  }
+  .scope-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 36%, rgba(0,0,0,0.88) 75%, rgba(0,0,0,0.97) 100%);
+  }
+  .scope-reticle-ring {
+    position: absolute;
+    width: 340px;
+    height: 340px;
+    border: 1.5px solid rgba(0, 229, 255, 0.5);
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.25);
+  }
+  .scope-cross-h {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 20%, rgba(0,229,255,0.7) 45%, #fff 50%, rgba(0,229,255,0.7) 55%, transparent 80%);
+  }
+  .scope-cross-v {
+    position: absolute;
+    height: 100%;
+    width: 1px;
+    background: linear-gradient(180deg, transparent 20%, rgba(0,229,255,0.7) 45%, #fff 50%, rgba(0,229,255,0.7) 55%, transparent 80%);
+  }
+  .scope-readout {
+    position: absolute;
+    bottom: 22%;
+    display: flex;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    letter-spacing: 0.08em;
+    background: rgba(7, 9, 14, 0.85);
+    padding: 5px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 229, 255, 0.4);
+  }
+
+  /* Airspace Boundary Warning Banner (Battlefield / Warzone Style) */
+  #boundary-warning-banner {
+    position: absolute;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(220, 38, 38, 0.92);
+    color: #ffffff;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 800;
+    padding: 8px 24px;
+    border-radius: 8px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    z-index: 300;
+    letter-spacing: 0.06em;
+    animation: pulseWarn 0.8s ease-in-out infinite alternate;
+  }
+  @keyframes pulseWarn {
+    from { opacity: 0.85; transform: translateX(-50%) scale(0.98); }
+    to { opacity: 1; transform: translateX(-50%) scale(1.02); }
+  }
+
+  /* Pointer Lock / Mouse Aim Badge */
+  #mouse-aim-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    padding: 4px 14px;
+    border-radius: 14px;
+    background: rgba(7, 9, 14, 0.8);
+    border: 1px solid var(--border-porcelain);
+    color: var(--text-tertiary);
+    pointer-events: none;
+    z-index: 25;
+    display: none;
+    transition: all 0.2s;
+  }
+  body.in-flight #mouse-aim-indicator {
+    display: block;
+  }
+  #mouse-aim-indicator.active {
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+    background: rgba(0, 229, 255, 0.15);
+  }
+
+  /* Floating 3D Damage Numbers */
+  .floating-dmg {
+    position: absolute;
+    pointer-events: none;
+    font-family: var(--font-mono);
+    font-weight: 800;
+    text-shadow: 0 0 6px #000000;
+    transform: translate(-50%, -50%);
+    animation: floatUp 0.75s ease-out forwards;
+    z-index: 120;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    50% { transform: translate(-50%, -25px) scale(1.15); }
+    100% { opacity: 0; transform: translate(-50%, -45px) scale(0.9); }
+  }
+
   /* Flight Controls Legend */
   #flight-controls-legend {
     position: absolute;
@@ -1657,37 +2009,64 @@
     </div>
 
     <!-- Real-Time Multiplayer Room & Link Section -->
-    <div id="multiplayer-room-panel" style="background:rgba(255,255,255,0.03); border:1px solid var(--border-porcelain); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+    <div id="multiplayer-room-panel" style="background:rgba(255,255,255,0.03); border:1px solid var(--border-porcelain); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
       <div style="display:flex; align-items:center; justify-content:space-between;">
-        <span style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-tertiary); letter-spacing:0.06em;">LIVE MULTIPLAYER SESSION</span>
-        <span id="mp-status-pill" style="font-family:var(--font-mono); font-size:0.62rem; padding:2px 8px; border-radius:12px; background:rgba(16,185,129,0.15); color:var(--accent-mint); border:1px solid rgba(16,185,129,0.3)">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:0.85rem;">🌐</span>
+          <span style="font-family:var(--font-mono); font-size:0.7rem; font-weight:700; color:#fff; letter-spacing:0.06em;">LIVE MULTIPLAYER FLIGHT SQUAD</span>
+        </div>
+        <span id="mp-status-pill" style="font-family:var(--font-mono); font-size:0.62rem; padding:3px 10px; border-radius:12px; background:rgba(16,185,129,0.15); color:var(--accent-mint); border:1px solid rgba(16,185,129,0.3); font-weight:700;">
           ● READY TO FLY
         </span>
       </div>
 
-      <!-- Room Code & 1-Click Copy Invite Link -->
-      <div style="display:flex; gap:8px; align-items:center;">
-        <div style="flex:1; background:rgba(7,9,14,0.85); border:1px solid var(--border-porcelain); border-radius:8px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between;">
-          <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-secondary);">ROOM:</span>
-          <span id="mp-room-code-display" style="font-family:var(--font-mono); font-size:0.95rem; font-weight:700; color:var(--accent-cyan); letter-spacing:0.08em;">SKY-842</span>
+      <!-- Room Code & Quick Action Row -->
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <div style="flex:1; min-width:140px; background:rgba(7,9,14,0.9); border:1px solid var(--border-porcelain); border-radius:8px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-secondary);">ROOM CODE:</span>
+          <span id="mp-room-code-display" style="font-family:var(--font-mono); font-size:1.05rem; font-weight:800; color:var(--accent-cyan); letter-spacing:0.08em;">SKY-842</span>
         </div>
-        <button onclick="copyMultiplayerInviteLink()" class="action-btn" id="btn-copy-link" style="padding:9px 14px; font-size:0.72rem; background:rgba(0,229,255,0.16); border-color:var(--accent-cyan); color:var(--accent-cyan); font-weight:700; white-space:nowrap;">
-          📋 Copy Invite Link
+        <button onclick="createNewMultiplayerRoom()" class="action-btn" id="btn-new-room" title="Generate a fresh room code" style="padding:9px 12px; font-size:0.72rem; background:rgba(255,255,255,0.06); border-color:var(--border-porcelain); color:#e2e8f0; font-weight:600;">
+          🎲 New Room
         </button>
+      </div>
+
+      <!-- Shareable Invite Link Box with 1-Tap Copy & Native Share -->
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-tertiary); letter-spacing:0.04em;">INVITE LINK (SEND TO A FRIEND):</span>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="mp-share-url-box" readonly onclick="this.select();" value="https://drone-explainer.vercel.app/?room=SKY-842" style="flex:1; background:rgba(7,9,14,0.85); border:1px solid rgba(0,229,255,0.35); border-radius:8px; padding:8px 10px; font-family:var(--font-mono); font-size:0.7rem; color:var(--accent-cyan); outline:none; text-overflow:ellipsis;" />
+          <button onclick="copyMultiplayerInviteLink()" class="action-btn" id="btn-copy-link" style="padding:8px 14px; font-size:0.72rem; background:rgba(0,229,255,0.18); border-color:var(--accent-cyan); color:var(--accent-cyan); font-weight:700; white-space:nowrap;">
+            📋 Copy Link
+          </button>
+        </div>
+      </div>
+
+      <!-- Social & Native Sharing Buttons -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <button onclick="shareNativeInviteLink()" class="action-btn" id="btn-native-share" style="padding:8px 12px; font-size:0.72rem; background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.4); color:var(--accent-mint); font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span>📲</span> Share Link (Mobile/App)
+        </button>
+        <a id="mp-whatsapp-btn" href="#" target="_blank" class="action-btn" style="padding:8px 12px; font-size:0.72rem; background:rgba(37,211,102,0.15); border-color:rgba(37,211,102,0.4); color:#4ade80; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; text-decoration:none;">
+          <span>💬</span> WhatsApp Invite
+        </a>
       </div>
 
       <!-- Join a Friend's Room Input -->
-      <div style="display:flex; gap:8px; align-items:center;">
-        <input type="text" id="mp-join-input" placeholder="Paste friend's link or enter code (e.g. SKY-842)..." style="flex:1; background:rgba(7,9,14,0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:7px 10px; font-family:var(--font-mono); font-size:0.7rem; color:#fff; outline:none;" />
-        <button onclick="joinRoomFromInput()" class="action-btn" style="padding:7px 14px; font-size:0.7rem; background:rgba(255,255,255,0.08); border-color:var(--border-porcelain); color:#fff; white-space:nowrap;">
-          Join Flight
-        </button>
+      <div style="border-top:1px dashed rgba(255,255,255,0.12); padding-top:10px; display:flex; flex-direction:column; gap:6px;">
+        <span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-tertiary); letter-spacing:0.04em;">OR JOIN A FRIEND'S ROOM:</span>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="mp-join-input" placeholder="Paste link or enter room code (e.g. SKY-842)..." style="flex:1; background:rgba(7,9,14,0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:7px 10px; font-family:var(--font-mono); font-size:0.7rem; color:#fff; outline:none;" />
+          <button onclick="joinRoomFromInput()" class="action-btn" style="padding:7px 14px; font-size:0.7rem; background:rgba(255,255,255,0.1); border-color:var(--border-porcelain); color:#fff; white-space:nowrap; font-weight:600;">
+            Join Flight
+          </button>
+        </div>
       </div>
 
       <!-- Player Callsign & Connected Wingmen Counter -->
-      <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:0.65rem; color:var(--text-tertiary);">
-        <span>Callsign: <input type="text" id="mp-callsign-input" value="Ace-1" onchange="updatePlayerCallsign(this.value)" style="background:transparent; border:none; border-bottom:1px dashed var(--accent-cyan); color:var(--accent-cyan); font-family:var(--font-mono); font-size:0.68rem; width:80px; text-align:center; outline:none;" /></span>
-        <span id="mp-players-count" style="color:var(--astra-butter);">1 Pilot Connected</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:0.65rem; color:var(--text-tertiary); border-top:1px solid rgba(255,255,255,0.06); padding-top:6px;">
+        <span>Callsign: <input type="text" id="mp-callsign-input" value="Ace-1" onchange="updatePlayerCallsign(this.value)" title="Change your pilot callsign" style="background:transparent; border:none; border-bottom:1px dashed var(--accent-cyan); color:var(--accent-cyan); font-family:var(--font-mono); font-size:0.68rem; width:80px; text-align:center; outline:none; font-weight:700;" /></span>
+        <span id="mp-players-count" style="color:var(--accent-gold); font-weight:700;">1 Pilot Connected</span>
       </div>
     </div>
 
@@ -1859,6 +2238,13 @@
         <div class="osd-item">
           <span class="osd-label">COINS</span>
           <span class="osd-val" id="osd-coins-val" style="color:var(--accent-gold)">350</span>
+        </div>
+        <!-- Online Friends Multiplayer Squad Pill (Always visible on Mobile & Desktop) -->
+        <div id="osd-multiplayer-badge" onclick="shareNativeInviteLink()" title="Tap to invite wingmen or share room link" style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,229,255,0.16); border:1px solid rgba(0,229,255,0.45); border-radius:14px; padding:3px 9px; cursor:pointer; user-select:none;">
+          <span style="font-size:0.75rem;">🌐</span>
+          <span id="osd-room-code-tag" style="font-family:var(--font-mono); font-weight:700; color:var(--accent-cyan); font-size:0.68rem; letter-spacing:0.04em;">ROOM: SKY-842</span>
+          <span id="osd-mp-count" style="font-size:0.62rem; color:var(--accent-gold); font-family:var(--font-mono); font-weight:700;">(1)</span>
+          <span style="font-size:0.58rem; background:var(--accent-cyan); color:#000; padding:1px 6px; border-radius:4px; font-weight:800; letter-spacing:0.03em;">INVITE</span>
         </div>
         <div class="osd-desktop-tools" style="display:flex; align-items:center; gap:8px;">
           <div class="osd-item">
@@ -2065,18 +2451,90 @@
             <span style="color:var(--accent-gold)" id="price-emp">400 COINS</span>
           </div>
         </div>
+
+        <!-- ── AAA DYNAMIC TARGETING & WEAPONS RETICLE (PUBG / CoD Style) ── -->
+        <div id="combat-reticle-container">
+          <!-- Dynamic Center Crosshair -->
+          <div class="reticle-crosshair" id="reticle-crosshair">
+            <div class="reticle-post top"></div>
+            <div class="reticle-post bottom"></div>
+            <div class="reticle-post left"></div>
+            <div class="reticle-post right"></div>
+            <div class="reticle-dot"></div>
+          </div>
+
+          <!-- Dynamic Predictive Lead Indicator Pip -->
+          <div id="reticle-lead-pip">
+            <div class="lead-ring"></div>
+            <div class="lead-dot"></div>
+            <span class="lead-label">AIM LEAD</span>
+          </div>
+
+          <!-- Tactical Enemy Bounding Box -->
+          <div id="hud-target-box">
+            <div class="t-bracket tl"></div>
+            <div class="t-bracket tr"></div>
+            <div class="t-bracket bl"></div>
+            <div class="t-bracket br"></div>
+            <div class="t-info">
+              <span id="t-name">ROGUE-01</span>
+              <span id="t-dist">142M</span>
+            </div>
+            <div class="t-hp-bar"><div id="t-hp-fill"></div></div>
+          </div>
+
+          <!-- Call of Duty Style Hitmarker (White X) -->
+          <div id="cod-hitmarker">
+            <div class="hm-tick t1"></div>
+            <div class="hm-tick t2"></div>
+            <div class="hm-tick t3"></div>
+            <div class="hm-tick t4"></div>
+          </div>
+
+          <!-- Call of Duty Kill Confirmation -->
+          <div id="cod-killmarker">
+            <div class="kill-skull">☠️</div>
+            <div class="kill-banner-text">TARGET DESTROYED +150</div>
+          </div>
+
+          <!-- ADS Precision Sniper Scope Overlay -->
+          <div id="ads-scope-overlay">
+            <div class="scope-vignette"></div>
+            <div class="scope-reticle-ring"></div>
+            <div class="scope-cross-h"></div>
+            <div class="scope-cross-v"></div>
+            <div class="scope-readout">
+              <span>OPTIC: 3.5X ACOG</span>
+              <span id="ads-range-val">RNG: 140M</span>
+              <span id="ads-lead-val" style="color:var(--accent-mint)">READY</span>
+            </div>
+          </div>
+
+          <!-- Airspace Boundary Warning Banner -->
+          <div id="boundary-warning-banner">
+            <span style="font-size:1.1rem">⚠️</span>
+            <span>LEAVING COMBAT AIRSPACE — TURN BACK</span>
+            <span id="boundary-countdown" style="background:#000; padding:2px 8px; border-radius:4px; color:#f87171">5.0s</span>
+          </div>
+        </div>
+
+        <!-- Mouse Aim / Pointer Lock Indicator -->
+        <div id="mouse-aim-indicator">
+          🖱️ Click to Lock Mouse Aim [ESC to unlock]
+        </div>
       </div>
 
       <!-- Flight Controls Legend -->
       <div id="flight-controls-legend" class="glass-panel">
-        <div><span class="key-badge">W</span> <span class="key-badge">S</span> Pitch / Move</div>
-        <div><span class="key-badge">A</span> <span class="key-badge">D</span> Strafe / Turn</div>
-        <div><span class="key-badge">Q</span> <span class="key-badge">E</span> Yaw</div>
-        <div><span class="key-badge">SPACE</span> / <span class="key-badge">SHIFT</span> Altitude</div>
-        <div style="color:var(--accent-cyan); font-weight:700"><span class="key-badge">C</span> Cam Mode</div>
-        <div style="color:var(--astra-lavender); font-weight:700"><span class="key-badge">V</span> Flip Angle</div>
-        <div style="color:var(--accent-rose); font-weight:700"><span class="key-badge">L-CLICK / F</span> Shoot Laser</div>
-        <div style="color:var(--accent-cyan); font-weight:700"><span class="key-badge">R-CLICK / M</span> Missile</div>
+        <div><span class="key-badge">L-CLICK</span> Auto-Laser</div>
+        <div><span class="key-badge">R-CLICK</span> ADS Scope</div>
+        <div><span class="key-badge">MOUSE</span> Aim & Steer</div>
+        <div><span class="key-badge">W</span> Throttle</div>
+        <div><span class="key-badge">S</span> Brake</div>
+        <div><span class="key-badge">A</span> <span class="key-badge">D</span> Bank</div>
+        <div><span class="key-badge">SPACE</span> / <span class="key-badge">SHIFT</span> Alt</div>
+        <div style="color:var(--accent-cyan); font-weight:700"><span class="key-badge">M / E</span> Missile</div>
+        <div style="color:var(--astra-butter); font-weight:700"><span class="key-badge">C</span> Cam</div>
       </div>
 
       <!-- ── MOBILE TOUCH CONTROLS ── -->
@@ -2108,6 +2566,10 @@
           <button class="mob-btn respawn" id="mob-respawn-btn" aria-label="Respawn">
             <span class="btn-icon">↺</span>
             <span class="btn-label">Respawn</span>
+          </button>
+          <button class="mob-btn" id="mob-ads-btn" aria-label="ADS Scope" style="border-color:var(--accent-mint); color:var(--accent-mint); background:rgba(16,185,129,0.15)">
+            <span class="btn-icon">🎯</span>
+            <span class="btn-label">SCOPE</span>
           </button>
           <button class="mob-btn fire" id="mob-fire-btn" aria-label="Fire laser">
             <span class="btn-icon">🔵</span>
@@ -2428,6 +2890,53 @@ class SoundEngine {
     osc.start();
     osc.stop(this.ctx.currentTime + 0.45);
   }
+
+  // Modern Call of Duty Style Hitmarker Tick
+  playHitmarkerSound() {
+    if (!this.soundEnabled || !this.initialized || !this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(2400, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.035);
+    gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.035);
+    osc.connect(gain);
+    gain.connect(this.masterGain || this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.035);
+  }
+
+  // Call of Duty Kill Confirmation Heavy Bass Thud
+  playKillConfirmSound() {
+    if (!this.soundEnabled || !this.initialized || !this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(360, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(65, this.ctx.currentTime + 0.28);
+    gain.gain.setValueAtTime(0.45, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.28);
+    osc.connect(gain);
+    gain.connect(this.masterGain || this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.28);
+  }
+
+  // Tactical Lock-on Radar Tone
+  playLockOnBeep(isLocked) {
+    if (!this.soundEnabled || !this.initialized || !this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(isLocked ? 1480 : 920, this.ctx.currentTime);
+    gain.gain.setValueAtTime(isLocked ? 0.18 : 0.08, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + (isLocked ? 0.08 : 0.04));
+    osc.connect(gain);
+    gain.connect(this.masterGain || this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + (isLocked ? 0.08 : 0.04));
+  }
 }
 
 const audio = new SoundEngine();
@@ -2652,9 +3161,9 @@ function createBuildingTexture() {
 const realWorld = new THREE.Group();
 scene.add(realWorld);
 
-// Contoured Terrain
-const terrainSize = 2200;
-const terrainSegments = 100;
+// Contoured Terrain — Expanded 5,000-Meter Combat Airspace
+const terrainSize = 5200;
+const terrainSegments = 130;
 const groundGeo = new THREE.PlaneGeometry(terrainSize, terrainSize, terrainSegments, terrainSegments);
 const posAttr = groundGeo.attributes.position;
 
@@ -2662,44 +3171,65 @@ for (let i = 0; i < posAttr.count; i++) {
   const x = posAttr.getX(i);
   const y = posAttr.getY(i);
   const distFromCenter = Math.sqrt(x * x + y * y);
-  const isAirfield = (Math.abs(x) < 80 && Math.abs(y) < 320);
+  const isAirfield = (Math.abs(x) < 140 && Math.abs(y) < 700);
+  const isOcean = (x < -680 && Math.abs(y) < 900);
 
   if (isAirfield) {
     posAttr.setZ(i, 0);
+  } else if (isOcean) {
+    posAttr.setZ(i, -12);
   } else {
-    const hill1 = Math.sin(x * 0.008) * Math.cos(y * 0.008) * 18;
-    const hill2 = Math.sin(x * 0.018 + 1.2) * Math.cos(y * 0.015) * 8;
-    const mountainNorth = (y < -350 ? Math.pow(Math.abs(y + 350) * 0.07, 1.4) : 0);
-    const mountainWest = (x < -400 ? Math.pow(Math.abs(x + 400) * 0.06, 1.4) : 0);
-    const elevation = Math.max(0, (hill1 + hill2 + mountainNorth + mountainWest) * Math.min(1, (distFromCenter - 60) * 0.02));
+    const hill1 = Math.sin(x * 0.005) * Math.cos(y * 0.005) * 22;
+    const hill2 = Math.sin(x * 0.012 + 1.2) * Math.cos(y * 0.010) * 12;
+    // Towering Alpine Ridge to North
+    const mountainNorth = (y < -450 ? Math.pow(Math.abs(y + 450) * 0.045, 1.45) : 0);
+    // Western Canyons
+    const mountainWest = (x < -450 && Math.abs(y) > 900 ? Math.pow(Math.abs(x + 450) * 0.04, 1.4) : 0);
+    // Eastern Rolling Hills
+    const hillsEast = (x > 800 ? Math.sin(x * 0.008) * 35 : 0);
+    const elevation = Math.max(0, (hill1 + hill2 + mountainNorth + mountainWest + hillsEast) * Math.min(1, Math.max(0, distFromCenter - 100) * 0.015));
     posAttr.setZ(i, elevation);
   }
 }
 groundGeo.computeVertexNormals();
 
 const grassTex = createGrassTexture();
+grassTex.repeat.set(160, 160);
 const groundMat = new THREE.MeshStandardMaterial({ map: grassTex, roughness: 0.88, metalness: 0.05, flatShading: true });
 const terrain = new THREE.Mesh(groundGeo, groundMat);
 terrain.rotation.x = -Math.PI / 2;
 terrain.receiveShadow = true;
 realWorld.add(terrain);
 
-// Asphalt Runway & Helipad
+// ── SECTOR 1: MEGA MILITARY AIRBASE & RUNWAY (1,200 METERS) ──
 const runwayTex = createRunwayTexture();
-const runway = new THREE.Mesh(new THREE.PlaneGeometry(60, 520), new THREE.MeshStandardMaterial({ map: runwayTex, roughness: 0.8, metalness: 0.1 }));
+runwayTex.repeat.set(1, 2.5);
+const runway = new THREE.Mesh(new THREE.PlaneGeometry(80, 1200), new THREE.MeshStandardMaterial({ map: runwayTex, roughness: 0.8, metalness: 0.1 }));
 runway.rotation.x = -Math.PI / 2;
-runway.position.set(0, 0.03, 60);
+runway.position.set(0, 0.04, 0);
 runway.receiveShadow = true;
 realWorld.add(runway);
 
-const taxiway = new THREE.Mesh(new THREE.PlaneGeometry(28, 85), new THREE.MeshStandardMaterial({ color: 0x2b2e34, roughness: 0.85 }));
-taxiway.rotation.x = -Math.PI / 2;
-taxiway.position.set(45, 0.032, 0);
-taxiway.rotation.z = Math.PI / 2;
-taxiway.receiveShadow = true;
-realWorld.add(taxiway);
+// Dual Parallel Taxiways
+[-65, 65].forEach(tx => {
+  const tw = new THREE.Mesh(new THREE.PlaneGeometry(28, 1100), new THREE.MeshStandardMaterial({ color: 0x22262c, roughness: 0.85 }));
+  tw.rotation.x = -Math.PI / 2;
+  tw.position.set(tx, 0.035, 0);
+  tw.receiveShadow = true;
+  realWorld.add(tw);
 
-// Helipad
+  // Connecting high-speed taxiways
+  for (let z = -450; z <= 450; z += 225) {
+    const conn = new THREE.Mesh(new THREE.PlaneGeometry(28, 45), new THREE.MeshStandardMaterial({ color: 0x22262c, roughness: 0.85 }));
+    conn.rotation.x = -Math.PI / 2;
+    conn.rotation.z = Math.PI / 2;
+    conn.position.set(tx > 0 ? 32 : -32, 0.036, z);
+    conn.receiveShadow = true;
+    realWorld.add(conn);
+  }
+});
+
+// Dual Military Helipads
 const helipadCanvas = document.createElement('canvas');
 helipadCanvas.width = 256; helipadCanvas.height = 256;
 const hCtx = helipadCanvas.getContext('2d');
@@ -2714,125 +3244,313 @@ hCtx.fillStyle = '#ffffff';
 hCtx.fillRect(80, 60, 22, 136);
 hCtx.fillRect(154, 60, 22, 136);
 hCtx.fillRect(80, 116, 96, 24);
-
 const helipadTex = new THREE.CanvasTexture(helipadCanvas);
-const helipadMesh = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), new THREE.MeshStandardMaterial({ map: helipadTex, roughness: 0.7 }));
-helipadMesh.rotation.x = -Math.PI / 2;
-helipadMesh.position.set(0, 0.035, 0);
-helipadMesh.receiveShadow = true;
-realWorld.add(helipadMesh);
 
-// Lake
-const lake = new THREE.Mesh(new THREE.PlaneGeometry(450, 320), new THREE.MeshStandardMaterial({ color: 0x1d527a, roughness: 0.1, metalness: 0.9 }));
-lake.rotation.x = -Math.PI / 2;
-lake.position.set(-260, 0.02, 150);
-lake.receiveShadow = true;
-realWorld.add(lake);
+[-35, 35].forEach((hx, idx) => {
+  const pad = new THREE.Mesh(new THREE.PlaneGeometry(24, 24), new THREE.MeshStandardMaterial({ map: helipadTex, roughness: 0.7 }));
+  pad.rotation.x = -Math.PI / 2;
+  pad.position.set(hx, 0.045, idx === 0 ? 0 : -80);
+  pad.receiveShadow = true;
+  realWorld.add(pad);
+});
 
-// City Skyline
+// 4 Massive Aircraft Hangars
+const hangarMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4, metalness: 0.6 });
+const hangarDoorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7 });
+[
+  { x: 105, z: -160, rot: -Math.PI / 2 },
+  { x: 105, z: -80, rot: -Math.PI / 2 },
+  { x: 105, z: 80, rot: -Math.PI / 2 },
+  { x: 105, z: 160, rot: -Math.PI / 2 }
+].forEach(h => {
+  const hGroup = new THREE.Group();
+  const bldg = new THREE.Mesh(new THREE.BoxGeometry(45, 18, 55), hangarMat);
+  bldg.position.y = 9;
+  bldg.castShadow = true;
+  bldg.receiveShadow = true;
+  hGroup.add(bldg);
+
+  const roof = new THREE.Mesh(new THREE.CylinderGeometry(23.5, 23.5, 55, 16, 1, false, 0, Math.PI), hangarMat);
+  roof.rotation.z = Math.PI / 2;
+  roof.rotation.y = Math.PI / 2;
+  roof.position.y = 18;
+  roof.castShadow = true;
+  hGroup.add(roof);
+
+  const door = new THREE.Mesh(new THREE.PlaneGeometry(32, 16), hangarDoorMat);
+  door.position.set(-22.6, 8, 0);
+  door.rotation.y = -Math.PI / 2;
+  hGroup.add(door);
+
+  hGroup.position.set(h.x, 0, h.z);
+  realWorld.add(hGroup);
+});
+
+// Control Tower & Air Defense SAM Site
+const towerShaft = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 8, 56, 16), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 }));
+towerShaft.position.set(110, 28, 0);
+towerShaft.castShadow = true;
+realWorld.add(towerShaft);
+
+const towerCab = new THREE.Mesh(new THREE.CylinderGeometry(9.5, 7.5, 10, 16), new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.1, metalness: 0.85 }));
+towerCab.position.set(110, 60, 0);
+towerCab.castShadow = true;
+realWorld.add(towerCab);
+
+const radarBar = new THREE.Mesh(new THREE.BoxGeometry(9, 1.1, 1.6), new THREE.MeshStandardMaterial({ color: 0xf59e0b }));
+radarBar.position.set(110, 66, 0);
+realWorld.add(radarBar);
+
+// SAM Missile Battery Defense Site
+const samGroup = new THREE.Group();
+const samBase = new THREE.Mesh(new THREE.CylinderGeometry(6, 7, 2, 16), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+samBase.position.y = 1;
+samGroup.add(samBase);
+for (let p = -2; p <= 2; p += 4) {
+  const pod = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 9), new THREE.MeshStandardMaterial({ color: 0x475569 }));
+  pod.rotation.x = -Math.PI / 5;
+  pod.position.set(p, 4.5, 0);
+  samGroup.add(pod);
+}
+samGroup.position.set(-110, 0, 120);
+realWorld.add(samGroup);
+
+// ── SECTOR 2: CYBER MEGAPOLIS CITY (80+ SKYSCRAPERS) ──
 const bldgTex = createBuildingTexture();
 const cityGroup = new THREE.Group();
 realWorld.add(cityGroup);
-const bldgColors = [0x2c3e50, 0x34495e, 0x243342, 0x1f2a38, 0x2b3846];
-for (let i = 0; i < 36; i++) {
-  const w = 20 + Math.random() * 24;
-  const d = 20 + Math.random() * 24;
-  const h = 55 + Math.random() * 120;
-  const bMesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ map: bldgTex, color: bldgColors[i % bldgColors.length], roughness: 0.25, metalness: 0.75 }));
-  const row = Math.floor(i / 6), col = i % 6;
-  const x = 140 + col * 42 + (Math.random() - 0.5) * 12;
-  const z = -80 + row * 48 + (Math.random() - 0.5) * 12;
+const bldgColors = [0x1e293b, 0x0f172a, 0x1e3a5f, 0x111827, 0x1f2937, 0x1e222d];
+
+for (let i = 0; i < 84; i++) {
+  const w = 24 + Math.random() * 32;
+  const d = 24 + Math.random() * 32;
+  const h = 65 + Math.random() * 195; // Up to 260m skyscrapers!
+  const bMesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({
+    map: bldgTex,
+    color: bldgColors[i % bldgColors.length],
+    roughness: 0.2,
+    metalness: 0.85
+  }));
+  const col = i % 12;
+  const row = Math.floor(i / 12);
+  const x = 200 + col * 65 + (Math.random() - 0.5) * 16;
+  const z = -480 + row * 85 + (Math.random() - 0.5) * 16;
   bMesh.position.set(x, h / 2, z);
   bMesh.castShadow = true;
   bMesh.receiveShadow = true;
   cityGroup.add(bMesh);
 
-  if (h > 95) {
-    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.4, 20, 8), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
-    mast.position.set(x, h + 10, z);
+  // Rooftop Helipads on top of 10 tall skyscrapers
+  if (h > 140 && i % 4 === 0) {
+    const rPad = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), new THREE.MeshStandardMaterial({ map: helipadTex, roughness: 0.6 }));
+    rPad.rotation.x = -Math.PI / 2;
+    rPad.position.set(x, h + 0.1, z);
+    cityGroup.add(rPad);
+  }
+
+  // Aviation Warning Beacon Spire
+  if (h > 120) {
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.5, 24, 8), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+    mast.position.set(x, h + 12, z);
     cityGroup.add(mast);
-    const beacon = new THREE.Mesh(new THREE.SphereGeometry(1.0, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-    beacon.position.set(x, h + 20, z);
+    const beacon = new THREE.Mesh(new THREE.SphereGeometry(1.2, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+    beacon.position.set(x, h + 24, z);
     cityGroup.add(beacon);
   }
 }
 
-// Control Tower & Hangars
-const towerShaft = new THREE.Mesh(new THREE.CylinderGeometry(5, 7, 48, 16), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 }));
-towerShaft.position.set(65, 24, -40);
-towerShaft.castShadow = true;
-realWorld.add(towerShaft);
+// ── SECTOR 3: INDUSTRIAL PETROCHEMICAL REFINERY (SOUTH) ──
+const refineryGroup = new THREE.Group();
+realWorld.add(refineryGroup);
 
-const towerCab = new THREE.Mesh(new THREE.CylinderGeometry(8.5, 6.5, 9, 16), new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.1, metalness: 0.85 }));
-towerCab.position.set(65, 52, -40);
-towerCab.castShadow = true;
-realWorld.add(towerCab);
+// 4 Giant Parabolic Cooling Towers
+for (let c = 0; c < 4; c++) {
+  const coolTower = new THREE.Mesh(
+    new THREE.CylinderGeometry(15, 24, 60, 24, 1, true),
+    new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8, side: THREE.DoubleSide })
+  );
+  coolTower.position.set(-180 + c * 75, 30, 820);
+  coolTower.castShadow = true;
+  refineryGroup.add(coolTower);
+}
 
-const radarBar = new THREE.Mesh(new THREE.BoxGeometry(8, 0.9, 1.4), new THREE.MeshStandardMaterial({ color: 0xf59e0b }));
-radarBar.position.set(65, 58, -40);
-realWorld.add(radarBar);
+// 8 Spherical Pressurized Gas / Fuel Tanks
+for (let s = 0; s < 8; s++) {
+  const sphereTank = new THREE.Mesh(
+    new THREE.SphereGeometry(14, 20, 20),
+    new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.35, metalness: 0.75 })
+  );
+  const sx = -220 + (s % 4) * 65;
+  const sz = 930 + Math.floor(s / 4) * 65;
+  sphereTank.position.set(sx, 16, sz);
+  sphereTank.castShadow = true;
+  refineryGroup.add(sphereTank);
 
-// Wind Turbines
+  // Support Legs
+  const legs = new THREE.Mesh(new THREE.CylinderGeometry(13.5, 14, 5, 8, 1, true), new THREE.MeshStandardMaterial({ color: 0x334155 }));
+  legs.position.set(sx, 2.5, sz);
+  refineryGroup.add(legs);
+}
+
+// 6 Refinery Flare Stacks with Fire Glow
+for (let f = 0; f < 6; f++) {
+  const flareStack = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.8, 1.4, 75, 12),
+    new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8 })
+  );
+  const fx = 160 + (f % 3) * 55;
+  const fz = 820 + Math.floor(f / 3) * 65;
+  flareStack.position.set(fx, 37.5, fz);
+  flareStack.castShadow = true;
+  refineryGroup.add(flareStack);
+
+  const flame = new THREE.Mesh(
+    new THREE.ConeGeometry(2.5, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xf97316 })
+  );
+  flame.position.set(fx, 78, fz);
+  refineryGroup.add(flame);
+}
+
+// ── SECTOR 4: NAVAL HARBOR & AIRCRAFT CARRIER BATTLESHIP (WEST) ──
+// Giant Ocean Plane
+const oceanMat = new THREE.MeshStandardMaterial({ color: 0x0f2b48, roughness: 0.12, metalness: 0.88 });
+const ocean = new THREE.Mesh(new THREE.PlaneGeometry(2400, 1800), oceanMat);
+ocean.rotation.x = -Math.PI / 2;
+ocean.position.set(-1350, 0.02, 0);
+ocean.receiveShadow = true;
+realWorld.add(ocean);
+
+// 320-Meter Aircraft Carrier Battleship
+const carrierGroup = new THREE.Group();
+const hullMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.45, metalness: 0.7 });
+const deckMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+
+// Lower Hull
+const carrierHull = new THREE.Mesh(new THREE.BoxGeometry(65, 20, 320), hullMat);
+carrierHull.position.y = 8;
+carrierHull.castShadow = true;
+carrierGroup.add(carrierHull);
+
+// Angled Flight Deck with Runway Strip
+const deckCanvas = document.createElement('canvas');
+deckCanvas.width = 512; deckCanvas.height = 1024;
+const dCtx = deckCanvas.getContext('2d');
+dCtx.fillStyle = '#1e242d';
+dCtx.fillRect(0, 0, 512, 1024);
+dCtx.strokeStyle = '#f59e0b';
+dCtx.lineWidth = 8;
+dCtx.strokeRect(20, 20, 472, 984);
+dCtx.fillStyle = '#ffffff';
+dCtx.font = "bold 90px monospace";
+dCtx.textAlign = "center";
+dCtx.fillText("77", 256, 180);
+for (let y = 140; y < 900; y += 80) dCtx.fillRect(250, y, 12, 45);
+const carrierDeckTex = new THREE.CanvasTexture(deckCanvas);
+
+const carrierDeck = new THREE.Mesh(new THREE.PlaneGeometry(74, 335), new THREE.MeshStandardMaterial({ map: carrierDeckTex, roughness: 0.75 }));
+carrierDeck.rotation.x = -Math.PI / 2;
+carrierDeck.position.set(0, 18.2, 0);
+carrierGroup.add(carrierDeck);
+
+// Island Command Superstructure & Radar Mast
+const island = new THREE.Mesh(new THREE.BoxGeometry(14, 26, 45), hullMat);
+island.position.set(24, 31, -25);
+island.castShadow = true;
+carrierGroup.add(island);
+
+const carrierRadar = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 1.2, 28, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
+carrierRadar.position.set(24, 56, -25);
+carrierGroup.add(carrierRadar);
+
+carrierGroup.position.set(-1100, 0, -80);
+carrierGroup.rotation.y = 0.22;
+realWorld.add(carrierGroup);
+
+// Offshore Oil & Heli Platform
+const oilRig = new THREE.Group();
+const rigPlatform = new THREE.Mesh(new THREE.BoxGeometry(55, 6, 55), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7 }));
+rigPlatform.position.y = 22;
+oilRig.add(rigPlatform);
+const rigPad = new THREE.Mesh(new THREE.PlaneGeometry(32, 32), new THREE.MeshStandardMaterial({ map: helipadTex }));
+rigPad.rotation.x = -Math.PI / 2;
+rigPad.position.y = 25.1;
+oilRig.add(rigPad);
+for (let lx = -22; lx <= 22; lx += 44) {
+  for (let lz = -22; lz <= 22; lz += 44) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 3.5, 22, 12), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+    leg.position.set(lx, 11, lz);
+    oilRig.add(leg);
+  }
+}
+oilRig.position.set(-1450, 0, 380);
+realWorld.add(oilRig);
+
+// ── SECTOR 5: ALPINE MOUNTAIN RIDGELINE & WIND TURBINES (NORTH) ──
 const turbines = [];
-[-340, -260, -180].forEach((xPos, idx) => {
+[-700, -520, -340, -160, 20, 200, 380, 560].forEach((xPos, idx) => {
   const turbGroup = new THREE.Group();
-  const tower = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 2.4, 75, 16), new THREE.MeshStandardMaterial({ color: 0xf1f5f9 }));
-  tower.position.y = 37.5;
+  const tower = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.8, 85, 16), new THREE.MeshStandardMaterial({ color: 0xf1f5f9 }));
+  tower.position.y = 42.5;
   turbGroup.add(tower);
 
-  const nacelle = new THREE.Mesh(new THREE.BoxGeometry(3.5, 3.5, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
-  nacelle.position.set(0, 75, 0);
+  const nacelle = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 9), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
+  nacelle.position.set(0, 85, 0);
   turbGroup.add(nacelle);
 
   const rotorHub = new THREE.Group();
-  rotorHub.position.set(0, 75, 4.2);
+  rotorHub.position.set(0, 85, 4.8);
   turbGroup.add(rotorHub);
 
   for (let b = 0; b < 3; b++) {
-    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.9, 30, 0.3), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-    blade.position.y = 15;
+    const blade = new THREE.Mesh(new THREE.BoxGeometry(1.1, 35, 0.35), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+    blade.position.y = 17.5;
     const bWrap = new THREE.Group();
     bWrap.rotation.z = (b * Math.PI * 2) / 3;
     bWrap.add(blade);
     rotorHub.add(bWrap);
   }
-  turbGroup.position.set(xPos, 0, -220 + idx * 60);
+  turbGroup.position.set(xPos, 45 + Math.abs(xPos) * 0.08, -680 - (idx % 2) * 90);
   realWorld.add(turbGroup);
   turbines.push(rotorHub);
 });
 
-// Trees
-const treeTrunkGeo = new THREE.CylinderGeometry(0.35, 0.55, 4.5, 8);
-const treeFoliageGeo = new THREE.ConeGeometry(3.6, 9, 8);
+// 500+ Procedural Forest Trees
+const treeTrunkGeo = new THREE.CylinderGeometry(0.4, 0.65, 5, 8);
+const treeFoliageGeo = new THREE.ConeGeometry(4.2, 11, 8);
 const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
-const foliageMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27, roughness: 0.8 });
-const foliageMat2 = new THREE.MeshStandardMaterial({ color: 0x3d7036, roughness: 0.8 });
+const foliageMat = new THREE.MeshStandardMaterial({ color: 0x22542a, roughness: 0.8 });
+const foliageMat2 = new THREE.MeshStandardMaterial({ color: 0x2f6a39, roughness: 0.8 });
 
-for (let i = 0; i < 220; i++) {
-  let x = (Math.random() - 0.5) * 950, z = (Math.random() - 0.5) * 950;
-  if (Math.abs(x) < 45 && z > -90 && z < 320) x += (x >= 0 ? 55 : -55);
-  if (x > 100 && x < 400 && z > -110 && z < 250) continue;
+for (let i = 0; i < 480; i++) {
+  let x = (Math.random() - 0.5) * 2200;
+  let z = (Math.random() - 0.5) * 2200;
+
+  // Keep clear of runway and ocean
+  if (Math.abs(x) < 75 && Math.abs(z) < 650) continue;
+  if (x < -680 && Math.abs(z) < 900) continue;
+  if (x > 180 && x < 950 && z > -500 && z < 500) continue;
 
   const treeGroup = new THREE.Group();
   const trunk = new THREE.Mesh(treeTrunkGeo, trunkMat);
-  trunk.position.y = 2.25;
+  trunk.position.y = 2.5;
   treeGroup.add(trunk);
 
   const foliage = new THREE.Mesh(treeFoliageGeo, (i % 2 === 0 ? foliageMat : foliageMat2));
-  foliage.position.y = 7.5;
+  foliage.position.y = 8.5;
   treeGroup.add(foliage);
 
-  const s = 0.8 + Math.random() * 0.7;
+  const s = 0.8 + Math.random() * 0.8;
   treeGroup.scale.set(s, s, s);
   treeGroup.position.set(x, 0, z);
   realWorld.add(treeGroup);
 }
 
-// ── COIN COLLECTION SYSTEM ───────────────────────────────────
+// ── 50 TACTICAL COLLECTIBLE COINS ACROSS ALL SECTORS ──
 const coinsGroup = new THREE.Group();
 scene.add(coinsGroup);
 
-const coinGeo = new THREE.CylinderGeometry(1.4, 1.4, 0.35, 24);
+const coinGeo = new THREE.CylinderGeometry(1.6, 1.6, 0.4, 24);
 const coinMat = new THREE.MeshStandardMaterial({
   color: 0xfbbf24,
   emissive: 0xd97706,
@@ -2842,28 +3560,27 @@ const coinMat = new THREE.MeshStandardMaterial({
 });
 
 const coinList = [];
-for (let i = 0; i < 28; i++) {
+// Distribute 48 coins strategically: runway approaches, skyscraper canyons, aircraft carrier deck, refinery loop
+const coinPositions = [];
+// Airbase runway loop (10)
+for (let c = 0; c < 10; c++) coinPositions.push(new THREE.Vector3((c % 2 === 0 ? -18 : 18), 10 + c * 3.5, -450 + c * 100));
+// Skyscraper gaps & rooftop rings (16)
+for (let c = 0; c < 16; c++) coinPositions.push(new THREE.Vector3(260 + (c % 4) * 120, 65 + Math.random() * 95, -350 + Math.floor(c / 4) * 180));
+// Aircraft Carrier approach line (8)
+for (let c = 0; c < 8; c++) coinPositions.push(new THREE.Vector3(-1100, 24 + c * 4, -280 + c * 75));
+// Refinery towers flight canyon (8)
+for (let c = 0; c < 8; c++) coinPositions.push(new THREE.Vector3(-180 + c * 55, 35 + (c % 2) * 25, 780 + (c % 3) * 60));
+// Mountain pass crests (8)
+for (let c = 0; c < 8; c++) coinPositions.push(new THREE.Vector3(-400 + c * 110, 85 + Math.random() * 35, -550 - (c % 2) * 80));
+
+coinPositions.forEach(cp => {
   const cMesh = new THREE.Mesh(coinGeo, coinMat);
   cMesh.rotation.x = Math.PI / 2;
-  let cx, cy, cz;
-  if (i < 8) {
-    cx = (i % 2 === 0 ? -15 : 15);
-    cy = 8 + i * 4;
-    cz = 30 + i * 45;
-  } else if (i < 18) {
-    cx = 140 + (i - 8) * 25;
-    cy = 40 + Math.random() * 55;
-    cz = -60 + (i - 8) * 25;
-  } else {
-    cx = -180 + (i - 18) * 35;
-    cy = 14 + Math.random() * 25;
-    cz = 80 + (i - 18) * 20;
-  }
-  cMesh.position.set(cx, cy, cz);
+  cMesh.position.copy(cp);
   cMesh.castShadow = true;
   coinsGroup.add(cMesh);
-  coinList.push({ mesh: cMesh, collected: false, basePos: new THREE.Vector3(cx, cy, cz) });
-}
+  coinList.push({ mesh: cMesh, collected: false, basePos: cp.clone() });
+});
 
 // ── MULTIPLAYER BOT SWARM & COMBAT DRONES ─────────────────────
 const combatDrones = [];
@@ -3196,7 +3913,16 @@ const player = {
   shieldRechargeTimer: 0
 };
 
-// Key Listeners & Mouse Shooting
+// ── MODERN MOUSE AIM, POINTER LOCK & FLIGHT CONTROLS (PUBG / CoD Style) ──
+const mouseAim = {
+  isLocked: false,
+  isMouseDown: false,
+  isAds: false,
+  sensitivity: 0.0022,
+  continuousFireTimer: 0
+};
+
+// Key Listeners & Tactical Actions
 const keys = {};
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
@@ -3204,13 +3930,13 @@ window.addEventListener('keydown', e => {
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
     e.preventDefault();
   }
-  if ((e.code === 'KeyR' || e.key === 'r')) {
+  if (e.code === 'KeyR' || e.key === 'r') {
     respawnDrone();
   }
   if (e.code === 'KeyF' || e.key === 'f') {
     fireLaser();
   }
-  if (e.code === 'KeyM' || e.key === 'm') {
+  if (e.code === 'KeyM' || e.key === 'm' || e.code === 'KeyE' || e.key === 'e') {
     fireMissile();
   }
   if (e.code === 'KeyC' || e.key === 'c') {
@@ -3236,17 +3962,66 @@ window.addEventListener('keyup', e => {
   keys[e.key.toLowerCase()] = false;
 });
 
-window.addEventListener('mousedown', e => {
+// Pointer Lock on Flight Canvas Click
+window.addEventListener('click', (e) => {
   if (appMode !== 'combat' && appMode !== 'flight') return;
-  // If modal is open, don't fire weapons
-  if (document.getElementById('combat-setup-modal').classList.contains('active')) return;
-  if (e.button === 0) fireLaser();
-  if (e.button === 2) {
+  const modal = document.getElementById('combat-setup-modal');
+  if (modal && modal.classList.contains('active')) return;
+  if (e.target.closest('.interactive') || e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) return;
+
+  if (!document.pointerLockElement && renderer && renderer.domElement) {
+    renderer.domElement.requestPointerLock();
+  }
+});
+
+document.addEventListener('pointerlockchange', () => {
+  mouseAim.isLocked = (document.pointerLockElement === (renderer && renderer.domElement));
+  const badge = document.getElementById('mouse-aim-indicator');
+  if (badge) {
+    badge.classList.toggle('active', mouseAim.isLocked);
+    badge.textContent = mouseAim.isLocked ? "🎯 Mouse Aim: Active [ESC to release]" : "🖱️ Click Canvas to Lock Mouse Aim [ESC to unlock]";
+  }
+});
+
+// Mouse Movement: Steering Yaw & Pitch with Smooth Responsiveness
+window.addEventListener('mousemove', (e) => {
+  if (appMode !== 'combat' && appMode !== 'flight') return;
+  if (!mouseAim.isLocked) return;
+
+  const sens = mouseAim.isAds ? mouseAim.sensitivity * 0.45 : mouseAim.sensitivity;
+  player.yaw -= e.movementX * sens;
+  player.pitch = Math.max(-0.75, Math.min(0.75, player.pitch - e.movementY * sens * 0.7));
+});
+
+// Mouse Buttons: Left-Click Auto-Laser, Right-Click ADS Scope, Middle-Click Missile
+window.addEventListener('mousedown', (e) => {
+  if (appMode !== 'combat' && appMode !== 'flight') return;
+  const modal = document.getElementById('combat-setup-modal');
+  if (modal && modal.classList.contains('active')) return;
+  if (e.target.closest('.interactive') || e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) return;
+
+  if (e.button === 0) { // Left Click: Fire Laser & engage continuous auto-stream
+    mouseAim.isMouseDown = true;
+    fireLaser();
+    mouseAim.continuousFireTimer = 0.115;
+  } else if (e.button === 2) { // Right Click: ADS Precision Scope Zoom
+    e.preventDefault();
+    mouseAim.isAds = true;
+  } else if (e.button === 1) { // Middle Click: Homing Missile
     e.preventDefault();
     fireMissile();
   }
 });
-window.addEventListener('contextmenu', e => {
+
+window.addEventListener('mouseup', (e) => {
+  if (e.button === 0) {
+    mouseAim.isMouseDown = false;
+  } else if (e.button === 2) {
+    mouseAim.isAds = false;
+  }
+});
+
+window.addEventListener('contextmenu', (e) => {
   if (appMode === 'combat' || appMode === 'flight') e.preventDefault();
 });
 
@@ -3985,20 +4760,32 @@ function confirmAndDeployCombat() {
     friendTeam.forEach((d, i) => {
       d.alive = true;
       d.hp = d.maxHp;
-      d.pos.set((i === 0 ? -14 : 14), 4, -12);
+      d.pos.set((i === 0 ? -18 : 18), 8, -25);
       scene.add(d.mesh);
     });
     postRadioMessage(`[MATCH]: Wingman Squad Co-op active. Blue Team covering your six.`, 'normal');
     showToast("Squad Co-Op: Playing with Allied Wingmen!");
   }
 
-  // Apply Enemy Threat Count
+  // Apply Enemy Threat Count with Sector Distribution across the 5km Airspace
   let enemyCount = (matchSettings.threatLevel === 'cadet' ? 3 : (matchSettings.threatLevel === 'veteran' ? 5 : 8));
+  const enemySpawnPositions = [
+    { x: 380, y: 75, z: -150 },   // Metropolis City Center
+    { x: 580, y: 110, z: 140 },   // High Altitude City
+    { x: -950, y: 45, z: -120 },  // Naval Aircraft Carrier Bay
+    { x: -1250, y: 55, z: 220 },  // Offshore Rig
+    { x: -140, y: 65, z: 750 },   // Petrochemical Refinery
+    { x: 190, y: 85, z: 880 },    // Refinery Towers
+    { x: -280, y: 115, z: -680 }, // Alpine Mountain Pass
+    { x: 260, y: 130, z: -720 }   // Mountain Ridge
+  ];
+
   enemyTeam.forEach((d, idx) => {
     if (idx < enemyCount) {
       d.alive = true;
       d.hp = d.maxHp;
-      d.pos.set(-140 + idx * 45, 22 + Math.random() * 25, 120 + (idx % 2 === 0 ? 80 : -40));
+      const sp = enemySpawnPositions[idx] || { x: -140, y: 45, z: 120 };
+      d.pos.set(sp.x, sp.y, sp.z);
       scene.add(d.mesh);
     } else {
       d.alive = false;
@@ -4009,7 +4796,172 @@ function confirmAndDeployCombat() {
   document.getElementById('osd-kills-val').textContent = `${enemyCount} ACTIVE`;
 }
 
-// Weapon Actions
+// ── AAA TACTICAL TARGETING, LEAD PREDICTION & HIT REGISTRATION ──
+let currentLockedEnemy = null;
+const currentLead3D = new THREE.Vector3();
+let lockOnSoundTimer = 0;
+
+function distPointToSegment(pt, a, b) {
+  const ab = new THREE.Vector3().subVectors(b, a);
+  const ap = new THREE.Vector3().subVectors(pt, a);
+  const lenSq = ab.lengthSq();
+  if (lenSq === 0) return pt.distanceTo(a);
+  const t = Math.max(0, Math.min(1, ap.dot(ab) / lenSq));
+  const proj = a.clone().addScaledVector(ab, t);
+  return pt.distanceTo(proj);
+}
+
+function updateTacticalTargeting(dt) {
+  if (appMode !== 'combat' && appMode !== 'flight') {
+    hideTargetHUD();
+    return;
+  }
+
+  // Camera forward direction vector
+  const camFwd = new THREE.Vector3();
+  camera.getWorldDirection(camFwd);
+
+  let bestEnemy = null;
+  let bestScore = 9999;
+
+  enemyTeam.forEach(e => {
+    if (!e.alive) return;
+    const toEnemy = e.pos.clone().sub(player.pos);
+    const dist = toEnemy.length();
+    toEnemy.normalize();
+    const dot = camFwd.dot(toEnemy);
+
+    // Target must be in front within ~38° cone
+    if (dot > 0.78) {
+      const angleWeight = (1.0 - dot) * 220;
+      const score = dist + angleWeight;
+      if (score < bestScore) {
+        bestScore = score;
+        bestEnemy = e;
+      }
+    }
+  });
+
+  currentLockedEnemy = bestEnemy;
+
+  const targetBox = document.getElementById('hud-target-box');
+  const leadPip = document.getElementById('reticle-lead-pip');
+
+  if (bestEnemy) {
+    const dist = player.pos.distanceTo(bestEnemy.pos);
+    const laserSpeed = 160.0;
+    const flightTime = dist / laserSpeed;
+
+    // Calculate dynamic 3D lead intercept point
+    currentLead3D.copy(bestEnemy.pos).addScaledVector(bestEnemy.vel, flightTime);
+
+    // Project positions to 2D screen coordinates
+    const screenPos = bestEnemy.pos.clone().project(camera);
+    const leadScreen = currentLead3D.clone().project(camera);
+
+    if (screenPos.z < 1.0) {
+      const sw = window.innerWidth;
+      const sh = window.innerHeight;
+      const ex = (screenPos.x * 0.5 + 0.5) * sw;
+      const ey = (-screenPos.y * 0.5 + 0.5) * sh;
+
+      const lx = (leadScreen.x * 0.5 + 0.5) * sw;
+      const ly = (-leadScreen.y * 0.5 + 0.5) * sh;
+
+      if (targetBox) {
+        targetBox.style.display = 'block';
+        targetBox.style.left = `${ex}px`;
+        targetBox.style.top = `${ey}px`;
+        const nameEl = document.getElementById('t-name');
+        if (nameEl) nameEl.textContent = bestEnemy.id;
+        const distEl = document.getElementById('t-dist');
+        if (distEl) distEl.textContent = `${Math.round(dist)}M`;
+        const hpFill = document.getElementById('t-hp-fill');
+        if (hpFill) hpFill.style.width = `${Math.max(0, (bestEnemy.hp / bestEnemy.maxHp) * 100)}%`;
+      }
+
+      if (leadPip) {
+        leadPip.style.display = 'block';
+        leadPip.style.left = `${lx}px`;
+        leadPip.style.top = `${ly}px`;
+
+        const dCross = Math.hypot(sw / 2 - lx, sh / 2 - ly);
+        const isLockedOn = (dCross < 38);
+        leadPip.classList.toggle('locked', isLockedOn);
+
+        const leadVal = document.getElementById('ads-lead-val');
+        if (leadVal) {
+          leadVal.textContent = isLockedOn ? "⚡ LEAD LOCKED" : "TARGET ACQUIRED";
+          leadVal.style.color = isLockedOn ? "var(--accent-gold)" : "var(--accent-mint)";
+        }
+      }
+
+      const rngVal = document.getElementById('ads-range-val');
+      if (rngVal) rngVal.textContent = `RNG: ${Math.round(dist)}M`;
+
+      // Lock on sound
+      lockOnSoundTimer -= dt;
+      if (lockOnSoundTimer <= 0) {
+        audio.playLockOnBeep(dist < 180);
+        lockOnSoundTimer = (dist < 180 ? 0.28 : 0.65);
+      }
+      return;
+    }
+  }
+
+  hideTargetHUD();
+}
+
+function hideTargetHUD() {
+  const targetBox = document.getElementById('hud-target-box');
+  if (targetBox) targetBox.style.display = 'none';
+  const leadPip = document.getElementById('reticle-lead-pip');
+  if (leadPip) leadPip.style.display = 'none';
+}
+
+function triggerHitmarker(isCrit = false) {
+  const hm = document.getElementById('cod-hitmarker');
+  if (hm) {
+    hm.classList.remove('active');
+    void hm.offsetWidth;
+    hm.classList.add('active');
+    setTimeout(() => hm.classList.remove('active'), 130);
+  }
+  audio.playHitmarkerSound();
+}
+
+function triggerKillMarker(droneId) {
+  const km = document.getElementById('cod-killmarker');
+  if (km) {
+    km.classList.remove('active');
+    void km.offsetWidth;
+    km.classList.add('active');
+    setTimeout(() => km.classList.remove('active'), 1400);
+  }
+  audio.playKillConfirmSound();
+}
+
+function spawnDamageNumber(pos3D, amount, isCrit = false) {
+  try {
+    const el = document.createElement('div');
+    el.className = 'floating-dmg';
+    el.textContent = (isCrit ? `🔥 ${amount}` : `${amount}`);
+    el.style.color = isCrit ? '#fbbf24' : '#ffffff';
+    el.style.fontSize = isCrit ? '1.2rem' : '0.88rem';
+    document.body.appendChild(el);
+
+    const screenPos = pos3D.clone().project(camera);
+    const sw = window.innerWidth, sh = window.innerHeight;
+    const sx = (screenPos.x * 0.5 + 0.5) * sw + (Math.random() - 0.5) * 32;
+    const sy = (-screenPos.y * 0.5 + 0.5) * sh + (Math.random() - 0.5) * 24;
+    el.style.left = `${sx}px`;
+    el.style.top = `${sy}px`;
+
+    setTimeout(() => el.remove(), 750);
+  } catch (e) {}
+}
+
+// ── WEAPON ACTIONS (SMART LASER CONVERGENCE & HOMING MISSILE) ──
 function fireLaser(fromDrone = null, targetPos = null) {
   const isPlayer = !fromDrone;
   const origin = isPlayer ? player.pos.clone().add(new THREE.Vector3(0, 0.2, 0)) : fromDrone.pos.clone().add(new THREE.Vector3(0, 0.2, 0));
@@ -4018,8 +4970,27 @@ function fireLaser(fromDrone = null, targetPos = null) {
   let fwdDir;
   if (targetPos) {
     fwdDir = targetPos.clone().sub(origin).normalize();
+  } else if (isPlayer) {
+    const rawDroneFwd = new THREE.Vector3(
+      Math.sin(player.yaw) * Math.cos(player.pitch),
+      -Math.sin(player.pitch),
+      Math.cos(player.yaw) * Math.cos(player.pitch)
+    ).normalize();
+
+    // If targeted enemy has a lead point within aim assist cone, smart-converge towards lead point!
+    if (currentLockedEnemy && currentLockedEnemy.alive) {
+      const toLead = currentLead3D.clone().sub(origin).normalize();
+      const dot = rawDroneFwd.dot(toLead);
+      if (dot > 0.80) { // within ~36° cone
+        fwdDir = rawDroneFwd.clone().lerp(toLead, 0.82).normalize();
+      } else {
+        fwdDir = rawDroneFwd;
+      }
+    } else {
+      fwdDir = rawDroneFwd;
+    }
   } else {
-    fwdDir = new THREE.Vector3(Math.sin(yaw), -player.pitch * 0.8, Math.cos(yaw)).normalize();
+    fwdDir = new THREE.Vector3(Math.sin(yaw), -fromDrone.pitch * 0.8, Math.cos(yaw)).normalize();
   }
 
   const pMesh = new THREE.Mesh(laserGeo, (isPlayer || !fromDrone.isEnemy ? cyanLaserMat : redLaserMat));
@@ -4029,12 +5000,13 @@ function fireLaser(fromDrone = null, targetPos = null) {
 
   projectiles.push({
     mesh: pMesh,
-    vel: fwdDir.clone().multiplyScalar(130),
+    lastPos: origin.clone(),
+    vel: fwdDir.clone().multiplyScalar(165),
     isPlayer: isPlayer,
     isEnemy: fromDrone ? fromDrone.isEnemy : false,
-    damage: isPlayer ? 22 : 14,
+    damage: isPlayer ? (mouseAim.isAds ? 32 : 24) : 14,
     isMissile: false,
-    life: 2.2
+    life: 2.5
   });
 
   if (isPlayer) {
@@ -4045,11 +5017,15 @@ function fireLaser(fromDrone = null, targetPos = null) {
 
 function fireMissile() {
   if (player.missileCooldown > 0) return;
-  player.missileCooldown = 1.6;
+  player.missileCooldown = 1.4;
 
   audio.playMissileLaunchSound();
   const origin = player.pos.clone().add(new THREE.Vector3(0, 0.5, 0));
-  const fwdDir = new THREE.Vector3(Math.sin(player.yaw), 0.2, Math.cos(player.yaw)).normalize();
+  const fwdDir = new THREE.Vector3(
+    Math.sin(player.yaw) * Math.cos(player.pitch),
+    -Math.sin(player.pitch),
+    Math.cos(player.yaw) * Math.cos(player.pitch)
+  ).normalize();
 
   if (window.mpEngine) window.mpEngine.broadcastMissile(origin, fwdDir);
 
@@ -4058,27 +5034,30 @@ function fireMissile() {
   mMesh.lookAt(origin.clone().add(fwdDir));
   scene.add(mMesh);
 
-  let bestTarget = null;
-  let minAngle = 0.8;
-  enemyTeam.forEach(e => {
-    if (!e.alive) return;
-    const toEnemy = e.pos.clone().sub(origin).normalize();
-    const dot = fwdDir.dot(toEnemy);
-    if (dot > 0.6 && (1 - dot) < minAngle) {
-      minAngle = 1 - dot;
-      bestTarget = e;
-    }
-  });
+  let bestTarget = currentLockedEnemy && currentLockedEnemy.alive ? currentLockedEnemy : null;
+  if (!bestTarget) {
+    let minAngle = 0.85;
+    enemyTeam.forEach(e => {
+      if (!e.alive) return;
+      const toEnemy = e.pos.clone().sub(origin).normalize();
+      const dot = fwdDir.dot(toEnemy);
+      if (dot > 0.55 && (1 - dot) < minAngle) {
+        minAngle = 1 - dot;
+        bestTarget = e;
+      }
+    });
+  }
 
   projectiles.push({
     mesh: mMesh,
-    vel: fwdDir.clone().multiplyScalar(45),
+    lastPos: origin.clone(),
+    vel: fwdDir.clone().multiplyScalar(55),
     isPlayer: true,
     isEnemy: false,
-    damage: 85,
+    damage: 95,
     isMissile: true,
     target: bestTarget,
-    life: 4.5
+    life: 5.0
   });
 
   postRadioMessage(`[MISSILE]: Fox 2 launched! ${bestTarget ? `Locking ${bestTarget.id}` : 'Unguided trajectory.'}`);
@@ -4618,7 +5597,7 @@ function animate() {
     }
   });
 
-  // 3. FLIGHT & COMBAT PLAYER DYNAMICS
+  // 3. FLIGHT & COMBAT PLAYER DYNAMICS (AAA Modern Vehicle Mechanics)
   if (appMode === 'flight' || appMode === 'combat') {
     const moveFwd = keys['KeyW'] || keys['w'] || keys['ArrowUp'];
     const moveBack = keys['KeyS'] || keys['s'] || keys['ArrowDown'];
@@ -4629,6 +5608,29 @@ function animate() {
     const climb = keys['Space'] || keys[' '];
     const descend = keys['ShiftLeft'] || keys['ShiftRight'] || keys['ControlLeft'] || keys['ControlRight'] || keys['KeyZ'] || keys['z'];
 
+    // Continuous full-auto laser cannon fire
+    if (mouseAim.isMouseDown || keys['KeyF'] || keys['f']) {
+      mouseAim.continuousFireTimer -= dt;
+      if (mouseAim.continuousFireTimer <= 0) {
+        fireLaser();
+        mouseAim.continuousFireTimer = 0.115; // 8.7 rounds/sec
+      }
+    }
+
+    // ADS Scope Zoom FOV Transition
+    const targetFov = mouseAim.isAds ? 42.0 : (cameraDirector.fov || 70.0);
+    camera.fov += (targetFov - camera.fov) * dt * 10.0;
+    camera.updateProjectionMatrix();
+
+    const scopeOverlay = document.getElementById('ads-scope-overlay');
+    if (scopeOverlay) scopeOverlay.classList.toggle('active', mouseAim.isAds);
+
+    const crosshairEl = document.getElementById('reticle-crosshair');
+    if (crosshairEl) {
+      crosshairEl.classList.toggle('ads', mouseAim.isAds);
+      crosshairEl.classList.toggle('firing', mouseAim.isMouseDown);
+    }
+
     if (player.missileCooldown > 0) player.missileCooldown -= dt;
     if (player.fireCooldown > 0) player.fireCooldown -= dt;
 
@@ -4638,26 +5640,34 @@ function animate() {
       updateHealthBars();
     }
 
+    // Keyboard Yaw Assist (Rudder trim)
     const yawSpeed = 2.4;
     if (yawL) player.yaw += yawSpeed * dt;
     if (yawR) player.yaw -= yawSpeed * dt;
 
+    // Full 3D Heading Direction Vector
     const fwdVec = new THREE.Vector3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
     const rightVec = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+    const fwdVec3D = new THREE.Vector3(
+      Math.sin(player.yaw) * Math.cos(player.pitch),
+      -Math.sin(player.pitch),
+      Math.cos(player.yaw) * Math.cos(player.pitch)
+    ).normalize();
 
-    const maxSpeed = 38.0;
-    const accel = 45.0;
+    const maxSpeed = mouseAim.isAds ? 22.0 : 42.0;
+    const accel = mouseAim.isAds ? 28.0 : 54.0;
 
-    if (moveFwd) player.vel.addScaledVector(fwdVec, accel * dt);
+    // Pitch-aware forward thrust
+    if (moveFwd) player.vel.addScaledVector(fwdVec3D, accel * dt);
     if (moveBack) player.vel.addScaledVector(fwdVec, -accel * dt * 0.7);
-    if (strafeL) player.vel.addScaledVector(rightVec, -accel * dt * 0.8);
-    if (strafeR) player.vel.addScaledVector(rightVec, accel * dt * 0.8);
+    if (strafeL) player.vel.addScaledVector(rightVec, -accel * dt * 0.85);
+    if (strafeR) player.vel.addScaledVector(rightVec, accel * dt * 0.85);
 
-    player.vel.x *= Math.pow(0.2, dt);
-    player.vel.z *= Math.pow(0.2, dt);
+    player.vel.x *= Math.pow(0.25, dt);
+    player.vel.z *= Math.pow(0.25, dt);
 
-    const climbRate = 18.0;
-    if (climb) player.targetY = Math.min(240, player.targetY + climbRate * dt);
+    const climbRate = 22.0;
+    if (climb) player.targetY = Math.min(320, player.targetY + climbRate * dt);
     else if (descend) player.targetY = Math.max(0.45, player.targetY - climbRate * dt);
 
     const altError = player.targetY - player.pos.y;
@@ -4671,13 +5681,10 @@ function animate() {
       player.targetY = 0.45;
     }
 
-    const localFwdSpeed = player.vel.dot(fwdVec);
+    // Aerodynamic Roll Bank
     const localRightSpeed = player.vel.dot(rightVec);
-    const targetPitch = (localFwdSpeed / maxSpeed) * 0.52;
-    const targetRoll = (-localRightSpeed / maxSpeed) * 0.52;
-
-    player.pitch += (targetPitch - player.pitch) * dt * 6.0;
-    player.roll += (targetRoll - player.roll) * dt * 6.0;
+    const targetRoll = (-localRightSpeed / maxSpeed) * 0.58;
+    player.roll += (targetRoll - player.roll) * dt * 7.0;
 
     droneMaster.position.copy(player.pos);
     droneMaster.rotation.set(0, 0, 0);
@@ -4694,6 +5701,39 @@ function animate() {
     const ladder = document.getElementById('horizon-pitch-ladder');
     if (ladder) {
       ladder.style.transform = `rotate(${-Math.round(player.roll * (180 / Math.PI))}deg) translateY(${Math.round(player.pitch * (180 / Math.PI)) * 2}px)`;
+    }
+
+    // Update Tactical HUD Target Box & Lead Prediction Pip
+    updateTacticalTargeting(dt);
+
+    // Airspace Perimeter Boundary Warning (2,400m radius)
+    const distFromOrigin = Math.hypot(player.pos.x, player.pos.z);
+    const boundaryLimit = 2400;
+    const boundaryBanner = document.getElementById('boundary-warning-banner');
+    if (distFromOrigin > boundaryLimit) {
+      if (boundaryBanner) {
+        boundaryBanner.style.display = 'flex';
+        player.boundaryTimer = Math.max(0, (player.boundaryTimer || 5.0) - dt);
+        const cdEl = document.getElementById('boundary-countdown');
+        if (cdEl) cdEl.textContent = `${player.boundaryTimer.toFixed(1)}s`;
+
+        if (player.boundaryTimer <= 0) {
+          player.hull = Math.max(0, player.hull - dt * 25);
+          updateHealthBars();
+          audio.playHitSound();
+          triggerDamageVignette();
+          // Turn back towards center
+          const toCenter = new THREE.Vector3(-player.pos.x, 0, -player.pos.z).normalize();
+          player.vel.addScaledVector(toCenter, 45 * dt);
+          if (player.hull <= 0) {
+            spawnExplosion(player.pos);
+            respawnDrone();
+          }
+        }
+      }
+    } else {
+      if (boundaryBanner) boundaryBanner.style.display = 'none';
+      player.boundaryTimer = 5.0;
     }
   }
 
@@ -4722,7 +5762,7 @@ function animate() {
           d.alive = true;
           d.hp = d.maxHp;
           d.shield = d.maxShield;
-          d.pos.set((Math.random() - 0.5) * 300, 25 + Math.random() * 40, (Math.random() - 0.5) * 300);
+          d.pos.set((Math.random() - 0.5) * 600, 35 + Math.random() * 50, (Math.random() - 0.5) * 600);
           scene.add(d.mesh);
           postRadioMessage(`[AI RADAR]: ${d.id} re-entered the airspace.`, 'normal');
         }
@@ -4731,7 +5771,7 @@ function animate() {
 
       if (d.isEnemy) aliveEnemies++;
 
-      d.props.forEach(p => p.rotation.y += 0.4);
+      d.props.forEach(p => p.rotation.y += 0.45);
 
       if (d.isEnemy) {
         const toPlayer = player.pos.clone().sub(d.pos);
@@ -4741,23 +5781,23 @@ function animate() {
         d.yaw += (targetYaw - d.yaw) * dt * 2.2;
         d.mesh.rotation.set(0, d.yaw, 0);
 
-        if (dist > 35) {
-          d.pos.add(toPlayer.normalize().multiplyScalar(dt * 22.0));
+        if (dist > 45) {
+          d.pos.add(toPlayer.normalize().multiplyScalar(dt * 24.0));
         } else {
           const circleVec = new THREE.Vector3(-toPlayer.z, 0, toPlayer.x).normalize();
-          d.pos.add(circleVec.multiplyScalar(dt * 18.0));
+          d.pos.add(circleVec.multiplyScalar(dt * 20.0));
         }
 
-        if (d.pos.y < 8) d.pos.y += dt * 6.0;
+        if (d.pos.y < 12) d.pos.y += dt * 8.0;
 
         d.fireTimer -= dt;
-        if (d.fireTimer <= 0 && dist < 120) {
+        if (d.fireTimer <= 0 && dist < 140) {
           fireLaser(d, player.pos.clone().add(new THREE.Vector3(0, 0.4, 0)));
           d.fireTimer = 1.6 + Math.random() * 1.2;
         }
       } else {
-        // Wingmen Follow Player
-        const escortOffset = (d.id === 'WINGMAN-01' ? new THREE.Vector3(-14, 2, -10) : new THREE.Vector3(14, 2, -10));
+        // Wingmen Follow Player in Formation
+        const escortOffset = (d.id === 'WINGMAN-01' ? new THREE.Vector3(-18, 3, -14) : new THREE.Vector3(18, 3, -14));
         escortOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
         const targetPos = player.pos.clone().add(escortOffset);
 
@@ -4768,7 +5808,7 @@ function animate() {
         d.fireTimer -= dt;
         if (d.fireTimer <= 0) {
           let nearestEnemy = null;
-          let minD = 140;
+          let minD = 180;
           enemyTeam.forEach(e => {
             if (!e.alive) return;
             const distE = d.pos.distanceTo(e.pos);
@@ -4789,22 +5829,25 @@ function animate() {
     document.getElementById('osd-kills-val').textContent = `${aliveEnemies} ACTIVE`;
   }
 
-  // 5. PROJECTILES & COLLISION DETECTION
+  // 5. PROJECTILES & COLLISION DETECTION (Anti-Tunneling Line Segment Raycast)
   for (let i = projectiles.length - 1; i >= 0; i--) {
     const p = projectiles[i];
     p.life -= dt;
 
     if (p.isMissile && p.target && p.target.alive) {
       const toT = p.target.pos.clone().sub(p.mesh.position).normalize();
-      p.vel.lerp(toT.multiplyScalar(65), dt * 4.0);
+      p.vel.lerp(toT.multiplyScalar(75), dt * 5.5);
       p.mesh.lookAt(p.mesh.position.clone().add(p.vel));
     }
 
+    const currentP = p.mesh.position.clone();
     p.mesh.position.addScaledVector(p.vel, dt);
+    const nextP = p.mesh.position.clone();
     let hit = false;
 
     if (p.isEnemy || p.isRemotePeer) {
-      if (p.mesh.position.distanceTo(player.pos) < 2.8) {
+      const distToPlayer = distPointToSegment(player.pos, currentP, nextP);
+      if (distToPlayer < 4.2) {
         hit = true;
         player.shieldRechargeTimer = 0;
         audio.playHitSound();
@@ -4829,9 +5872,11 @@ function animate() {
       // Local player laser hitting remote human wingman (PvP dogfight)
       if (p.isPlayer && window.mpEngine && window.mpEngine.remotePlayers) {
         window.mpEngine.remotePlayers.forEach(rp => {
-          if (p.mesh.position.distanceTo(rp.mesh.position) < 3.2) {
+          const distToRP = distPointToSegment(rp.mesh.position, currentP, nextP);
+          if (distToRP < 5.5) {
             hit = true;
-            audio.playHitSound();
+            triggerHitmarker(p.isMissile);
+            spawnDamageNumber(rp.mesh.position, p.damage, p.isMissile);
             window.mpEngine.broadcast({
               type: 'damage_hit',
               targetId: rp.peerId,
@@ -4847,12 +5892,22 @@ function animate() {
         });
       }
 
+      // Hitting AI Rogue Swarm with generous 6.2m collision sphere & line segment
       combatDrones.forEach(d => {
         if (!d.alive || !d.isEnemy) return;
-        if (p.mesh.position.distanceTo(d.pos) < 3.2) {
+        const distToEnemy = distPointToSegment(d.pos, currentP, nextP);
+        const hitRadius = p.isMissile ? 7.8 : 6.2;
+
+        if (distToEnemy < hitRadius) {
           hit = true;
           d.hp -= p.damage;
-          audio.playHitSound();
+
+          if (p.isPlayer) {
+            triggerHitmarker(p.isMissile);
+            spawnDamageNumber(d.pos, p.damage, p.isMissile);
+          } else {
+            audio.playHitSound();
+          }
 
           if (d.hp <= 0) {
             d.alive = false;
@@ -4861,16 +5916,21 @@ function animate() {
             player.kills++;
             player.coins += 150;
             updateCoinDisplay();
+            if (p.isPlayer) triggerKillMarker(d.id);
             postRadioMessage(`[KILLFEED]: VALKYRIE 💥 destroyed ${d.id} (+150 COINS)`, 'kill');
 
             const pop = document.getElementById('combo-popup');
-            pop.textContent = `TARGET DESTROYED! +150 COINS`;
-            pop.classList.add('show');
-            setTimeout(() => pop.classList.remove('show'), 700);
+            if (pop) {
+              pop.textContent = `TARGET DESTROYED! +150 COINS`;
+              pop.classList.add('show');
+              setTimeout(() => pop.classList.remove('show'), 700);
+            }
           }
         }
       });
     }
+
+    p.lastPos = nextP.clone();
 
     if (hit || p.life <= 0 || p.mesh.position.y < 0.2) {
       scene.remove(p.mesh);
@@ -5132,7 +6192,13 @@ window.addEventListener('resize', () => {
 
         rightKnob.style.transform = `translate(calc(-50% + ${nx}px), calc(-50% + ${ny}px))`;
 
-        // Horizontal = yaw
+        // Modern Analog Yaw & Pitch Aiming (PUBG / CoD Mobile style)
+        if (Math.abs(nx) > DEAD) {
+          player.yaw -= (nx / MAX_DIST) * (mouseAim.isAds ? 0.025 : 0.055);
+        }
+        if (Math.abs(ny) > DEAD) {
+          player.pitch = Math.max(-0.75, Math.min(0.75, player.pitch - (ny / MAX_DIST) * (mouseAim.isAds ? 0.018 : 0.038)));
+        }
         setVKey('KeyQ', nx < -DEAD);
         setVKey('KeyE', nx > DEAD);
       }
@@ -5169,9 +6235,41 @@ window.addEventListener('resize', () => {
 
     // ---- Action Buttons ----
     const fireBtn = document.getElementById('mob-fire-btn');
+    const adsBtn = document.getElementById('mob-ads-btn');
     const missileBtn = document.getElementById('mob-missile-btn');
     const respawnBtn = document.getElementById('mob-respawn-btn');
     const camBtn = document.getElementById('mob-cam-btn');
+
+    // Continuous fire while holding mob fire button
+    if (fireBtn) {
+      fireBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        fireBtn.classList.add('pressed');
+        mouseAim.isMouseDown = true;
+        fireLaser();
+        mouseAim.continuousFireTimer = 0.115;
+      }, { passive: false });
+
+      const stopFire = (e) => {
+        e.preventDefault();
+        fireBtn.classList.remove('pressed');
+        mouseAim.isMouseDown = false;
+      };
+      fireBtn.addEventListener('touchend', stopFire, { passive: false });
+      fireBtn.addEventListener('touchcancel', stopFire, { passive: false });
+      fireBtn.addEventListener('mousedown', () => { mouseAim.isMouseDown = true; fireLaser(); });
+      fireBtn.addEventListener('mouseup', () => { mouseAim.isMouseDown = false; });
+    }
+
+    // Toggle ADS Precision Scope on mobile
+    if (adsBtn) {
+      adsBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        mouseAim.isAds = !mouseAim.isAds;
+        adsBtn.classList.toggle('pressed', mouseAim.isAds);
+        showToast(mouseAim.isAds ? "🎯 ADS Scope Engaged" : "Standard View");
+      });
+    }
 
     function tapAction(el, fn) {
       if (!el) return;
@@ -5184,13 +6282,9 @@ window.addEventListener('resize', () => {
         e.preventDefault();
         setTimeout(() => el.classList.remove('pressed'), 120);
       }, { passive: false });
-      // Mouse fallback for desktop testing
       el.addEventListener('click', fn);
     }
 
-    tapAction(fireBtn, () => {
-      if (appMode === 'combat' || appMode === 'flight') fireLaser();
-    });
     tapAction(missileBtn, () => {
       if (appMode === 'combat' || appMode === 'flight') fireMissile();
     });
