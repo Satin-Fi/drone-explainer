@@ -4278,7 +4278,7 @@ class MultiplayerEngine {
       return;
     }
     this.cleanup();
-    this.roomCode = targetCode.toUpperCase();
+    this.roomCode = targetCode.toUpperCase().trim();
     this.isHost = false;
     const hostPeerId = this.hostPrefix + this.getCleanCode(this.roomCode);
 
@@ -4297,8 +4297,7 @@ class MultiplayerEngine {
       console.log(`[MP] Guest peer opened: ${myId}. Connecting to host ${hostPeerId}...`);
 
       const conn = this.peer.connect(hostPeerId, {
-        reliable: false,
-        serialization: 'json'
+        reliable: true
       });
 
       this.setupConnectionHandlers(conn, true);
@@ -4307,7 +4306,7 @@ class MultiplayerEngine {
     this.peer.on('error', (err) => {
       console.warn("[MP] Guest peer error:", err.type, err.message);
       if (err.type === 'peer-unavailable') {
-        showToast(`Room ${this.roomCode} not found. Creating room as host...`);
+        showToast(`Room ${this.roomCode} not active. Initializing as flight host...`);
         this.initHost(this.roomCode);
       } else {
         this.updateStatusPill("OFFLINE", false);
@@ -4320,7 +4319,7 @@ class MultiplayerEngine {
   }
 
   setupConnectionHandlers(conn, isConnectingToHost) {
-    conn.on('open', () => {
+    const onOpen = () => {
       console.log(`[MP] Connection established with ${conn.peer}`);
       this.connections.set(conn.peer, conn);
       this.isConnected = true;
@@ -4336,8 +4335,15 @@ class MultiplayerEngine {
       this.updateUI();
       this.startSync();
 
-      showToast(isConnectingToHost ? `Joined formation in room ${this.roomCode}!` : `Wingman connected to your room!`);
-    });
+      showToast(isConnectingToHost ? `⚡ Joined formation in room ${this.roomCode}!` : `⚡ Wingman joined your flight!`);
+      if (audio && audio.soundEnabled) audio.playTargetLockSound();
+    };
+
+    if (conn.open) {
+      onOpen();
+    } else {
+      conn.on('open', onOpen);
+    }
 
     conn.on('data', (data) => {
       this.handlePacket(data, conn.peer);
@@ -4544,8 +4550,18 @@ class MultiplayerEngine {
     }
 
     const dObj = createCombatDroneMesh(false);
-    dObj.mesh.position.set(player.pos.x, player.pos.y + 2, player.pos.z - 5);
+    const sideOffset = (this.remotePlayers.size % 2 === 0 ? 12 : -12);
+    dObj.mesh.position.set(player.pos.x + sideOffset, Math.max(2.0, player.pos.y + 0.8), player.pos.z - 6);
     scene.add(dObj.mesh);
+
+    // Glowing LED Strobes for remote allied wingman
+    const strobeL = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+    strobeL.position.set(-1.3, 0.2, 0);
+    dObj.mesh.add(strobeL);
+
+    const strobeR = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
+    strobeR.position.set(1.3, 0.2, 0);
+    dObj.mesh.add(strobeR);
 
     const nametag = this.createNametagCanvas(callsign || 'Wingman');
     dObj.mesh.add(nametag.sprite);
@@ -4697,9 +4713,22 @@ class MultiplayerEngine {
     if (codeEl) codeEl.textContent = this.roomCode;
 
     const countEl = document.getElementById('mp-players-count');
-    if (countEl) {
-      const total = 1 + this.remotePlayers.size;
-      countEl.textContent = `${total} Pilot${total === 1 ? '' : 's'} Connected`;
+    const osdCountEl = document.getElementById('osd-mp-count');
+    const osdCodeTag = document.getElementById('osd-room-code-tag');
+    const shareInput = document.getElementById('mp-share-url-box');
+    const waBtn = document.getElementById('mp-whatsapp-btn');
+
+    const total = 1 + this.remotePlayers.size;
+    const txt = `${total} Pilot${total === 1 ? '' : 's'} Connected`;
+    if (countEl) countEl.textContent = txt;
+    if (osdCountEl) osdCountEl.textContent = `(${total})`;
+    if (osdCodeTag) osdCodeTag.textContent = `ROOM: ${this.roomCode}`;
+
+    const link = getMultiplayerInviteLink(this.roomCode);
+    if (shareInput) shareInput.value = link;
+    if (waBtn) {
+      const waMsg = encodeURIComponent(`Fly with me in Astra Valkyrie Dogfight! Join room ${this.roomCode}: ${link}`);
+      waBtn.href = `https://api.whatsapp.com/send?text=${waMsg}`;
     }
 
     const csInput = document.getElementById('mp-callsign-input');
@@ -4806,14 +4835,21 @@ function confirmAndDeployCombat() {
     postRadioMessage(`[MATCH]: Solo Ace mode selected. You are alone in the airspace.`, 'normal');
     showToast("Single Player Solo Ace Engaged!");
   } else {
+    const hasHumanFriends = window.mpEngine && window.mpEngine.remotePlayers && window.mpEngine.remotePlayers.size > 0;
     friendTeam.forEach((d, i) => {
-      d.alive = true;
+      d.alive = !hasHumanFriends;
       d.hp = d.maxHp;
       d.pos.set((i === 0 ? -18 : 18), 8, -25);
-      scene.add(d.mesh);
+      if (d.alive) scene.add(d.mesh);
+      else scene.remove(d.mesh);
     });
-    postRadioMessage(`[MATCH]: Wingman Squad Co-op active. Blue Team covering your six.`, 'normal');
-    showToast("Squad Co-Op: Playing with Allied Wingmen!");
+    if (hasHumanFriends) {
+      postRadioMessage(`[MATCH]: Real-time Online Squad active with your friends!`, 'normal');
+      showToast("Online Formation: Flying with Friends in 3D!");
+    } else {
+      postRadioMessage(`[MATCH]: Squad ready. Share room link to fly with your friends!`, 'normal');
+      showToast("Squad Ready! Share invite link with friends to fly together.");
+    }
   }
 
   // Apply Enemy Threat Count with Sector Distribution across the 5km Airspace
@@ -6352,19 +6388,22 @@ window.addEventListener('resize', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const roomParam = urlParams.get('room') || urlParams.get('r');
     if (roomParam) {
-      console.log("[MP] Multiplayer invite detected in URL:", roomParam);
+      const cleanCode = roomParam.trim().toUpperCase();
+      console.log("[MP] Multiplayer invite detected in URL:", cleanCode);
       setTimeout(() => {
         setAppMode('combat');
+        confirmAndDeployCombat();
         if (window.mpEngine) {
-          window.mpEngine.joinRoom(roomParam.trim());
+          window.mpEngine.joinRoom(cleanCode);
         }
-      }, 500);
+        showToast(`🚀 Joined flight formation in Room ${cleanCode}!`);
+      }, 350);
     } else {
       setTimeout(() => {
         if (window.mpEngine) {
           window.mpEngine.initHost();
         }
-      }, 200);
+      }, 150);
     }
   } catch (err) {
     console.warn("[MP] URL detection non-fatal notice:", err);
