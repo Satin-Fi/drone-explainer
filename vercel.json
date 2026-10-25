@@ -1,6 +1,7 @@
 {
   "cleanUrls": true,
   "rewrites": [
+    { "source": "/", "destination": "/index.html" },
     { "source": "/drone-explainer", "destination": "/drone-explainer.html" }
   ]
 }

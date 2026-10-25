@@ -197,6 +197,32 @@
     border-radius: 50%;
   }
 
+  .sound-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: rgba(16, 185, 129, 0.14);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: var(--accent-mint);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+  }
+  .sound-toggle-btn.muted {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+  }
+  .sound-toggle-btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+  }
+
   /* ── MAIN CONTENT WORKSPACE ───────────────────────────────── */
   #workspace {
     flex: 1;
@@ -848,10 +874,17 @@
   @media (max-width: 768px) {
     #camera-director-dock {
       bottom: auto;
-      top: 68px;
-      left: 10px;
-      width: 290px;
+      top: 102px;
+      left: 8px;
+      width: 280px;
       font-size: 0.65rem;
+    }
+    #camera-director-dock.minimized {
+      top: 102px;
+      bottom: auto;
+      left: 8px;
+      width: auto;
+      padding: 6px 12px;
     }
   }
 
@@ -1292,6 +1325,18 @@
   body.touch-device.in-flight #mobile-controls {
     display: block;
   }
+  @media (pointer: coarse) {
+    body.in-flight #mobile-controls {
+      display: block;
+    }
+    body.in-flight #flight-controls-legend {
+      display: none !important;
+    }
+  }
+  /* Hide CAD footer toolbar in flight and combat modes */
+  body.in-flight footer {
+    display: none !important;
+  }
   /* On touch devices, hide the keyboard legend (replaced by touch UI) */
   body.touch-device #flight-controls-legend {
     display: none !important;
@@ -1480,56 +1525,67 @@
 
   /* Combat HUD mobile repositioning */
   @media (max-width: 768px) {
+    #flight-osd-bar {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+      justify-content: flex-start;
+      gap: 10px;
+      padding: 5px 12px;
+      top: 58px;
+      border-radius: 12px;
+      font-size: 0.62rem;
+      width: 95vw;
+      max-width: 95vw;
+    }
+    #flight-osd-bar::-webkit-scrollbar { display: none; }
     .combat-vitals-box {
       bottom: auto;
-      top: 70px;
-      left: 10px;
-      width: 200px;
+      top: 142px;
+      left: 8px;
+      width: 130px;
+      padding: 6px 8px;
     }
     .combat-radar-card {
-      top: 70px;
-      right: 10px;
-      width: 120px;
-      height: 120px;
+      top: 100px;
+      right: 8px;
+      width: 95px;
+      height: 95px;
     }
     .combat-armory-dock {
       bottom: auto;
-      top: 200px;
-      right: 10px;
-      padding: 8px 10px;
+      top: 205px;
+      right: 8px;
+      padding: 5px 8px;
+      max-width: 125px;
     }
-    .weapon-btn { font-size: 0.62rem; padding: 5px 8px; }
-    .armory-title { font-size: 0.6rem; }
+    .combat-armory-dock .weapon-btn {
+      font-size: 0.55rem;
+      padding: 3px 6px;
+    }
+    .armory-title {
+      font-size: 0.56rem;
+    }
     .combat-radio-chatter {
-      top: auto;
-      bottom: 260px;
-      left: 10px;
-      width: 180px;
-      font-size: 0.6rem;
+      display: none;
     }
     /* Flight HUD tapes - reduce size on mobile */
-    .hud-tape { padding: 6px 10px; }
-    .tape-val { font-size: 1.1rem; }
-    .speed-tape { left: 8px; }
-    .alt-tape { right: 8px; }
-    .hud-reticle-wrap { width: 200px; height: 200px; }
-    /* OSD bar on mobile */
-    #flight-osd-bar {
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      padding: 6px 12px;
-      top: 64px;
-      border-radius: 12px;
-      font-size: 0.65rem;
-    }
+    .hud-tape { padding: 4px 8px; }
+    .tape-val { font-size: 0.95rem; }
+    .speed-tape { left: 4px; }
+    .alt-tape { right: 4px; }
+    .hud-reticle-wrap { width: 170px; height: 170px; }
   }
 
   @media (max-width: 480px) {
-    .combat-radar-card { width: 100px; height: 100px; }
-    .combat-vitals-box { width: 160px; }
-    .joystick-zone { width: 130px; height: 130px; }
+    .combat-radar-card { width: 90px; height: 90px; }
+    .combat-vitals-box { width: 130px; }
+    .joystick-zone { width: 130px; height: 130px; bottom: 75px; }
     .joystick-knob { width: 44px; height: 44px; }
+    .altitude-btns { bottom: 135px; }
+    .alt-btn { width: 42px; height: 42px; font-size: 1.0rem; }
+    .mob-btn { width: 56px; height: 56px; font-size: 0.65rem; }
+    .mob-btn.fire { width: 70px; height: 70px; }
   }
 </style>
 </head>
@@ -1550,48 +1606,44 @@
     <div class="modal-header">
       <div class="modal-title">
         <span style="color:var(--accent-enemy)">⚔️</span>
-        Combat Arena Operations
+        Combat Arena
       </div>
       <div class="modal-close-btn" onclick="closeCombatModal()">✕</div>
     </div>
 
     <!-- Mode Selector: Friends vs Single -->
     <div>
-      <div class="option-group-label">Match Deployment Mode</div>
+      <div class="option-group-label">Mode</div>
       <div class="choice-grid">
-        <div class="choice-card active" id="mode-choice-friends" onclick="selectMatchMode('friends')">
-          <div class="choice-title">
+        <div class="choice-card active" id="mode-choice-friends" onclick="selectMatchMode('friends')" style="padding:12px; text-align:center;">
+          <div class="choice-title" style="justify-content:center;">
             <span style="color:var(--accent-friend)">👥</span>
             Play with Friends
           </div>
-          <div class="choice-desc">Deploy with 2 Allied Wingmen in formation. Co-op radio chatter & team dogfighting.</div>
         </div>
-        <div class="choice-card" id="mode-choice-single" onclick="selectMatchMode('single')">
-          <div class="choice-title">
+        <div class="choice-card" id="mode-choice-single" onclick="selectMatchMode('single')" style="padding:12px; text-align:center;">
+          <div class="choice-title" style="justify-content:center;">
             <span style="color:var(--accent-cyan)">👤</span>
             Single Player
           </div>
-          <div class="choice-desc">Solo Ace dogfight against the rogue swarm. No AI wingmen, 100% individual skill.</div>
         </div>
       </div>
     </div>
 
     <!-- Audio & Sound Controls -->
     <div>
-      <div class="option-group-label">Audio & Acoustics</div>
+      <div class="option-group-label">Audio</div>
       <div style="display:flex; flex-direction:column; gap:8px;">
         <div class="settings-row">
           <div class="settings-info">
-            <div class="settings-title">Master Sound & Weapon FX</div>
-            <div class="settings-sub">Laser blasts, homing missiles, motor whine, and explosions</div>
+            <div class="settings-title">Sound FX & Master Audio</div>
           </div>
-          <button class="toggle-switch-btn on" id="toggle-sfx-btn" onclick="toggleAudioSetting('sfx')">ON</button>
+          <button class="toggle-switch-btn on" id="toggle-sfx-btn" onclick="toggleMasterSound()">ON</button>
         </div>
 
         <div class="settings-row">
           <div class="settings-info">
             <div class="settings-title">Tactical Radio Chatter</div>
-            <div class="settings-sub">Squad communications, target callouts & threat alerts</div>
           </div>
           <button class="toggle-switch-btn on" id="toggle-radio-btn" onclick="toggleAudioSetting('radio')">ON</button>
         </div>
@@ -1600,19 +1652,16 @@
 
     <!-- Enemy Swarm Density -->
     <div>
-      <div class="option-group-label">Swarm Threat Level</div>
+      <div class="option-group-label">Threat Level</div>
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-        <div class="choice-card" id="threat-cadet" onclick="selectThreatLevel('cadet')" style="padding:8px 10px; text-align:center;">
-          <div class="choice-title" style="justify-content:center; color:var(--accent-mint)">🟢 Cadet</div>
-          <div class="choice-desc">3 Rogue Drones</div>
+        <div class="choice-card" id="threat-cadet" onclick="selectThreatLevel('cadet')" style="padding:10px; text-align:center;">
+          <div class="choice-title" style="justify-content:center; color:var(--accent-mint)">🟢 Cadet (3)</div>
         </div>
-        <div class="choice-card active" id="threat-veteran" onclick="selectThreatLevel('veteran')" style="padding:8px 10px; text-align:center;">
-          <div class="choice-title" style="justify-content:center; color:var(--accent-gold)">🟡 Veteran</div>
-          <div class="choice-desc">5 Rogue Drones</div>
+        <div class="choice-card active" id="threat-veteran" onclick="selectThreatLevel('veteran')" style="padding:10px; text-align:center;">
+          <div class="choice-title" style="justify-content:center; color:var(--accent-gold)">🟡 Veteran (5)</div>
         </div>
-        <div class="choice-card" id="threat-ace" onclick="selectThreatLevel('ace')" style="padding:8px 10px; text-align:center;">
-          <div class="choice-title" style="justify-content:center; color:var(--accent-enemy)">🔴 Incursion</div>
-          <div class="choice-desc">8 Rogues + Heavy</div>
+        <div class="choice-card" id="threat-ace" onclick="selectThreatLevel('ace')" style="padding:10px; text-align:center;">
+          <div class="choice-title" style="justify-content:center; color:var(--accent-enemy)">🔴 Incursion (8)</div>
         </div>
       </div>
     </div>
@@ -1620,7 +1669,7 @@
     <!-- Action Buttons -->
     <div class="modal-action-row">
       <button class="deploy-btn" onclick="confirmAndDeployCombat()">
-        <span>🚀 Deploy to Arena</span>
+        ⚡ ENGAGE ARENA
       </button>
     </div>
   </div>
@@ -1639,7 +1688,6 @@
       </div>
       <div>
         <div class="brand-title">Astra X-4 Valkyrie</div>
-        <div class="brand-sub">Industrial Real-World UAV & Aerial Combat</div>
       </div>
     </div>
 
@@ -1663,8 +1711,12 @@
       </button>
     </div>
 
-    <!-- Status Badges & Live Coin Counter -->
+    <!-- Status Badges, Live Coin Counter & Sound Toggle -->
     <div class="telemetry-badges">
+      <button class="sound-toggle-btn active" id="header-sound-btn" onclick="toggleMasterSound()" title="Toggle Master Audio [U]">
+        <span id="header-sound-icon">🔊</span>
+        <span id="header-sound-text">SOUND ON</span>
+      </button>
       <div class="badge-tag" style="background:rgba(251,191,36,0.12); border-color:rgba(251,191,36,0.35); color:var(--accent-gold); font-weight:700">
         <span style="font-size:0.85rem">🪙</span>
         <span id="badge-coins-val">350 COINS</span>
@@ -1688,35 +1740,35 @@
       <div class="component-card-list">
         <div class="comp-item active" onclick="focusComponent('chassis')">
           <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
-          <div><div class="comp-text-title">T700 Carbon Monocoque</div><div class="comp-text-meta">Central Hull & Arm Clamps</div></div>
+          <div class="comp-text-title">T700 Carbon Monocoque</div>
         </div>
         <div class="comp-item" onclick="focusComponent('motors')">
           <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></div>
-          <div><div class="comp-text-title">2814 900KV BLDC Motors</div><div class="comp-text-meta">4× Outrunner Brushless</div></div>
+          <div class="comp-text-title">2814 900KV BLDC Motors</div>
         </div>
         <div class="comp-item" onclick="focusComponent('props')">
           <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 2 20 20M2 22 22 2"/></svg></div>
-          <div><div class="comp-text-title">13" Aerodynamic Propellers</div><div class="comp-text-meta">Carbon-Reinforced Folding</div></div>
+          <div class="comp-text-title">13" Aerodynamic Propellers</div>
         </div>
         <div class="comp-item" onclick="focusComponent('fc')">
           <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/></svg></div>
-          <div><div class="comp-text-title">Flight Controller H7</div><div class="comp-text-meta">Dual IMU · 1kHz PID Loop</div></div>
+          <div class="comp-text-title">Flight Controller H7</div>
         </div>
         <div class="comp-item" onclick="focusComponent('esc')">
           <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="14"/><line x1="10" y1="10" x2="10" y2="14"/></svg></div>
-          <div><div class="comp-text-title">4-in-1 65A BLHeli_32 ESC</div><div class="comp-text-meta">DShot1200 · Active Braking</div></div>
+          <div class="comp-text-title">4-in-1 65A BLHeli_32 ESC</div>
         </div>
         <div class="comp-item" onclick="focusComponent('battery')">
           <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg></div>
-          <div><div class="comp-text-title">6S 8500mAh Solid-State</div><div class="comp-text-meta">22.2V · 188.7Wh Pack</div></div>
+          <div class="comp-text-title">6S 8500mAh Solid-State</div>
         </div>
         <div class="comp-item" onclick="focusComponent('gimbal')">
           <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-          <div><div class="comp-text-title">3-Axis Optical Gimbal</div><div class="comp-text-meta">Sony 1" CMOS 4K60HDR</div></div>
+          <div class="comp-text-title">3-Axis Optical Gimbal</div>
         </div>
         <div class="comp-item" onclick="focusComponent('sensors')">
           <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
-          <div><div class="comp-text-title">Omni-LiDAR & Vision Flow</div><div class="comp-text-meta">Ground TOF + 360° Avoidance</div></div>
+          <div class="comp-text-title">Omni-LiDAR & Vision Flow</div>
         </div>
       </div>
     </aside>
@@ -1751,6 +1803,9 @@
           <span class="osd-label">COINS</span>
           <span class="osd-val" id="osd-coins-val" style="color:var(--accent-gold)">350</span>
         </div>
+        <button class="action-btn" id="osd-sound-btn" onclick="toggleMasterSound()" title="Toggle Master Audio [U]" style="padding:4px 10px; font-size:0.68rem; background:rgba(16,185,129,0.15); border-color:var(--accent-mint); color:var(--accent-mint)">
+          🔊 Sound: ON
+        </button>
         <div class="osd-item" style="border-left:1px solid rgba(255,255,255,0.12); padding-left:10px;">
           <span class="osd-label">CAM</span>
           <select id="osd-cam-select" onchange="setCameraMode(this.value)" class="osd-cam-select" title="Switch Camera Mode [C]">
@@ -1790,7 +1845,6 @@
           <div>
             <div class="dock-section-title">
               <span>Camera Modes</span>
-              <span style="color:var(--accent-cyan)">[C] Cycle · [1-8]</span>
             </div>
             <div class="cam-grid-modes">
               <div class="cam-mode-chip active" id="chip-chase" onclick="setCameraMode('chase')">Chase</div>
@@ -1807,8 +1861,7 @@
           <!-- Angles Section -->
           <div>
             <div class="dock-section-title">
-              <span>View Angle Presets</span>
-              <span style="color:var(--astra-lavender)">[V] Flip 180°</span>
+              <span>View Angles</span>
             </div>
             <div class="cam-grid-angles">
               <div class="cam-angle-chip active" id="chip-angle-rear" onclick="setCameraAngle('rear')">Rear 0°</div>
@@ -1855,10 +1908,6 @@
             <button class="dock-quick-btn" onclick="resetCameraDefaults()">
               🎯 Reset Cam
             </button>
-          </div>
-
-          <div class="dock-hotkey-hint">
-            Hotkeys: [C] Cycle Cam · [V] Flip 180° · [1-8] Direct Mode
           </div>
         </div>
       </div>
@@ -1963,6 +2012,51 @@
         <div style="color:var(--accent-rose); font-weight:700"><span class="key-badge">L-CLICK / F</span> Shoot Laser</div>
         <div style="color:var(--accent-cyan); font-weight:700"><span class="key-badge">R-CLICK / M</span> Missile</div>
       </div>
+
+      <!-- ── MOBILE TOUCH CONTROLS ── -->
+      <div id="mobile-controls">
+        <!-- Left Joystick: Move (Forward/Back/Strafe) -->
+        <div class="joystick-zone left" id="joy-left-zone">
+          <div class="joystick-base">
+            <div class="joystick-knob" id="joy-left-knob"></div>
+          </div>
+          <div class="joystick-label">Move</div>
+        </div>
+
+        <!-- Right Joystick: Yaw (turn left/right) -->
+        <div class="joystick-zone right" id="joy-right-zone">
+          <div class="joystick-base">
+            <div class="joystick-knob" id="joy-right-knob"></div>
+          </div>
+          <div class="joystick-label">Yaw / Look</div>
+        </div>
+
+        <!-- Altitude buttons (left of right joystick) -->
+        <div class="altitude-btns" id="alt-btns">
+          <button class="alt-btn" id="btn-climb" aria-label="Climb">▲</button>
+          <button class="alt-btn" id="btn-descend" aria-label="Descend">▼</button>
+        </div>
+
+        <!-- Center action buttons -->
+        <div class="mobile-action-row">
+          <button class="mob-btn respawn" id="mob-respawn-btn" aria-label="Respawn">
+            <span class="btn-icon">↺</span>
+            <span class="btn-label">Respawn</span>
+          </button>
+          <button class="mob-btn fire" id="mob-fire-btn" aria-label="Fire laser">
+            <span class="btn-icon">🔵</span>
+            <span class="btn-label">LASER</span>
+          </button>
+          <button class="mob-btn missile" id="mob-missile-btn" aria-label="Fire missile">
+            <span class="btn-icon">🚀</span>
+            <span class="btn-label">Missile</span>
+          </button>
+          <button class="mob-btn" id="mob-cam-btn" aria-label="Cycle Camera" style="border-color:var(--accent-cyan); color:var(--accent-cyan); background:rgba(0,229,255,0.12)">
+            <span class="btn-icon">📹</span>
+            <span class="btn-label">CAM</span>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- RIGHT PANEL: Live Engineering Telemetry & Specs -->
@@ -1976,9 +2070,6 @@
         <div class="spec-title-row">
           <div class="spec-main-title" id="detail-title">Carbon Monocoque</div>
           <div class="spec-tag" id="detail-tag">AEROSPACE GRADE</div>
-        </div>
-        <div class="spec-desc" id="detail-desc">
-          Toray T700 multidirectional woven carbon fiber composite shell with high-temperature epoxy matrix. CNC anodized 7075 aluminum motor arm clamps ensure zero structural deflection under 12G shock loads.
         </div>
       </div>
 
@@ -2002,7 +2093,7 @@
       </div>
 
       <div style="display:flex; flex-direction:column; gap:6px;">
-        <div class="section-label" style="font-size:0.62rem">Motor RPM Array (BLHeli DShot)</div>
+        <div class="section-label" style="font-size:0.62rem">Motor RPM</div>
         <div class="motor-matrix">
           <div class="motor-meter-row">
             <span class="motor-lbl">M1·CW</span>
@@ -2069,6 +2160,7 @@
 class SoundEngine {
   constructor() {
     this.ctx = null;
+    this.masterGain = null;
     this.motorOsc1 = null;
     this.motorOsc2 = null;
     this.motorGain = null;
@@ -2078,10 +2170,21 @@ class SoundEngine {
   }
 
   init() {
-    if (this.initialized) return;
+    if (this.initialized && this.ctx) {
+      if (this.ctx.state === 'suspended' && this.soundEnabled) {
+        this.ctx.resume().catch(() => {});
+      }
+      return;
+    }
     try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.ctx = new AudioContext();
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      this.ctx = new AudioContextClass();
+
+      // Master Gain Node controlling all audio outputs
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.setValueAtTime(this.soundEnabled ? 1.0 : 0.0, this.ctx.currentTime);
+      this.masterGain.connect(this.ctx.destination);
 
       // Dual Quadrotor Motor Synthesis
       this.motorOsc1 = this.ctx.createOscillator();
@@ -2093,24 +2196,58 @@ class SoundEngine {
 
       this.motorOsc1.frequency.setValueAtTime(110, this.ctx.currentTime);
       this.motorOsc2.frequency.setValueAtTime(220, this.ctx.currentTime);
-      this.motorGain.gain.setValueAtTime(0.015, this.ctx.currentTime);
+      this.motorGain.gain.setValueAtTime(this.soundEnabled ? 0.015 : 0.0, this.ctx.currentTime);
 
       this.motorOsc1.connect(this.motorGain);
       this.motorOsc2.connect(this.motorGain);
-      this.motorGain.connect(this.ctx.destination);
+      this.motorGain.connect(this.masterGain);
 
       this.motorOsc1.start();
       this.motorOsc2.start();
       this.initialized = true;
+
+      if (!this.soundEnabled) {
+        this.masterGain.gain.setValueAtTime(0, this.ctx.currentTime);
+        this.motorGain.gain.setValueAtTime(0, this.ctx.currentTime);
+      }
     } catch (e) {
       console.warn("Audio Context init pending user gesture", e);
     }
   }
 
+  setSoundEnabled(enabled) {
+    this.soundEnabled = !!enabled;
+    if (!this.initialized) {
+      this.init();
+    }
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    if (this.masterGain) {
+      this.masterGain.gain.cancelScheduledValues(t);
+      this.masterGain.gain.setValueAtTime(this.soundEnabled ? 1.0 : 0.0, t);
+    }
+    if (this.motorGain) {
+      this.motorGain.gain.cancelScheduledValues(t);
+      this.motorGain.gain.setValueAtTime(this.soundEnabled ? 0.015 : 0.0, t);
+    }
+
+    if (this.soundEnabled) {
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
+    } else {
+      if (this.ctx.state === 'running') {
+        this.ctx.suspend().catch(() => {});
+      }
+    }
+  }
+
   updateRpm(rpmNorm) {
-    if (!this.initialized || !this.ctx) return;
-    if (!this.soundEnabled) {
-      this.motorGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.05);
+    if (!this.soundEnabled || !this.initialized || !this.ctx || !this.motorGain) {
+      if (this.motorGain && this.ctx) {
+        this.motorGain.gain.setValueAtTime(0, this.ctx.currentTime);
+      }
       return;
     }
     const baseFreq = 120 + rpmNorm * 680;
@@ -2131,7 +2268,7 @@ class SoundEngine {
     gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
     osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.masterGain || this.ctx.destination);
     osc.start();
     osc.stop(this.ctx.currentTime + 0.12);
   }
@@ -2147,7 +2284,7 @@ class SoundEngine {
     gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
     osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.masterGain || this.ctx.destination);
     osc.start();
     osc.stop(this.ctx.currentTime + 0.4);
   }
@@ -2174,7 +2311,7 @@ class SoundEngine {
 
     noise.connect(filter);
     filter.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.masterGain || this.ctx.destination);
     noise.start();
   }
 
@@ -2189,7 +2326,7 @@ class SoundEngine {
     gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
     osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.masterGain || this.ctx.destination);
     osc.start();
     osc.stop(this.ctx.currentTime + 0.3);
   }
@@ -2205,7 +2342,7 @@ class SoundEngine {
     gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
     osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.masterGain || this.ctx.destination);
     osc.start();
     osc.stop(this.ctx.currentTime + 0.15);
   }
@@ -2221,7 +2358,7 @@ class SoundEngine {
     gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.45);
     osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gain.connect(this.masterGain || this.ctx.destination);
     osc.start();
     osc.stop(this.ctx.currentTime + 0.45);
   }
@@ -2230,6 +2367,7 @@ class SoundEngine {
 const audio = new SoundEngine();
 window.addEventListener('click', () => audio.init(), { once: true });
 window.addEventListener('keydown', () => audio.init(), { once: true });
+window.addEventListener('touchstart', () => audio.init(), { once: true });
 </script>
 
 <!-- Main Three.js Application Logic -->
@@ -3015,6 +3153,9 @@ window.addEventListener('keydown', e => {
   if (e.code === 'KeyV' || e.key === 'v') {
     flipCameraAngle();
   }
+  if (e.code === 'KeyU' || e.key === 'u') {
+    toggleMasterSound();
+  }
   if (e.code === 'Digit1') setCameraMode('chase');
   if (e.code === 'Digit2') setCameraMode('fpv');
   if (e.code === 'Digit3') setCameraMode('action');
@@ -3058,22 +3199,59 @@ function selectMatchMode(mode) {
   document.getElementById('mode-choice-single').classList.toggle('active', mode === 'single');
 }
 
+function toggleMasterSound() {
+  if (!audio.initialized) audio.init();
+  const newState = !audio.soundEnabled;
+  audio.setSoundEnabled(newState);
+  updateAllSoundUI(newState);
+}
+
+function updateAllSoundUI(enabled) {
+  matchSettings.sfx = enabled;
+
+  // Header sound button
+  const headerBtn = document.getElementById('header-sound-btn');
+  if (headerBtn) {
+    headerBtn.className = `sound-toggle-btn ${enabled ? 'active' : 'muted'}`;
+    const icon = document.getElementById('header-sound-icon');
+    const text = document.getElementById('header-sound-text');
+    if (icon) icon.textContent = enabled ? '🔊' : '🔇';
+    if (text) text.textContent = enabled ? 'SOUND ON' : 'MUTED';
+  }
+
+  // OSD sound button
+  const osdBtn = document.getElementById('osd-sound-btn');
+  if (osdBtn) {
+    osdBtn.innerHTML = enabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+    osdBtn.style.color = enabled ? 'var(--accent-mint)' : '#fca5a5';
+    osdBtn.style.borderColor = enabled ? 'var(--accent-mint)' : 'var(--accent-enemy)';
+    osdBtn.style.background = enabled ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.18)';
+  }
+
+  // Modal switch button
+  const modalBtn = document.getElementById('toggle-sfx-btn');
+  if (modalBtn) {
+    modalBtn.textContent = enabled ? 'ON' : 'OFF';
+    modalBtn.className = `toggle-switch-btn ${enabled ? 'on' : 'off'}`;
+  }
+
+  showToast(enabled ? "Sound: ON" : "Sound: MUTED");
+}
+
 function toggleAudioSetting(type) {
   if (type === 'sfx') {
-    matchSettings.sfx = !matchSettings.sfx;
-    audio.soundEnabled = matchSettings.sfx;
-    const btn = document.getElementById('toggle-sfx-btn');
-    btn.textContent = matchSettings.sfx ? 'ON' : 'OFF';
-    btn.className = `toggle-switch-btn ${matchSettings.sfx ? 'on' : 'off'}`;
-    showToast(matchSettings.sfx ? "Sound FX: ON" : "Sound FX: MUTED");
+    toggleMasterSound();
   } else if (type === 'radio') {
     matchSettings.radio = !matchSettings.radio;
     audio.radioEnabled = matchSettings.radio;
     const btn = document.getElementById('toggle-radio-btn');
-    btn.textContent = matchSettings.radio ? 'ON' : 'OFF';
-    btn.className = `toggle-switch-btn ${matchSettings.radio ? 'on' : 'off'}`;
+    if (btn) {
+      btn.textContent = matchSettings.radio ? 'ON' : 'OFF';
+      btn.className = `toggle-switch-btn ${matchSettings.radio ? 'on' : 'off'}`;
+    }
     const box = document.getElementById('combat-radio-chatter');
     if (box) box.style.display = matchSettings.radio ? 'flex' : 'none';
+    showToast(matchSettings.radio ? "Radio Chatter: ON" : "Radio Chatter: MUTED");
   }
 }
 
@@ -3324,6 +3502,7 @@ function toggleSpin() {
 }
 
 // 📹 CAMERA DIRECTOR STATE & ADVANCED CONTROLS 📹
+const isMobileClient = (typeof window !== 'undefined' && (window.innerWidth <= 768 || ('ontouchstart' in window)));
 const cameraDirector = {
   mode: 'chase', // 'chase', 'fpv', 'action', 'topdown', 'side', 'reverse', 'cinematic', 'orbit'
   dist: 5.8,
@@ -3331,9 +3510,18 @@ const cameraDirector = {
   yawAngleOffset: 0, // radians: 0, Math.PI, Math.PI/2, etc.
   fov: 65,
   cinematicAngle: 0,
-  isMinimized: false,
+  isMinimized: isMobileClient,
   presetAngle: 'rear'
 };
+
+if (cameraDirector.isMinimized) {
+  setTimeout(() => {
+    const dock = document.getElementById('camera-director-dock');
+    if (dock) dock.classList.add('minimized');
+    const btn = document.getElementById('dock-toggle-btn');
+    if (btn) btn.textContent = '+';
+  }, 0);
+}
 
 const CAMERA_MODES_ORDER = ['chase', 'fpv', 'action', 'topdown', 'side', 'reverse', 'cinematic', 'orbit'];
 
@@ -3554,7 +3742,8 @@ function focusComponent(key) {
   event.currentTarget.classList.add('active');
   document.getElementById('detail-title').textContent = data.title;
   document.getElementById('detail-tag').textContent = data.tag;
-  document.getElementById('detail-desc').textContent = data.desc;
+  const descEl = document.getElementById('detail-desc');
+  if (descEl) descEl.textContent = data.desc;
   showToast(`Focused: ${data.title}`);
 }
 
@@ -4052,231 +4241,200 @@ window.addEventListener('resize', () => {
 
 // ── MOBILE TOUCH JOYSTICK SYSTEM ─────────────────────────────
 (function setupMobileControls() {
-  const isTouchDevice = () => ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  try {
+    const isTouchDevice = () => (
+      'ontouchstart' in window ||
+      navigator.maxTouchPoints > 0 ||
+      (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+    );
 
-  // Mark body as touch device so CSS can gate the mobile UI
-  function applyTouchClass() {
-    if (isTouchDevice()) {
+    // Mark body as touch device so CSS can gate the mobile UI
+    function applyTouchClass() {
+      if (isTouchDevice()) {
+        document.body.classList.add('touch-device');
+      }
+    }
+    applyTouchClass();
+    // Also detect on first touch (for devices that report touch late)
+    window.addEventListener('touchstart', () => {
       document.body.classList.add('touch-device');
+      audio.init();
+    }, { once: true });
+
+    // Virtual key state driven by joysticks
+    const vkeys = {
+      KeyW: false, KeyS: false, KeyA: false, KeyD: false,
+      KeyQ: false, KeyE: false, Space: false, ShiftLeft: false
+    };
+
+    function setVKey(key, val) {
+      vkeys[key] = val;
+      keys[key] = val;
+      // also set the letter key aliases used in the game loop
+      const aliases = { KeyW:'w', KeyS:'s', KeyA:'a', KeyD:'d', KeyQ:'q', KeyE:'e' };
+      if (aliases[key]) keys[aliases[key]] = val;
     }
-  }
-  applyTouchClass();
-  // Also detect on first touch (for devices that report touch late)
-  window.addEventListener('touchstart', () => {
-    document.body.classList.add('touch-device');
-    audio.init();
-  }, { once: true });
 
-  // Virtual key state driven by joysticks
-  const vkeys = {
-    KeyW: false, KeyS: false, KeyA: false, KeyD: false,
-    KeyQ: false, KeyE: false, Space: false, ShiftLeft: false
-  };
-
-  function setVKey(key, val) {
-    vkeys[key] = val;
-    keys[key] = val;
-    // also set the letter key aliases used in the game loop
-    const aliases = { KeyW:'w', KeyS:'s', KeyA:'a', KeyD:'d', KeyQ:'q', KeyE:'e' };
-    if (aliases[key]) keys[aliases[key]] = val;
-  }
-
-  function clearAllVKeys() {
-    Object.keys(vkeys).forEach(k => setVKey(k, false));
-  }
-
-  // ---- Left Joystick (Move: W/S/A/D) ----
-  const leftZone = document.getElementById('joy-left-zone');
-  const leftKnob = document.getElementById('joy-left-knob');
-  let leftTouch = null;
-  let leftOrigin = { x: 0, y: 0 };
-  const DEAD = 12;
-  const MAX_DIST = 55;
-
-  leftZone.addEventListener('touchstart', e => {
-    e.preventDefault();
-    const t = e.changedTouches[0];
-    leftTouch = t.identifier;
-    const rect = leftZone.getBoundingClientRect();
-    leftOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-  }, { passive: false });
-
-  leftZone.addEventListener('touchmove', e => {
-    e.preventDefault();
-    for (const t of e.changedTouches) {
-      if (t.identifier !== leftTouch) continue;
-      const dx = t.clientX - leftOrigin.x;
-      const dy = t.clientY - leftOrigin.y;
-      const dist = Math.min(Math.hypot(dx, dy), MAX_DIST);
-      const angle = Math.atan2(dy, dx);
-      const nx = dist * Math.cos(angle);
-      const ny = dist * Math.sin(angle);
-
-      // Move knob
-      leftKnob.style.transform = `translate(calc(-50% + ${nx}px), calc(-50% + ${ny}px))`;
-
-      // Map to keys
-      setVKey('KeyW', ny < -DEAD);  // up = forward
-      setVKey('KeyS', ny > DEAD);   // down = back
-      setVKey('KeyA', nx < -DEAD);  // left strafe
-      setVKey('KeyD', nx > DEAD);   // right strafe
+    function clearAllVKeys() {
+      Object.keys(vkeys).forEach(k => setVKey(k, false));
     }
-  }, { passive: false });
 
-  function endLeftJoy(e) {
-    for (const t of e.changedTouches) {
-      if (t.identifier !== leftTouch) continue;
-      leftTouch = null;
-      leftKnob.style.transform = 'translate(-50%, -50%)';
-      setVKey('KeyW', false);
-      setVKey('KeyS', false);
-      setVKey('KeyA', false);
-      setVKey('KeyD', false);
-    }
-  }
-  leftZone.addEventListener('touchend', endLeftJoy, { passive: false });
-  leftZone.addEventListener('touchcancel', endLeftJoy, { passive: false });
+    // ---- Left Joystick (Move: W/S/A/D) ----
+    const leftZone = document.getElementById('joy-left-zone');
+    const leftKnob = document.getElementById('joy-left-knob');
+    if (!leftZone || !leftKnob) return;
 
-  // ---- Right Joystick (Yaw: Q/E, left-right) ----
-  const rightZone = document.getElementById('joy-right-zone');
-  const rightKnob = document.getElementById('joy-right-knob');
-  let rightTouch = null;
-  let rightOrigin = { x: 0, y: 0 };
+    let leftTouch = null;
+    let leftOrigin = { x: 0, y: 0 };
+    const DEAD = 12;
+    const MAX_DIST = 55;
 
-  rightZone.addEventListener('touchstart', e => {
-    e.preventDefault();
-    const t = e.changedTouches[0];
-    rightTouch = t.identifier;
-    const rect = rightZone.getBoundingClientRect();
-    rightOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-  }, { passive: false });
-
-  rightZone.addEventListener('touchmove', e => {
-    e.preventDefault();
-    for (const t of e.changedTouches) {
-      if (t.identifier !== rightTouch) continue;
-      const dx = t.clientX - rightOrigin.x;
-      const dy = t.clientY - rightOrigin.y;
-      const dist = Math.min(Math.hypot(dx, dy), MAX_DIST);
-      const angle = Math.atan2(dy, dx);
-      const nx = dist * Math.cos(angle);
-      const ny = dist * Math.sin(angle);
-
-      rightKnob.style.transform = `translate(calc(-50% + ${nx}px), calc(-50% + ${ny}px))`;
-
-      // Horizontal = yaw
-      setVKey('KeyQ', nx < -DEAD);
-      setVKey('KeyE', nx > DEAD);
-    }
-  }, { passive: false });
-
-  function endRightJoy(e) {
-    for (const t of e.changedTouches) {
-      if (t.identifier !== rightTouch) continue;
-      rightTouch = null;
-      rightKnob.style.transform = 'translate(-50%, -50%)';
-      setVKey('KeyQ', false);
-      setVKey('KeyE', false);
-    }
-  }
-  rightZone.addEventListener('touchend', endRightJoy, { passive: false });
-  rightZone.addEventListener('touchcancel', endRightJoy, { passive: false });
-
-  // ---- Altitude Buttons ----
-  function holdBtn(el, keyCode) {
-    const start = (e) => { e.preventDefault(); setVKey(keyCode, true); el.classList.add('pressed'); };
-    const stop = (e) => { e.preventDefault(); setVKey(keyCode, false); el.classList.remove('pressed'); };
-    el.addEventListener('touchstart', start, { passive: false });
-    el.addEventListener('touchend', stop, { passive: false });
-    el.addEventListener('touchcancel', stop, { passive: false });
-    // Mouse fallback
-    el.addEventListener('mousedown', start);
-    el.addEventListener('mouseup', stop);
-    el.addEventListener('mouseleave', stop);
-  }
-
-  holdBtn(document.getElementById('btn-climb'), 'Space');
-  holdBtn(document.getElementById('btn-descend'), 'ShiftLeft');
-
-  // ---- Action Buttons ----
-  const fireBtn = document.getElementById('mob-fire-btn');
-  const missileBtn = document.getElementById('mob-missile-btn');
-  const respawnBtn = document.getElementById('mob-respawn-btn');
-
-  function tapAction(el, fn) {
-    el.addEventListener('touchstart', (e) => {
+    leftZone.addEventListener('touchstart', e => {
       e.preventDefault();
-      el.classList.add('pressed');
-      fn();
+      const t = e.changedTouches[0];
+      leftTouch = t.identifier;
+      const rect = leftZone.getBoundingClientRect();
+      leftOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
     }, { passive: false });
-    el.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      setTimeout(() => el.classList.remove('pressed'), 120);
-    }, { passive: false });
-    // Mouse fallback for desktop testing
-    el.addEventListener('click', fn);
-  }
 
-  tapAction(fireBtn, () => {
-    if (appMode === 'combat' || appMode === 'flight') fireLaser();
-  });
-  tapAction(missileBtn, () => {
-    if (appMode === 'combat' || appMode === 'flight') fireMissile();
-  });
-  tapAction(respawnBtn, respawnDrone);
-  const camBtn = document.getElementById('mob-cam-btn');
-  if (camBtn) {
-    tapAction(camBtn, cycleCameraMode);
+    leftZone.addEventListener('touchmove', e => {
+      e.preventDefault();
+      for (const t of e.changedTouches) {
+        if (t.identifier !== leftTouch) continue;
+        const dx = t.clientX - leftOrigin.x;
+        const dy = t.clientY - leftOrigin.y;
+        const dist = Math.min(Math.hypot(dx, dy), MAX_DIST);
+        const angle = Math.atan2(dy, dx);
+        const nx = dist * Math.cos(angle);
+        const ny = dist * Math.sin(angle);
+
+        // Move knob
+        leftKnob.style.transform = `translate(calc(-50% + ${nx}px), calc(-50% + ${ny}px))`;
+
+        // Map to keys
+        setVKey('KeyW', ny < -DEAD);  // up = forward
+        setVKey('KeyS', ny > DEAD);   // down = back
+        setVKey('KeyA', nx < -DEAD);  // left strafe
+        setVKey('KeyD', nx > DEAD);   // right strafe
+      }
+    }, { passive: false });
+
+    function endLeftJoy(e) {
+      for (const t of e.changedTouches) {
+        if (t.identifier !== leftTouch) continue;
+        leftTouch = null;
+        leftKnob.style.transform = 'translate(-50%, -50%)';
+        setVKey('KeyW', false);
+        setVKey('KeyS', false);
+        setVKey('KeyA', false);
+        setVKey('KeyD', false);
+      }
+    }
+    leftZone.addEventListener('touchend', endLeftJoy, { passive: false });
+    leftZone.addEventListener('touchcancel', endLeftJoy, { passive: false });
+
+    // ---- Right Joystick (Yaw: Q/E, left-right) ----
+    const rightZone = document.getElementById('joy-right-zone');
+    const rightKnob = document.getElementById('joy-right-knob');
+    if (!rightZone || !rightKnob) return;
+
+    let rightTouch = null;
+    let rightOrigin = { x: 0, y: 0 };
+
+    rightZone.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      rightTouch = t.identifier;
+      const rect = rightZone.getBoundingClientRect();
+      rightOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    }, { passive: false });
+
+    rightZone.addEventListener('touchmove', e => {
+      e.preventDefault();
+      for (const t of e.changedTouches) {
+        if (t.identifier !== rightTouch) continue;
+        const dx = t.clientX - rightOrigin.x;
+        const dy = t.clientY - rightOrigin.y;
+        const dist = Math.min(Math.hypot(dx, dy), MAX_DIST);
+        const angle = Math.atan2(dy, dx);
+        const nx = dist * Math.cos(angle);
+        const ny = dist * Math.sin(angle);
+
+        rightKnob.style.transform = `translate(calc(-50% + ${nx}px), calc(-50% + ${ny}px))`;
+
+        // Horizontal = yaw
+        setVKey('KeyQ', nx < -DEAD);
+        setVKey('KeyE', nx > DEAD);
+      }
+    }, { passive: false });
+
+    function endRightJoy(e) {
+      for (const t of e.changedTouches) {
+        if (t.identifier !== rightTouch) continue;
+        rightTouch = null;
+        rightKnob.style.transform = 'translate(-50%, -50%)';
+        setVKey('KeyQ', false);
+        setVKey('KeyE', false);
+      }
+    }
+    rightZone.addEventListener('touchend', endRightJoy, { passive: false });
+    rightZone.addEventListener('touchcancel', endRightJoy, { passive: false });
+
+    // ---- Altitude Buttons ----
+    function holdBtn(el, keyCode) {
+      if (!el) return;
+      const start = (e) => { e.preventDefault(); setVKey(keyCode, true); el.classList.add('pressed'); };
+      const stop = (e) => { e.preventDefault(); setVKey(keyCode, false); el.classList.remove('pressed'); };
+      el.addEventListener('touchstart', start, { passive: false });
+      el.addEventListener('touchend', stop, { passive: false });
+      el.addEventListener('touchcancel', stop, { passive: false });
+      // Mouse fallback
+      el.addEventListener('mousedown', start);
+      el.addEventListener('mouseup', stop);
+      el.addEventListener('mouseleave', stop);
+    }
+
+    holdBtn(document.getElementById('btn-climb'), 'Space');
+    holdBtn(document.getElementById('btn-descend'), 'ShiftLeft');
+
+    // ---- Action Buttons ----
+    const fireBtn = document.getElementById('mob-fire-btn');
+    const missileBtn = document.getElementById('mob-missile-btn');
+    const respawnBtn = document.getElementById('mob-respawn-btn');
+    const camBtn = document.getElementById('mob-cam-btn');
+
+    function tapAction(el, fn) {
+      if (!el) return;
+      el.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        el.classList.add('pressed');
+        fn();
+      }, { passive: false });
+      el.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        setTimeout(() => el.classList.remove('pressed'), 120);
+      }, { passive: false });
+      // Mouse fallback for desktop testing
+      el.addEventListener('click', fn);
+    }
+
+    tapAction(fireBtn, () => {
+      if (appMode === 'combat' || appMode === 'flight') fireLaser();
+    });
+    tapAction(missileBtn, () => {
+      if (appMode === 'combat' || appMode === 'flight') fireMissile();
+    });
+    tapAction(respawnBtn, respawnDrone);
+    if (camBtn) {
+      tapAction(camBtn, cycleCameraMode);
+    }
+  } catch (err) {
+    console.error('Mobile controls setup non-fatal error:', err);
   }
 })();
 
 // Start loop
 animate();
 </script>
-
-<!-- ── MOBILE TOUCH CONTROLS ── -->
-<div id="mobile-controls">
-  <!-- Left Joystick: Move (Forward/Back/Strafe) -->
-  <div class="joystick-zone left" id="joy-left-zone">
-    <div class="joystick-base">
-      <div class="joystick-knob" id="joy-left-knob"></div>
-    </div>
-    <div class="joystick-label">Move</div>
-  </div>
-
-  <!-- Right Joystick: Yaw (turn left/right) -->
-  <div class="joystick-zone right" id="joy-right-zone">
-    <div class="joystick-base">
-      <div class="joystick-knob" id="joy-right-knob"></div>
-    </div>
-    <div class="joystick-label">Yaw / Look</div>
-  </div>
-
-  <!-- Altitude buttons (left of right joystick) -->
-  <div class="altitude-btns" id="alt-btns">
-    <button class="alt-btn" id="btn-climb" aria-label="Climb">▲</button>
-    <button class="alt-btn" id="btn-descend" aria-label="Descend">▼</button>
-  </div>
-
-  <!-- Center action buttons -->
-  <div class="mobile-action-row">
-    <button class="mob-btn respawn" id="mob-respawn-btn" aria-label="Respawn">
-      <span class="btn-icon">↺</span>
-      <span class="btn-label">Respawn</span>
-    </button>
-    <button class="mob-btn fire" id="mob-fire-btn" aria-label="Fire laser">
-      <span class="btn-icon">🔵</span>
-      <span class="btn-label">LASER</span>
-    </button>
-    <button class="mob-btn missile" id="mob-missile-btn" aria-label="Fire missile">
-      <span class="btn-icon">🚀</span>
-      <span class="btn-label">Missile</span>
-    </button>
-    <button class="mob-btn" id="mob-cam-btn" aria-label="Cycle Camera" style="border-color:var(--accent-cyan); color:var(--accent-cyan); background:rgba(0,229,255,0.12)">
-      <span class="btn-icon">📹</span>
-      <span class="btn-label">CAM</span>
-    </button>
-  </div>
-</div>
 </body>
 </html>
