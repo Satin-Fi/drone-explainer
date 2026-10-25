@@ -392,51 +392,136 @@
   .tape-val { font-size: 1.6rem; font-weight: 700; color: var(--accent-cyan); text-shadow: 0 0 12px rgba(0,229,255,0.4); }
   .tape-lbl { font-size: 0.62rem; color: var(--text-tertiary); letter-spacing: 0.12em; }
 
-  /* Compact Real-Time Telemetry Bar for Flight Mode */
+  /* ── CLEAN TOP GAME HUD (Apex Legends / Call of Duty Style) ── */
   #flight-osd-bar {
     position: absolute;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 14px;
+    left: 0;
+    right: 0;
     display: none;
     align-items: center;
-    gap: 16px;
-    padding: 7px 20px;
-    border-radius: 24px;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    pointer-events: auto;
-    z-index: 20;
+    justify-content: space-between;
+    padding: 0 24px;
+    pointer-events: none;
+    z-index: 25;
   }
   #flight-osd-bar.active {
     display: flex;
   }
-  .osd-item {
+
+  /* Top-Center Objective / Score Badge */
+  #hud-top-objective {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 18px;
+    background: rgba(15, 23, 42, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-family: var(--font-mono);
+    pointer-events: auto;
+  }
+  .hud-stat-badge {
     display: flex;
     align-items: center;
     gap: 6px;
-  }
-  .osd-label {
-    color: var(--text-tertiary);
-    font-size: 0.65rem;
-  }
-  .osd-val {
-    color: var(--astra-lavender);
+    font-size: 0.72rem;
     font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .hud-badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+  .hud-badge-dot.red { background: #f43f5e; box-shadow: 0 0 8px #f43f5e; }
+  .hud-badge-dot.green { background: #10b981; box-shadow: 0 0 8px #10b981; }
+  .hud-badge-lbl {
+    color: var(--text-tertiary);
+    font-size: 0.62rem;
+  }
+  .hud-badge-val.enemy { color: #fca5a5; }
+  .hud-badge-val.gold { color: #fbbf24; }
+  .hud-badge-val.cyan { color: #38bdf8; }
+  .hud-badge-val.green { color: #34d399; }
+  .hud-divider {
+    width: 1px;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.15);
   }
 
-  /* Notification Toast (Positioned at top so it never covers the screen or controls) */
+  /* Top-Right Tactical Icon Strip */
+  #hud-top-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: auto;
+  }
+  .hud-icon-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 229, 255, 0.14);
+    border: 1px solid rgba(0, 229, 255, 0.45);
+    border-radius: 16px;
+    padding: 5px 12px;
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .hud-icon-pill:hover, .hud-icon-pill:active {
+    background: rgba(0, 229, 255, 0.28);
+    box-shadow: 0 0 14px rgba(0, 229, 255, 0.4);
+    transform: translateY(-1px);
+  }
+  .hud-icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #e2e8f0;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .hud-icon-btn:hover, .hud-icon-btn:active {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Notification Toast (Positioned at top: 72px so it NEVER covers top HUD or icons) */
   #toast-notif {
     position: absolute;
-    top: 14px;
+    top: 72px;
     left: 50%;
-    transform: translateX(-50%) translateY(-35px);
+    transform: translateX(-50%) translateY(-20px);
     opacity: 0;
-    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-    padding: 6px 18px;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 7px 20px;
     border-radius: 20px;
     font-size: 0.72rem;
     font-weight: 600;
+    font-family: var(--font-mono);
     letter-spacing: 0.03em;
     pointer-events: none;
     z-index: 300;
@@ -444,7 +529,10 @@
     align-items: center;
     gap: 8px;
     white-space: nowrap;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    color: #e2e8f0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
   }
   #toast-notif.show {
     transform: translateX(-50%) translateY(0);
@@ -2248,25 +2336,25 @@
       z-index: 25;
     }
 
-    /* Telemetry pill sits cleanly centered below vitals and radar without any overlap */
     #flight-osd-bar {
-      top: 140px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 4px 12px;
-      gap: 10px;
-      font-size: 0.60rem;
-      border-radius: 18px;
-      white-space: nowrap;
-      overflow: hidden;
-      justify-content: center;
-      max-width: 90vw;
-      z-index: 25;
-      background: rgba(14, 18, 28, 0.78);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      top: 10px;
+      padding: 0 10px;
     }
-    .osd-desktop-tools {
-      display: none !important;
+    #hud-top-objective {
+      padding: 4px 10px;
+      gap: 6px;
+    }
+    #hud-top-actions {
+      gap: 6px;
+    }
+    .hud-icon-pill {
+      padding: 4px 8px;
+      font-size: 0.62rem;
+    }
+    .hud-icon-btn {
+      width: 30px;
+      height: 30px;
+      font-size: 0.78rem;
     }
 
     /* Hide static unnecessary clutter in game mode on mobile */
@@ -2300,7 +2388,7 @@
     .alt-btn { width: 42px; height: 42px; font-size: 1.0rem; }
     .mob-btn { width: 56px; height: 56px; font-size: 0.65rem; }
     .mob-btn.fire { width: 70px; height: 70px; }
-    #flight-osd-bar { top: 140px; font-size: 0.58rem; padding: 4px 10px; gap: 8px; }
+    #flight-osd-bar { top: 8px; padding: 0 6px; }
   }
 </style>
 </head>
@@ -2443,6 +2531,19 @@
       </div>
     </div>
 
+    <!-- Quick Controls & Camera Access -->
+    <div>
+      <div class="option-group-label">HUD & Camera Controls</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <button class="action-btn" onclick="toggleCodmHud(); closeCombatModal();" style="padding:10px; font-size:0.72rem; background:rgba(244,63,94,0.15); border-color:#f43f5e; color:#fca5a5; font-weight:700;">
+          📱 Toggle CODM HUD
+        </button>
+        <button class="action-btn" onclick="toggleCameraDock(); closeCombatModal();" style="padding:10px; font-size:0.72rem; background:rgba(0,229,255,0.15); border-color:var(--accent-cyan); color:var(--accent-cyan); font-weight:700;">
+          📹 Camera Director
+        </button>
+      </div>
+    </div>
+
     <!-- Action Buttons -->
     <div class="modal-action-row">
       <button class="deploy-btn" onclick="confirmAndDeployCombat()">
@@ -2558,76 +2659,52 @@
         <span id="toast-text">Tactical Combat Systems Online.</span>
       </div>
 
-      <!-- Real-Time Flight OSD Bar (Top HUD in Flight Mode) -->
-      <div id="flight-osd-bar" class="glass-panel">
-        <div class="osd-item">
-          <span class="osd-label">AIR SPD</span>
-          <span class="osd-val" id="osd-spd-val" style="color:var(--accent-cyan)">0.0 M/S</span>
-        </div>
-        <div class="osd-item">
-          <span class="osd-label">ALT</span>
-          <span class="osd-val" id="osd-alt-val">1.2 M</span>
-        </div>
-        <div class="osd-item combat-only" id="osd-enemies-box">
-          <span class="osd-label">ENEMIES</span>
-          <span class="osd-val" id="osd-kills-val" style="color:var(--accent-enemy)">5 ACTIVE</span>
-        </div>
-        <div class="osd-item combat-only" id="osd-coins-box">
-          <span class="osd-label">COINS</span>
-          <span class="osd-val" id="osd-coins-val" style="color:var(--accent-gold)">350</span>
-        </div>
-        <div class="osd-item flight-only" id="osd-flight-status-box">
-          <span class="osd-label">MODE</span>
-          <span class="osd-val" style="color:var(--accent-mint)">PEACEFUL CRUISE</span>
-        </div>
-        <div class="osd-item flight-only" id="osd-heading-box">
-          <span class="osd-label">HEADING</span>
-          <span class="osd-val" id="osd-hdg-val" style="color:var(--accent-cyan)">360° N</span>
-        </div>
-        <!-- Online Friends Multiplayer Squad Pill (Always visible on Mobile & Desktop) -->
-        <div id="osd-multiplayer-badge" onclick="shareNativeInviteLink()" title="Tap to invite wingmen or share room link" style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,229,255,0.16); border:1px solid rgba(0,229,255,0.45); border-radius:14px; padding:3px 9px; cursor:pointer; user-select:none;">
-          <span style="font-size:0.75rem;">🌐</span>
-          <span id="osd-room-code-tag" style="font-family:var(--font-mono); font-weight:700; color:var(--accent-cyan); font-size:0.68rem; letter-spacing:0.04em;">ROOM: SKY-842</span>
-          <span id="osd-mp-count" style="font-size:0.62rem; color:var(--accent-gold); font-family:var(--font-mono); font-weight:700;">(1)</span>
-          <span style="font-size:0.58rem; background:var(--accent-cyan); color:#000; padding:1px 6px; border-radius:4px; font-weight:800; letter-spacing:0.03em;">INVITE</span>
-        </div>
-        <div class="osd-desktop-tools" style="display:flex; align-items:center; gap:8px;">
-          <div class="osd-item">
-            <span class="osd-label">BATT</span>
-            <span class="osd-val" id="osd-bat-val" style="color:var(--accent-mint)">22.8V</span>
+      <!-- Real-Time Flight Top HUD (Clean Modern Combat Strip) -->
+      <div id="flight-osd-bar">
+        <!-- Top-Center Objective / Score Pill -->
+        <div id="hud-top-objective">
+          <div class="combat-only" style="display:flex; align-items:center; gap:12px;">
+            <div class="hud-stat-badge">
+              <span class="hud-badge-dot red"></span>
+              <span class="hud-badge-lbl">SWARM</span>
+              <span class="hud-badge-val enemy" id="osd-kills-val">5 ACTIVE</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-stat-badge">
+              <span class="hud-badge-lbl">🪙</span>
+              <span class="hud-badge-val gold" id="osd-coins-val">350</span>
+            </div>
           </div>
-          <button class="action-btn" id="osd-sound-btn" onclick="toggleMasterSound()" title="Toggle Master Audio [U]" style="padding:4px 10px; font-size:0.68rem; background:rgba(16,185,129,0.15); border-color:var(--accent-mint); color:var(--accent-mint)">
-            🔊 Sound
-          </button>
-          <div class="osd-item" style="border-left:1px solid rgba(255,255,255,0.12); padding-left:10px;">
-            <span class="osd-label">CAM</span>
-            <select id="osd-cam-select" onchange="setCameraMode(this.value)" class="osd-cam-select" title="Switch Camera Mode [C]">
-              <option value="chase">Chase [1]</option>
-              <option value="fpv">FPV Cockpit [2]</option>
-              <option value="action">Action Cam [3]</option>
-              <option value="topdown">Top-Down [4]</option>
-              <option value="side">Wingman [5]</option>
-              <option value="reverse">Nose In [6]</option>
-              <option value="cinematic">Cinematic [7]</option>
-              <option value="orbit">Free Orbit [8]</option>
-            </select>
+          <div class="flight-only" style="display:flex; align-items:center; gap:10px;">
+            <div class="hud-stat-badge">
+              <span class="hud-badge-dot green"></span>
+              <span class="hud-badge-val green">PEACEFUL CRUISE</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-stat-badge">
+              <span class="hud-badge-lbl">HDG</span>
+              <span class="hud-badge-val cyan" id="osd-hdg-val">360° N</span>
+            </div>
           </div>
-          <button onclick="toggleCameraDock()" class="action-btn" id="osd-cam-deck-btn" title="Toggle Camera Director Dock" style="padding:4px 10px; font-size:0.68rem; background:rgba(0,229,255,0.12); border-color:var(--accent-cyan); color:var(--accent-cyan)">
-            📹 Director
+        </div>
+
+        <!-- Top-Right Tactical Toolbar (Minimal, Sleek Icons) -->
+        <div id="hud-top-actions">
+          <button id="osd-multiplayer-badge" onclick="shareNativeInviteLink()" title="Invite Friends / Share Room Link" class="hud-icon-pill">
+            <span>🌐</span>
+            <span id="osd-room-code-tag">SKY-842</span>
+            <span id="osd-mp-count">(1)</span>
           </button>
-          <button onclick="copyMultiplayerInviteLink()" class="action-btn" id="osd-invite-btn" title="Copy Invite Link to send to friends" style="padding:4px 10px; font-size:0.68rem; background:rgba(0,229,255,0.14); border-color:var(--accent-cyan); color:var(--accent-cyan); font-weight:700">
-            📋 Invite Friends
+          <button class="hud-icon-btn" id="osd-sound-btn" onclick="toggleMasterSound()" title="Toggle Master Audio [U]">
+            🔊
           </button>
-          <button onclick="respawnDrone()" class="action-btn" style="padding:4px 12px; font-size:0.68rem; background:rgba(255,255,255,0.08); border-color:var(--border-porcelain)">
-            Respawn [R]
+          <button class="hud-icon-btn" id="osd-combat-setup-btn" onclick="openCombatModal()" title="Match Setup & Controls [ESC]">
+            ⚙️
           </button>
-          <button onclick="toggleCodmHud()" class="action-btn combat-only" id="osd-codm-hud-btn" title="Toggle Call of Duty Mobile HUD (Desktop & Touch)" style="padding:4px 10px; font-size:0.68rem; background:rgba(244,63,94,0.18); border-color:#f43f5e; color:#fca5a5; font-weight:700">
-            📱 CODM HUD
+          <button class="hud-icon-btn" onclick="respawnDrone()" title="Respawn / Repair [R]">
+            ↺
           </button>
         </div>
-        <button onclick="openCombatModal()" id="osd-combat-setup-btn" class="action-btn combat-only" style="padding:4px 10px; font-size:0.68rem; background:rgba(239,68,68,0.18); border-color:var(--accent-enemy); color:#fca5a5">
-          ⚙️ Setup
-        </button>
       </div>
 
       <!-- 📹 Floating Camera Director & Angle Controls Dock 📹 -->
@@ -3519,21 +3596,40 @@ function createGrassTexture() {
   const c = document.createElement('canvas');
   c.width = 512; c.height = 512;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#3f6c2c';
+
+  // Satellite earth-tone base (deep natural airfield soil & grass blend)
+  ctx.fillStyle = '#2c3b24';
   ctx.fillRect(0, 0, 512, 512);
-  for (let i = 0; i < 4000; i++) {
+
+  // Soft organic gradient blending (no harsh circles!)
+  for (let i = 0; i < 45; i++) {
     const x = Math.random() * 512, y = Math.random() * 512;
-    const r = Math.random() * 8 + 2;
-    const gVal = Math.floor(80 + Math.random() * 50);
-    ctx.fillStyle = `rgb(${Math.floor(gVal * 0.55)}, ${gVal}, ${Math.floor(gVal * 0.28)})`;
+    const rad = 40 + Math.random() * 80;
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, rad);
+    const shade = Math.random() > 0.4 ? 'rgba(56, 74, 44, 0.4)' : 'rgba(38, 44, 32, 0.45)';
+    grad.addColorStop(0, shade);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.arc(x, y, rad, 0, Math.PI * 2);
     ctx.fill();
   }
+
+  // Pixel-level soil/grass grain texture
+  const imgData = ctx.getImageData(0, 0, 512, 512);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const n = (Math.random() - 0.5) * 26;
+    d[i] = Math.max(0, Math.min(255, d[i] + n * 0.9));
+    d[i + 1] = Math.max(0, Math.min(255, d[i + 1] + n * 1.15));
+    d[i + 2] = Math.max(0, Math.min(255, d[i + 2] + n * 0.7));
+  }
+  ctx.putImageData(imgData, 0, 0);
+
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(90, 90);
+  tex.repeat.set(140, 140);
   return tex;
 }
 
@@ -3541,23 +3637,52 @@ function createRunwayTexture() {
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 2048;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#26292e';
+
+  // Dark weathered airfield asphalt
+  ctx.fillStyle = '#23262b';
   ctx.fillRect(0, 0, 1024, 2048);
-  ctx.fillStyle = 'rgba(255,255,255,0.03)';
-  for (let i = 0; i < 8000; i++) ctx.fillRect(Math.random() * 1024, Math.random() * 2048, 2, 2);
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(60, 0, 18, 2048);
-  ctx.fillRect(1024 - 78, 0, 18, 2048);
-  for (let y = 120; y < 1920; y += 160) ctx.fillRect(504, y, 16, 90);
-  for (let x = 120; x <= 900; x += 65) {
-    ctx.fillRect(x, 40, 36, 180);
-    ctx.fillRect(x, 2048 - 220, 36, 180);
+
+  // Asphalt grain noise
+  const imgData = ctx.getImageData(0, 0, 1024, 2048);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const n = (Math.random() - 0.5) * 16;
+    d[i] += n; d[i+1] += n; d[i+2] += n;
   }
-  ctx.font = "bold 130px monospace";
+  ctx.putImageData(imgData, 0, 0);
+
+  // Rubber tire skid marks at touchdown zones
+  ctx.fillStyle = 'rgba(12, 14, 18, 0.45)';
+  for (let i = 0; i < 18; i++) {
+    const y = 380 + Math.random() * 320;
+    ctx.fillRect(400 + Math.random() * 80, y, 35, 14 + Math.random() * 25);
+    const y2 = 1380 + Math.random() * 320;
+    ctx.fillRect(400 + Math.random() * 80, y2, 35, 14 + Math.random() * 25);
+  }
+
+  // Runway edge lines
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(55, 0, 16, 2048);
+  ctx.fillRect(1024 - 71, 0, 16, 2048);
+
+  // Centerline dashes
+  for (let y = 100; y < 1950; y += 140) {
+    ctx.fillRect(504, y, 16, 75);
+  }
+
+  // Threshold piano keys
+  for (let x = 110; x <= 910; x += 55) {
+    ctx.fillRect(x, 40, 32, 160);
+    ctx.fillRect(x, 2048 - 200, 32, 160);
+  }
+
+  // Number designators
+  ctx.font = "900 130px monospace";
   ctx.textAlign = "center";
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = "#f8fafc";
   ctx.fillText("24L", 512, 340);
   ctx.fillText("06R", 512, 1780);
+
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
@@ -6264,8 +6389,10 @@ function animate() {
     const horizontalSpeed = Math.sqrt(player.vel.x ** 2 + player.vel.z ** 2);
     document.getElementById('hud-spd-val').textContent = horizontalSpeed.toFixed(1);
     document.getElementById('hud-alt-val').textContent = Math.max(0, player.pos.y - 0.45).toFixed(1);
-    document.getElementById('osd-spd-val').textContent = `${horizontalSpeed.toFixed(1)} M/S`;
-    document.getElementById('osd-alt-val').textContent = `${Math.max(0, player.pos.y - 0.45).toFixed(1)} M`;
+    const osdSpdEl = document.getElementById('osd-spd-val');
+    if (osdSpdEl) osdSpdEl.textContent = `${horizontalSpeed.toFixed(1)} M/S`;
+    const osdAltEl = document.getElementById('osd-alt-val');
+    if (osdAltEl) osdAltEl.textContent = `${Math.max(0, player.pos.y - 0.45).toFixed(1)} M`;
 
     // Flight Simulator Compass Heading
     const deg = Math.round(((player.yaw % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI));
