@@ -1017,6 +1017,77 @@
     border: 1px solid rgba(0, 229, 255, 0.4);
   }
 
+  /* High-Tech Scope Target Lock Bracket */
+  .scope-lock-bracket {
+    position: absolute;
+    width: 84px;
+    height: 84px;
+    pointer-events: none;
+    transition: width 0.1s ease-out, height 0.1s ease-out;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transform: translate(-50%, -50%);
+    z-index: 36;
+  }
+  .scope-lock-bracket.active {
+    display: flex;
+  }
+  .scope-lock-corner {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-color: #00e5ff;
+    border-style: solid;
+    transition: border-color 0.12s, width 0.1s, height 0.1s;
+  }
+  .scope-lock-bracket.locked .scope-lock-corner {
+    border-color: #fbbf24;
+    width: 22px;
+    height: 22px;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+  }
+  .scope-lock-corner.tl { top: 0; left: 0; border-width: 2.5px 0 0 2.5px; }
+  .scope-lock-corner.tr { top: 0; right: 0; border-width: 2.5px 2.5px 0 0; }
+  .scope-lock-corner.bl { bottom: 0; left: 0; border-width: 0 0 2.5px 2.5px; }
+  .scope-lock-corner.br { bottom: 0; right: 0; border-width: 0 2.5px 2.5px 0; }
+  #scope-lock-status {
+    position: absolute;
+    top: -24px;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #00e5ff;
+    white-space: nowrap;
+    text-shadow: 0 0 8px rgba(0,229,255,0.85);
+  }
+  .scope-lock-bracket.locked #scope-lock-status {
+    color: #fbbf24;
+    text-shadow: 0 0 10px rgba(251,191,36,0.9);
+  }
+
+  /* Direction pointer when enemy is off-screen */
+  .scope-target-pointer {
+    position: absolute;
+    padding: 5px 12px;
+    background: rgba(15, 23, 42, 0.88);
+    border: 1.5px solid rgba(244, 63, 94, 0.85);
+    border-radius: 20px;
+    color: #fca5a5;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.5);
+    transform: translate(-50%, -50%);
+    z-index: 38;
+    pointer-events: none;
+  }
+
   /* Airspace Boundary Warning Banner (Battlefield / Warzone Style) */
   #boundary-warning-banner {
     position: absolute;
@@ -1361,30 +1432,32 @@
     display: none;
     align-items: center;
     justify-content: center;
-    background: rgba(7, 9, 14, 0.82);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(4, 7, 12, 0.86);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     pointer-events: auto;
+    padding: 16px;
+    box-sizing: border-box;
   }
   #combat-setup-modal.active {
     display: flex;
   }
 
   .modal-card {
-    width: 520px;
-    max-width: 92vw;
-    background: rgba(14, 18, 28, 0.94);
+    width: 860px;
+    max-width: 96vw;
+    max-height: min(88vh, 640px);
+    background: linear-gradient(150deg, rgba(16, 21, 33, 0.98), rgba(8, 11, 18, 0.98));
     border: 1px solid var(--border-porcelain);
-    border-radius: 18px;
-    padding: 24px 28px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 229, 255, 0.18);
+    border-radius: 16px;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 229, 255, 0.12);
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    animation: modalPopIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   @keyframes modalPopIn {
-    from { opacity: 0; transform: scale(0.92) translateY(12px); }
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
   }
 
@@ -1392,31 +1465,50 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 12px;
+    padding: 14px 22px;
     border-bottom: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.02);
+    flex-shrink: 0;
+  }
+  .modal-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .modal-title-badge {
+    font-size: 0.62rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+    font-weight: 700;
   }
   .modal-title {
-    font-size: 1.05rem;
+    font-size: 0.98rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--astra-lavender);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
   .modal-close-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border-subtle);
     color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     transition: all 0.2s;
   }
   .modal-close-btn:hover {
@@ -1425,23 +1517,74 @@
     color: #ffffff;
   }
 
+  /* Scrollable Modal Content */
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 22px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 720px) {
+    .modal-body {
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+  }
+
+  /* Custom Sleek Scrollbar */
+  .modal-body::-webkit-scrollbar {
+    width: 6px;
+  }
+  .modal-body::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .modal-body::-webkit-scrollbar-thumb {
+    background: rgba(238, 232, 250, 0.2);
+    border-radius: 3px;
+  }
+  .modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 229, 255, 0.5);
+  }
+
+  /* Form section boxes */
+  .modal-section-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .modal-card-box {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
   .option-group-label {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-family: var(--font-mono);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--text-tertiary);
-    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   /* Choice Chips / Grid */
   .choice-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
   }
   .choice-card {
-    padding: 12px 14px;
+    padding: 10px 12px;
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.03);
     border: 1.5px solid var(--border-subtle);
@@ -1449,7 +1592,8 @@
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
+    user-select: none;
   }
   .choice-card:hover {
     background: rgba(238, 232, 250, 0.06);
@@ -1461,53 +1605,58 @@
     box-shadow: 0 0 16px rgba(0, 229, 255, 0.2);
   }
   .choice-title {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 700;
     color: var(--text-primary);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
   .choice-desc {
-    font-size: 0.66rem;
+    font-size: 0.62rem;
     color: var(--text-secondary);
-    line-height: 1.4;
+    line-height: 1.35;
   }
 
-  /* Audio Toggles Row */
-  .settings-row {
+  /* Audio Pill Toggle Strip */
+  .audio-toggle-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .audio-pill-toggle {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 14px;
+    padding: 7px 10px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-subtle);
   }
-  .settings-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .settings-title {
-    font-size: 0.78rem;
+  .audio-pill-label {
+    font-size: 0.7rem;
     font-weight: 600;
     color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
-  .settings-sub {
-    font-size: 0.64rem;
-    color: var(--text-tertiary);
-    font-family: var(--font-mono);
+
+  /* Threat Grid */
+  .threat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
   }
 
   /* Toggle Pill Switch */
   .toggle-switch-btn {
-    padding: 5px 14px;
-    border-radius: 20px;
+    padding: 4px 12px;
+    border-radius: 16px;
     border: 1px solid var(--border-subtle);
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-secondary);
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-family: var(--font-mono);
     font-weight: 700;
     cursor: pointer;
@@ -1525,35 +1674,52 @@
     color: var(--accent-enemy);
   }
 
-  /* Modal Footer Deploy Button */
-  .modal-action-row {
+  /* Fixed Sticky Footer */
+  .modal-footer {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-top: 4px;
+    justify-content: space-between;
+    padding: 12px 22px;
+    border-top: 1px solid var(--border-subtle);
+    background: rgba(7, 10, 16, 0.95);
+    flex-shrink: 0;
+    gap: 14px;
   }
+  .modal-footer-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+  }
+  .modal-footer-meta strong {
+    color: var(--accent-cyan);
+  }
+
   .deploy-btn {
-    flex: 1;
-    padding: 12px;
-    border-radius: 10px;
+    padding: 11px 22px;
+    border-radius: 9px;
     border: none;
     background: linear-gradient(135deg, #ef4444, #b91c1c);
     color: #ffffff;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     cursor: pointer;
-    box-shadow: 0 4px 18px rgba(239, 68, 68, 0.45);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    min-width: 170px;
   }
   .deploy-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 22px rgba(239, 68, 68, 0.6);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+    background: linear-gradient(135deg, #f43f5e, #dc2626);
   }
 
   /* ── RIGHT PANEL: TELEMETRY & SUBSYSTEM DEEP-DIVE ─────────── */
@@ -2404,148 +2570,214 @@
 <div id="combo-popup">+150 COINS</div>
 
 <!-- ── COMBAT ARENA SETUP POPUP MODAL CARD ── -->
-<div id="combat-setup-modal" class="interactive">
+<div id="combat-setup-modal" class="interactive" onclick="if(event.target===this) closeCombatModal()">
   <div class="modal-card">
+    <!-- Fixed Header -->
     <div class="modal-header">
-      <div class="modal-title">
-        <span style="color:var(--accent-enemy)">⚔️</span>
-        Combat Arena
+      <div class="modal-title-group">
+        <span class="modal-title-badge">BRIEFING</span>
+        <div class="modal-title">
+          <span style="color:var(--accent-enemy)">⚔️</span>
+          Combat Arena Operations
+        </div>
       </div>
-      <div class="modal-close-btn" onclick="closeCombatModal()">✕</div>
+      <div class="modal-close-btn" onclick="closeCombatModal()" title="Close Briefing (Esc)">✕</div>
     </div>
 
-    <!-- Mode Selector: Online Friends vs Solo AI -->
-    <div>
-      <div class="option-group-label">Match Mode</div>
-      <div class="choice-grid">
-        <div class="choice-card active" id="mode-choice-friends" onclick="selectMatchMode('friends')" style="padding:10px; text-align:center;">
-          <div class="choice-title" style="justify-content:center;">
-            <span style="color:var(--accent-cyan)">🌐</span>
-            Play Online with Friends
+    <!-- Scrollable 2-Column Body -->
+    <div class="modal-body">
+
+      <!-- LEFT COLUMN: Mission Parameters -->
+      <div class="modal-section-col">
+        <!-- Match Deployment Mode -->
+        <div class="modal-card-box">
+          <div class="option-group-label">
+            <span>MISSION DEPLOYMENT MODE</span>
+            <span style="font-size:0.6rem; color:var(--accent-cyan);">STEP 1</span>
+          </div>
+          <div class="choice-grid">
+            <div class="choice-card active" id="mode-choice-friends" onclick="selectMatchMode('friends')">
+              <div class="choice-title">
+                <span style="color:var(--accent-cyan)">🌐</span>
+                Online Squad
+              </div>
+              <div class="choice-desc">Co-Op with friends via room code & AI wingmen</div>
+            </div>
+            <div class="choice-card" id="mode-choice-single" onclick="selectMatchMode('single')">
+              <div class="choice-title">
+                <span style="color:var(--accent-gold)">🤖</span>
+                Solo Ace
+              </div>
+              <div class="choice-desc">Solo intercept vs rogue swarm, zero wingmen</div>
+            </div>
           </div>
         </div>
-        <div class="choice-card" id="mode-choice-single" onclick="selectMatchMode('single')" style="padding:10px; text-align:center;">
-          <div class="choice-title" style="justify-content:center;">
-            <span style="color:var(--text-secondary)">🤖</span>
-            Solo vs AI Bots
+
+        <!-- Threat Level / Difficulty -->
+        <div class="modal-card-box">
+          <div class="option-group-label">
+            <span>SWARM THREAT LEVEL</span>
+            <span style="font-size:0.6rem; color:var(--text-secondary);">DIFFICULTY</span>
+          </div>
+          <div class="threat-grid">
+            <div class="choice-card" id="threat-cadet" onclick="selectThreatLevel('cadet')" style="padding:8px 6px; text-align:center;">
+              <div class="choice-title" style="justify-content:center; color:var(--accent-mint); font-size:0.75rem;">🟢 Cadet</div>
+              <div class="choice-desc" style="text-align:center;">3 Drones</div>
+            </div>
+            <div class="choice-card active" id="threat-veteran" onclick="selectThreatLevel('veteran')" style="padding:8px 6px; text-align:center;">
+              <div class="choice-title" style="justify-content:center; color:var(--accent-gold); font-size:0.75rem;">🟡 Veteran</div>
+              <div class="choice-desc" style="text-align:center;">5 Drones</div>
+            </div>
+            <div class="choice-card" id="threat-ace" onclick="selectThreatLevel('ace')" style="padding:8px 6px; text-align:center;">
+              <div class="choice-title" style="justify-content:center; color:var(--accent-enemy); font-size:0.75rem;">🔴 Incursion</div>
+              <div class="choice-desc" style="text-align:center;">8 Rogues</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio & Immersion -->
+        <div class="modal-card-box">
+          <div class="option-group-label">
+            <span>AVIONICS & SOUND FX</span>
+            <span style="font-size:0.6rem; color:var(--text-secondary);">AUDIO</span>
+          </div>
+          <div class="audio-toggle-grid">
+            <div class="audio-pill-toggle">
+              <div class="audio-pill-label">
+                <span>🔊</span> FX Audio
+              </div>
+              <button class="toggle-switch-btn on" id="toggle-sfx-btn" onclick="toggleMasterSound()">ON</button>
+            </div>
+            <div class="audio-pill-toggle">
+              <div class="audio-pill-label">
+                <span>📻</span> Radio Comms
+              </div>
+              <button class="toggle-switch-btn on" id="toggle-radio-btn" onclick="toggleAudioSetting('radio')">ON</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick HUD & Camera Shortcuts -->
+        <div class="modal-card-box" style="padding:10px 14px;">
+          <div class="option-group-label">
+            <span>TACTICAL HUD SHORTCUTS</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <button class="action-btn" onclick="toggleCodmHud(); closeCombatModal();" style="padding:8px; font-size:0.7rem; background:rgba(244,63,94,0.12); border-color:rgba(244,63,94,0.4); color:#fca5a5; font-weight:700;">
+              📱 Touch HUD
+            </button>
+            <button class="action-btn" onclick="toggleCameraDock(); closeCombatModal();" style="padding:8px; font-size:0.7rem; background:rgba(0,229,255,0.12); border-color:rgba(0,229,255,0.4); color:var(--accent-cyan); font-weight:700;">
+              📹 Camera Dock
+            </button>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Real-Time Multiplayer Room & Link Section -->
-    <div id="multiplayer-room-panel" style="background:rgba(255,255,255,0.03); border:1px solid var(--border-porcelain); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:12px;">
-      <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:0.85rem;">🌐</span>
-          <span style="font-family:var(--font-mono); font-size:0.7rem; font-weight:700; color:#fff; letter-spacing:0.06em;">LIVE MULTIPLAYER FLIGHT SQUAD</span>
-        </div>
-        <span id="mp-status-pill" style="font-family:var(--font-mono); font-size:0.62rem; padding:3px 10px; border-radius:12px; background:rgba(16,185,129,0.15); color:var(--accent-mint); border:1px solid rgba(16,185,129,0.3); font-weight:700;">
-          ● READY TO FLY
-        </span>
-      </div>
+      <!-- RIGHT COLUMN: Squad Uplink (Multiplayer) or Solo Briefing -->
+      <div class="modal-section-col">
 
-      <!-- Room Code & Quick Action Row -->
-      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-        <div style="flex:1; min-width:140px; background:rgba(7,9,14,0.9); border:1px solid var(--border-porcelain); border-radius:8px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between;">
-          <span style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-secondary);">ROOM CODE:</span>
-          <span id="mp-room-code-display" style="font-family:var(--font-mono); font-size:1.05rem; font-weight:800; color:var(--accent-cyan); letter-spacing:0.08em;">SKY-842</span>
-        </div>
-        <button onclick="createNewMultiplayerRoom()" class="action-btn" id="btn-new-room" title="Generate a fresh room code" style="padding:9px 12px; font-size:0.72rem; background:rgba(255,255,255,0.06); border-color:var(--border-porcelain); color:#e2e8f0; font-weight:600;">
-          🎲 New Room
-        </button>
-      </div>
-
-      <!-- Shareable Invite Link Box with 1-Tap Copy & Native Share -->
-      <div style="display:flex; flex-direction:column; gap:6px;">
-        <span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-tertiary); letter-spacing:0.04em;">INVITE LINK (SEND TO A FRIEND):</span>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <input type="text" id="mp-share-url-box" readonly onclick="this.select();" value="https://drone-explainer.vercel.app/?room=SKY-842" style="flex:1; background:rgba(7,9,14,0.85); border:1px solid rgba(0,229,255,0.35); border-radius:8px; padding:8px 10px; font-family:var(--font-mono); font-size:0.7rem; color:var(--accent-cyan); outline:none; text-overflow:ellipsis;" />
-          <button onclick="copyMultiplayerInviteLink()" class="action-btn" id="btn-copy-link" style="padding:8px 14px; font-size:0.72rem; background:rgba(0,229,255,0.18); border-color:var(--accent-cyan); color:var(--accent-cyan); font-weight:700; white-space:nowrap;">
-            📋 Copy Link
-          </button>
-        </div>
-      </div>
-
-      <!-- Social & Native Sharing Buttons -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-        <button onclick="shareNativeInviteLink()" class="action-btn" id="btn-native-share" style="padding:8px 12px; font-size:0.72rem; background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.4); color:var(--accent-mint); font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;">
-          <span>📲</span> Share Link (Mobile/App)
-        </button>
-        <a id="mp-whatsapp-btn" href="#" target="_blank" class="action-btn" style="padding:8px 12px; font-size:0.72rem; background:rgba(37,211,102,0.15); border-color:rgba(37,211,102,0.4); color:#4ade80; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; text-decoration:none;">
-          <span>💬</span> WhatsApp Invite
-        </a>
-      </div>
-
-      <!-- Join a Friend's Room Input -->
-      <div style="border-top:1px dashed rgba(255,255,255,0.12); padding-top:10px; display:flex; flex-direction:column; gap:6px;">
-        <span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-tertiary); letter-spacing:0.04em;">OR JOIN A FRIEND'S ROOM:</span>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <input type="text" id="mp-join-input" placeholder="Paste link or enter room code (e.g. SKY-842)..." style="flex:1; background:rgba(7,9,14,0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:7px 10px; font-family:var(--font-mono); font-size:0.7rem; color:#fff; outline:none;" />
-          <button onclick="joinRoomFromInput()" class="action-btn" style="padding:7px 14px; font-size:0.7rem; background:rgba(255,255,255,0.1); border-color:var(--border-porcelain); color:#fff; white-space:nowrap; font-weight:600;">
-            Join Flight
-          </button>
-        </div>
-      </div>
-
-      <!-- Player Callsign & Connected Wingmen Counter -->
-      <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:0.65rem; color:var(--text-tertiary); border-top:1px solid rgba(255,255,255,0.06); padding-top:6px;">
-        <span>Callsign: <input type="text" id="mp-callsign-input" value="Ace-1" onchange="updatePlayerCallsign(this.value)" title="Change your pilot callsign" style="background:transparent; border:none; border-bottom:1px dashed var(--accent-cyan); color:var(--accent-cyan); font-family:var(--font-mono); font-size:0.68rem; width:80px; text-align:center; outline:none; font-weight:700;" /></span>
-        <span id="mp-players-count" style="color:var(--accent-gold); font-weight:700;">1 Pilot Connected</span>
-      </div>
-    </div>
-
-    <!-- Audio & Sound Controls -->
-    <div>
-      <div class="option-group-label">Audio</div>
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <div class="settings-row">
-          <div class="settings-info">
-            <div class="settings-title">Sound FX & Master Audio</div>
+        <!-- SQUAD UPLINK PANEL (Visible when mode === 'friends') -->
+        <div id="multiplayer-room-panel" class="modal-card-box" style="gap:10px; border-color:rgba(0,229,255,0.3); background:rgba(0,229,255,0.02);">
+          <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:0.9rem;">🌐</span>
+              <span style="font-family:var(--font-mono); font-size:0.72rem; font-weight:700; color:#fff; letter-spacing:0.06em;">SQUAD UPLINK (P2P)</span>
+            </div>
+            <span id="mp-status-pill" style="font-family:var(--font-mono); font-size:0.6rem; padding:3px 8px; border-radius:10px; background:rgba(16,185,129,0.15); color:var(--accent-mint); border:1px solid rgba(16,185,129,0.3); font-weight:700;">
+              ● READY TO FLY
+            </span>
           </div>
-          <button class="toggle-switch-btn on" id="toggle-sfx-btn" onclick="toggleMasterSound()">ON</button>
-        </div>
 
-        <div class="settings-row">
-          <div class="settings-info">
-            <div class="settings-title">Tactical Radio Chatter</div>
+          <!-- Room Code & Quick Action Bar -->
+          <div style="display:flex; gap:8px; align-items:center;">
+            <div style="flex:1; background:rgba(7,9,14,0.9); border:1px solid var(--border-porcelain); border-radius:8px; padding:6px 12px; display:flex; align-items:center; justify-content:space-between;">
+              <span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-secondary);">ROOM:</span>
+              <span id="mp-room-code-display" style="font-family:var(--font-mono); font-size:1.0rem; font-weight:800; color:var(--accent-cyan); letter-spacing:0.08em;">SKY-842</span>
+            </div>
+            <button onclick="createNewMultiplayerRoom()" class="action-btn" id="btn-new-room" title="Generate fresh room code" style="padding:8px 12px; font-size:0.7rem; background:rgba(255,255,255,0.06); border-color:var(--border-porcelain); color:#e2e8f0; font-weight:600; white-space:nowrap;">
+              🎲 New Room
+            </button>
           </div>
-          <button class="toggle-switch-btn on" id="toggle-radio-btn" onclick="toggleAudioSetting('radio')">ON</button>
+
+          <!-- Share Link & Quick Invite Row -->
+          <div style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-family:var(--font-mono); font-size:0.62rem; color:var(--text-tertiary); letter-spacing:0.04em;">INVITE LINK (SEND TO WINGMEN):</span>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <input type="text" id="mp-share-url-box" readonly onclick="this.select();" value="https://drone-explainer.vercel.app/?room=SKY-842" style="flex:1; background:rgba(7,9,14,0.85); border:1px solid rgba(0,229,255,0.3); border-radius:8px; padding:7px 10px; font-family:var(--font-mono); font-size:0.68rem; color:var(--accent-cyan); outline:none; text-overflow:ellipsis; min-width:0;" />
+              <button onclick="copyMultiplayerInviteLink()" class="action-btn" id="btn-copy-link" style="padding:7px 12px; font-size:0.7rem; background:rgba(0,229,255,0.18); border-color:var(--accent-cyan); color:var(--accent-cyan); font-weight:700; white-space:nowrap;">
+                📋 Copy
+              </button>
+              <a id="mp-whatsapp-btn" href="#" target="_blank" class="action-btn" title="Send WhatsApp Invite" style="padding:7px 10px; font-size:0.7rem; background:rgba(37,211,102,0.15); border-color:rgba(37,211,102,0.4); color:#4ade80; font-weight:700; display:flex; align-items:center; justify-content:center; gap:4px; text-decoration:none; white-space:nowrap;">
+                💬 WhatsApp
+              </a>
+              <button onclick="shareNativeInviteLink()" class="action-btn" id="btn-native-share" title="Share via Mobile" style="padding:7px 10px; font-size:0.7rem; background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.4); color:var(--accent-mint); font-weight:700; display:none;">
+                📲
+              </button>
+            </div>
+          </div>
+
+          <!-- Join a Friend's Squad -->
+          <div style="border-top:1px dashed rgba(255,255,255,0.1); padding-top:8px; display:flex; flex-direction:column; gap:5px;">
+            <span style="font-family:var(--font-mono); font-size:0.62rem; color:var(--text-tertiary); letter-spacing:0.04em;">JOIN SQUAD BY CODE:</span>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <input type="text" id="mp-join-input" placeholder="Enter room code or link..." style="flex:1; background:rgba(7,9,14,0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:7px 10px; font-family:var(--font-mono); font-size:0.68rem; color:#fff; outline:none; min-width:0;" />
+              <button onclick="joinRoomFromInput()" class="action-btn" style="padding:7px 14px; font-size:0.7rem; background:rgba(255,255,255,0.1); border-color:var(--border-porcelain); color:#fff; white-space:nowrap; font-weight:600;">
+                Join Flight
+              </button>
+            </div>
+          </div>
+
+          <!-- Callsign & Connected Wingmen Counter -->
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:0.65rem; color:var(--text-tertiary); border-top:1px solid rgba(255,255,255,0.06); padding-top:6px;">
+            <span>Callsign: <input type="text" id="mp-callsign-input" value="Ace-1" onchange="updatePlayerCallsign(this.value)" title="Change pilot callsign" style="background:transparent; border:none; border-bottom:1px dashed var(--accent-cyan); color:var(--accent-cyan); font-family:var(--font-mono); font-size:0.68rem; width:80px; text-align:center; outline:none; font-weight:700;" /></span>
+            <span id="mp-players-count" style="color:var(--accent-gold); font-weight:700;">1 Pilot Connected</span>
+          </div>
         </div>
+
+        <!-- SOLO BRIEFING PANEL (Visible when mode === 'single') -->
+        <div id="solo-briefing-panel" class="modal-card-box" style="display:none; gap:10px; border-color:rgba(251,191,36,0.25); background:rgba(251,191,36,0.02);">
+          <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:0.9rem;">🤖</span>
+              <span style="font-family:var(--font-mono); font-size:0.72rem; font-weight:700; color:#fff; letter-spacing:0.06em;">SOLO ACE BRIEFING</span>
+            </div>
+            <span style="font-family:var(--font-mono); font-size:0.6rem; padding:3px 8px; border-radius:10px; background:rgba(245,158,11,0.15); color:var(--accent-gold); border:1px solid rgba(245,158,11,0.3); font-weight:700;">
+              ● SOLO SORTIE
+            </span>
+          </div>
+
+          <div style="font-size:0.72rem; color:var(--text-secondary); line-height:1.5; display:flex; flex-direction:column; gap:8px;">
+            <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:10px;">
+              <div style="color:var(--text-primary); font-weight:700; margin-bottom:4px;">🎯 Mission Objective</div>
+              <div>Intercept and eliminate the rogue drone swarm. You are deploying alone without AI wingmen support.</div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-family:var(--font-mono); font-size:0.65rem;">
+              <div style="background:rgba(255,255,255,0.03); padding:6px 8px; border-radius:6px; border:1px solid var(--border-subtle);">
+                <div style="color:var(--text-tertiary);">PRIMARY WEAPON</div>
+                <div style="color:var(--accent-cyan); font-weight:700;">Dual Pulse Laser</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03); padding:6px 8px; border-radius:6px; border:1px solid var(--border-subtle);">
+                <div style="color:var(--text-tertiary);">ORDNANCE</div>
+                <div style="color:var(--accent-enemy); font-weight:700;">Lock-On Missiles</div>
+              </div>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-tertiary); display:flex; justify-content:space-between; align-items:center; padding-top:4px;">
+              <span>Callsign: <strong style="color:var(--accent-cyan);" id="solo-callsign-preview">Ace-1</strong></span>
+              <span style="color:var(--accent-mint);">Radar Lock: Active</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
-    <!-- Enemy Swarm Density -->
-    <div>
-      <div class="option-group-label">Threat Level</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-        <div class="choice-card" id="threat-cadet" onclick="selectThreatLevel('cadet')" style="padding:10px; text-align:center;">
-          <div class="choice-title" style="justify-content:center; color:var(--accent-mint)">🟢 Cadet (3)</div>
-        </div>
-        <div class="choice-card active" id="threat-veteran" onclick="selectThreatLevel('veteran')" style="padding:10px; text-align:center;">
-          <div class="choice-title" style="justify-content:center; color:var(--accent-gold)">🟡 Veteran (5)</div>
-        </div>
-        <div class="choice-card" id="threat-ace" onclick="selectThreatLevel('ace')" style="padding:10px; text-align:center;">
-          <div class="choice-title" style="justify-content:center; color:var(--accent-enemy)">🔴 Incursion (8)</div>
-        </div>
+    <!-- Fixed Sticky Footer -->
+    <div class="modal-footer">
+      <div class="modal-footer-meta">
+        <span>MODE: <strong id="footer-mode-label">ONLINE SQUAD</strong></span>
+        <span>•</span>
+        <span>STATUS: <strong style="color:var(--accent-mint);">SYSTEMS NOMINAL</strong></span>
       </div>
-    </div>
-
-    <!-- Quick Controls & Camera Access -->
-    <div>
-      <div class="option-group-label">HUD & Camera Controls</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-        <button class="action-btn" onclick="toggleCodmHud(); closeCombatModal();" style="padding:10px; font-size:0.72rem; background:rgba(244,63,94,0.15); border-color:#f43f5e; color:#fca5a5; font-weight:700;">
-          📱 Toggle CODM HUD
-        </button>
-        <button class="action-btn" onclick="toggleCameraDock(); closeCombatModal();" style="padding:10px; font-size:0.72rem; background:rgba(0,229,255,0.15); border-color:var(--accent-cyan); color:var(--accent-cyan); font-weight:700;">
-          📹 Camera Director
-        </button>
-      </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="modal-action-row">
       <button class="deploy-btn" onclick="confirmAndDeployCombat()">
         ⚡ ENGAGE ARENA
       </button>
@@ -2928,6 +3160,22 @@
             <div class="scope-reticle-ring"></div>
             <div class="scope-cross-h"></div>
             <div class="scope-cross-v"></div>
+
+            <!-- Scope Smart Lock Center Bracket -->
+            <div id="scope-lock-bracket" class="scope-lock-bracket">
+              <div class="scope-lock-corner tl"></div>
+              <div class="scope-lock-corner tr"></div>
+              <div class="scope-lock-corner bl"></div>
+              <div class="scope-lock-corner br"></div>
+              <div id="scope-lock-status">TARGET ACQUIRED</div>
+            </div>
+
+            <!-- Off-screen Enemy Direction Chevron Indicator -->
+            <div id="scope-target-pointer" class="scope-target-pointer">
+              <span id="scope-target-arrow">◀</span>
+              <span id="scope-target-info">ROGUE-1 (80M)</span>
+            </div>
+
             <div class="scope-readout">
               <span>OPTIC: 3.5X ACOG</span>
               <span id="ads-range-val">RNG: 140M</span>
@@ -2952,7 +3200,7 @@
       <!-- Flight Controls Legend -->
       <div id="flight-controls-legend" class="glass-panel">
         <div><span class="key-badge">L-CLICK</span> Auto-Laser</div>
-        <div><span class="key-badge">R-CLICK</span> ADS Scope</div>
+        <div><span class="key-badge">R-CLICK / Q</span> ADS Smart Lock</div>
         <div><span class="key-badge">MOUSE</span> Aim & Steer</div>
         <div><span class="key-badge">W</span> Throttle</div>
         <div><span class="key-badge">S</span> Brake</div>
@@ -3431,6 +3679,22 @@ class SoundEngine {
     osc.stop(this.ctx.currentTime + 0.28);
   }
 
+  // Tactical Radar Target Lock Tone
+  playLockSound() {
+    if (!this.soundEnabled || !this.initialized || !this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1760, this.ctx.currentTime);
+    osc.frequency.setValueAtTime(2349, this.ctx.currentTime + 0.04);
+    gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.09);
+    osc.connect(gain);
+    gain.connect(this.masterGain || this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.09);
+  }
+
   // Tactical Lock-on Radar Tone
   playLockOnBeep(isLocked) {
     if (!this.soundEnabled || !this.initialized || !this.ctx) return;
@@ -3765,6 +4029,31 @@ runway.rotation.x = -Math.PI / 2;
 runway.position.set(0, 0.04, 0);
 runway.receiveShadow = true;
 realWorld.add(runway);
+
+// Runway Edge & Threshold Lights
+const runwayLightGeo = new THREE.SphereGeometry(0.35, 8, 8);
+const whiteLightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const greenLightMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+const redLightMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+const amberLightMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+
+for (let x = -38; x <= 38; x += 6) {
+  const tLight1 = new THREE.Mesh(runwayLightGeo, greenLightMat);
+  tLight1.position.set(x, 0.25, -590);
+  realWorld.add(tLight1);
+  const tLight2 = new THREE.Mesh(runwayLightGeo, redLightMat);
+  tLight2.position.set(x, 0.25, 590);
+  realWorld.add(tLight2);
+}
+
+for (let z = -580; z <= 580; z += 40) {
+  const lMat = Math.abs(z) > 420 ? amberLightMat : whiteLightMat;
+  [-41, 41].forEach(lx => {
+    const edgeLight = new THREE.Mesh(runwayLightGeo, lMat);
+    edgeLight.position.set(lx, 0.25, z);
+    realWorld.add(edgeLight);
+  });
+}
 
 // Dual Parallel Taxiways
 [-65, 65].forEach(tx => {
@@ -4486,6 +4775,14 @@ window.addEventListener('keydown', e => {
   if (e.code === 'KeyR' || e.key === 'r') {
     respawnDrone();
   }
+  if (e.code === 'KeyQ' || e.key === 'q') {
+    if (appMode === 'combat') {
+      mouseAim.isAds = !mouseAim.isAds;
+      const scopeToggleBtn = document.getElementById('codm-scope-btn');
+      if (scopeToggleBtn) scopeToggleBtn.classList.toggle('active', mouseAim.isAds);
+      showToast(mouseAim.isAds ? "🎯 ADS Smart Lock-On Engaged" : "Standard View");
+    }
+  }
   if (e.code === 'KeyF' || e.key === 'f') {
     if (appMode === 'combat') fireLaser();
   }
@@ -4541,7 +4838,7 @@ window.addEventListener('mousemove', (e) => {
   if (appMode !== 'combat' && appMode !== 'flight') return;
   if (!mouseAim.isLocked) return;
 
-  const sens = mouseAim.isAds ? mouseAim.sensitivity * 0.45 : mouseAim.sensitivity;
+  const sens = mouseAim.isAds ? mouseAim.sensitivity * 0.80 : mouseAim.sensitivity;
   player.yaw -= e.movementX * sens;
   player.pitch = Math.max(-0.75, Math.min(0.75, player.pitch - e.movementY * sens * 0.7));
 });
@@ -4586,20 +4883,45 @@ window.addEventListener('contextmenu', (e) => {
 
 // ── POPUP CARD GAME MODE & AUDIO SETTINGS ─────────────────────
 function openCombatModal() {
-  document.getElementById('combat-setup-modal').classList.add('active');
+  const modal = document.getElementById('combat-setup-modal');
+  if (modal) modal.classList.add('active');
 }
 
 function closeCombatModal() {
-  document.getElementById('combat-setup-modal').classList.remove('active');
+  const modal = document.getElementById('combat-setup-modal');
+  if (modal) modal.classList.remove('active');
 }
+
+// Global modal hotkeys: Esc to close, Enter to deploy
+window.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('combat-setup-modal');
+  if (!modal || !modal.classList.contains('active')) return;
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    closeCombatModal();
+  } else if (e.key === 'Enter' && e.target.tagName !== 'INPUT') {
+    e.preventDefault();
+    confirmAndDeployCombat();
+  }
+});
 
 function selectMatchMode(mode) {
   matchSettings.mode = mode;
-  document.getElementById('mode-choice-friends').classList.toggle('active', mode === 'friends');
-  document.getElementById('mode-choice-single').classList.toggle('active', mode === 'single');
+  const fChoice = document.getElementById('mode-choice-friends');
+  const sChoice = document.getElementById('mode-choice-single');
+  if (fChoice) fChoice.classList.toggle('active', mode === 'friends');
+  if (sChoice) sChoice.classList.toggle('active', mode === 'single');
   const roomPanel = document.getElementById('multiplayer-room-panel');
   if (roomPanel) {
     roomPanel.style.display = (mode === 'friends') ? 'flex' : 'none';
+  }
+  const soloPanel = document.getElementById('solo-briefing-panel');
+  if (soloPanel) {
+    soloPanel.style.display = (mode === 'single') ? 'flex' : 'none';
+  }
+  const footerMode = document.getElementById('footer-mode-label');
+  if (footerMode) {
+    footerMode.textContent = (mode === 'friends') ? 'ONLINE SQUAD' : 'SOLO ACE';
   }
 }
 
@@ -4748,6 +5070,8 @@ function updatePlayerCallsign(name) {
     window.mpEngine.setCallsign(clean);
   }
   localStorage.setItem('dronex_callsign', clean);
+  const soloCs = document.getElementById('solo-callsign-preview');
+  if (soloCs) soloCs.textContent = clean;
   showToast(`Callsign updated: ${clean}`);
 }
 
@@ -5444,6 +5768,7 @@ function confirmAndDeployCombat() {
 let currentLockedEnemy = null;
 const currentLead3D = new THREE.Vector3();
 let lockOnSoundTimer = 0;
+let camShakeIntensity = 0;
 
 function distPointToSegment(pt, a, b) {
   const ab = new THREE.Vector3().subVectors(b, a);
@@ -5456,29 +5781,45 @@ function distPointToSegment(pt, a, b) {
 }
 
 function updateTacticalTargeting(dt) {
+  if (lockOnSoundTimer > 0) lockOnSoundTimer -= dt;
   if (appMode !== 'combat') {
     hideTargetHUD();
     return;
   }
 
-  // Camera forward direction vector
-  const camFwd = new THREE.Vector3();
-  camera.getWorldDirection(camFwd);
+  // True drone forward flight and aim direction vector
+  const droneFwd = new THREE.Vector3(
+    Math.sin(player.yaw) * Math.cos(player.pitch),
+    -Math.sin(player.pitch),
+    Math.cos(player.yaw) * Math.cos(player.pitch)
+  ).normalize();
 
   let bestEnemy = null;
-  let bestScore = 9999;
+  let bestScore = 99999;
+  let nearestAnyEnemy = null;
+  let nearestAnyDist = 99999;
+
+  const isAds = mouseAim.isAds;
+  const maxRange = isAds ? 550.0 : 380.0;
+  const minDot = isAds ? 0.20 : 0.45; // Generous 78° cone in ADS
 
   enemyTeam.forEach(e => {
     if (!e.alive) return;
     const toEnemy = e.pos.clone().sub(player.pos);
     const dist = toEnemy.length();
-    toEnemy.normalize();
-    const dot = camFwd.dot(toEnemy);
+    if (dist < nearestAnyDist) {
+      nearestAnyDist = dist;
+      nearestAnyEnemy = e;
+    }
+    if (dist > maxRange) return;
 
-    // Target must be in front within ~38° cone
-    if (dot > 0.78) {
-      const angleWeight = (1.0 - dot) * 220;
-      const score = dist + angleWeight;
+    toEnemy.normalize();
+    const dot = droneFwd.dot(toEnemy);
+
+    if (dot > minDot) {
+      // Prioritize enemies closer to crosshair center
+      const angleDeviation = Math.acos(Math.max(-1, Math.min(1, dot)));
+      const score = angleDeviation * 160 + dist * 0.35;
       if (score < bestScore) {
         bestScore = score;
         bestEnemy = e;
@@ -5490,6 +5831,8 @@ function updateTacticalTargeting(dt) {
 
   const targetBox = document.getElementById('hud-target-box');
   const leadPip = document.getElementById('reticle-lead-pip');
+  const scopeLockBracket = document.getElementById('scope-lock-bracket');
+  const scopePointer = document.getElementById('scope-target-pointer');
 
   if (bestEnemy) {
     const dist = player.pos.distanceTo(bestEnemy.pos);
@@ -5503,9 +5846,10 @@ function updateTacticalTargeting(dt) {
     const screenPos = bestEnemy.pos.clone().project(camera);
     const leadScreen = currentLead3D.clone().project(camera);
 
+    const sw = window.innerWidth;
+    const sh = window.innerHeight;
+
     if (screenPos.z < 1.0) {
-      const sw = window.innerWidth;
-      const sh = window.innerHeight;
       const ex = (screenPos.x * 0.5 + 0.5) * sw;
       const ey = (-screenPos.y * 0.5 + 0.5) * sh;
 
@@ -5524,14 +5868,19 @@ function updateTacticalTargeting(dt) {
         if (hpFill) hpFill.style.width = `${Math.max(0, (bestEnemy.hp / bestEnemy.maxHp) * 100)}%`;
       }
 
+      const dCross = Math.hypot(sw / 2 - lx, sh / 2 - ly);
+      const isLockedOn = (dCross < (isAds ? 65 : 42));
+
       if (leadPip) {
         leadPip.style.display = 'block';
         leadPip.style.left = `${lx}px`;
         leadPip.style.top = `${ly}px`;
-
-        const dCross = Math.hypot(sw / 2 - lx, sh / 2 - ly);
-        const isLockedOn = (dCross < 38);
         leadPip.classList.toggle('locked', isLockedOn);
+
+        if (isLockedOn && lockOnSoundTimer <= 0) {
+          audio.playLockSound();
+          lockOnSoundTimer = 0.55;
+        }
 
         const leadVal = document.getElementById('ads-lead-val');
         if (leadVal) {
@@ -5540,17 +5889,60 @@ function updateTacticalTargeting(dt) {
         }
       }
 
+      // High-tech ADS Scope Bracket tracking & lock
+      if (scopeLockBracket) {
+        scopeLockBracket.classList.add('active');
+        scopeLockBracket.classList.toggle('locked', isLockedOn);
+        scopeLockBracket.style.left = `${lx}px`;
+        scopeLockBracket.style.top = `${ly}px`;
+        const statusEl = document.getElementById('scope-lock-status');
+        if (statusEl) {
+          statusEl.textContent = isLockedOn ? `⚡ LOCKED: ${bestEnemy.id} [${Math.round(dist)}M]` : `TRACKING: ${bestEnemy.id} [${Math.round(dist)}M]`;
+        }
+      }
+
+      if (scopePointer) scopePointer.style.display = 'none';
+
       const rngVal = document.getElementById('ads-range-val');
       if (rngVal) rngVal.textContent = `RNG: ${Math.round(dist)}M`;
 
       // Lock on sound
-      lockOnSoundTimer -= dt;
       if (lockOnSoundTimer <= 0) {
         audio.playLockOnBeep(dist < 180);
         lockOnSoundTimer = (dist < 180 ? 0.28 : 0.65);
       }
       return;
     }
+  }
+
+  // If in ADS mode and no enemy is in front, show directional chevron pointing toward nearest enemy
+  if (isAds && nearestAnyEnemy) {
+    if (scopePointer) {
+      scopePointer.style.display = 'flex';
+      const toNearest = nearestAnyEnemy.pos.clone().sub(player.pos).normalize();
+      const rightVec = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+      const dotRight = toNearest.dot(rightVec);
+      const dotFwd = toNearest.dot(droneFwd);
+
+      let arrow = '◀';
+      if (dotRight > 0.3) arrow = '▶';
+      else if (dotRight < -0.3) arrow = '◀';
+      else if (dotFwd < 0) arrow = '▼';
+      else arrow = '▲';
+
+      const arrowEl = document.getElementById('scope-target-arrow');
+      const infoEl = document.getElementById('scope-target-info');
+      if (arrowEl) arrowEl.textContent = arrow;
+      if (infoEl) infoEl.textContent = `${nearestAnyEnemy.id} (${Math.round(nearestAnyDist)}M)`;
+
+      const sw = window.innerWidth, sh = window.innerHeight;
+      const angle = Math.atan2(-dotRight, dotFwd);
+      const rad = 140;
+      scopePointer.style.left = `${sw / 2 + Math.sin(angle) * rad}px`;
+      scopePointer.style.top = `${sh / 2 + Math.cos(angle) * rad}px`;
+    }
+  } else {
+    if (scopePointer) scopePointer.style.display = 'none';
   }
 
   hideTargetHUD();
@@ -5561,6 +5953,15 @@ function hideTargetHUD() {
   if (targetBox) targetBox.style.display = 'none';
   const leadPip = document.getElementById('reticle-lead-pip');
   if (leadPip) leadPip.style.display = 'none';
+  const scopeLockBracket = document.getElementById('scope-lock-bracket');
+  if (scopeLockBracket) scopeLockBracket.classList.remove('active');
+  const rngVal = document.getElementById('ads-range-val');
+  if (rngVal) rngVal.textContent = "RNG: --";
+  const leadVal = document.getElementById('ads-lead-val');
+  if (leadVal) {
+    leadVal.textContent = "SEARCHING...";
+    leadVal.style.color = "#94a3b8";
+  }
 }
 
 function triggerHitmarker(isCrit = false) {
@@ -5626,8 +6027,11 @@ function fireLaser(fromDrone = null, targetPos = null) {
     if (currentLockedEnemy && currentLockedEnemy.alive) {
       const toLead = currentLead3D.clone().sub(origin).normalize();
       const dot = rawDroneFwd.dot(toLead);
-      if (dot > 0.80) { // within ~36° cone
-        fwdDir = rawDroneFwd.clone().lerp(toLead, 0.82).normalize();
+      if (mouseAim.isAds && dot > 0.40) {
+        // High-precision sniper laser convergence in ADS (virtually 100% pinpoint accuracy)
+        fwdDir = rawDroneFwd.clone().lerp(toLead, 0.95).normalize();
+      } else if (dot > 0.72) {
+        fwdDir = rawDroneFwd.clone().lerp(toLead, 0.85).normalize();
       } else {
         fwdDir = rawDroneFwd;
       }
@@ -5655,6 +6059,7 @@ function fireLaser(fromDrone = null, targetPos = null) {
   });
 
   if (isPlayer) {
+    camShakeIntensity = Math.min(0.08, camShakeIntensity + 0.022);
     audio.playLaserSound();
     if (window.mpEngine) window.mpEngine.broadcastLaser(origin, fwdDir);
   }
@@ -5664,6 +6069,7 @@ function fireMissile() {
   if (appMode !== 'combat') return;
   if (player.missileCooldown > 0) return;
   player.missileCooldown = 1.4;
+  camShakeIntensity = 0.15;
 
   audio.playMissileLaunchSound();
   const origin = player.pos.clone().add(new THREE.Vector3(0, 0.5, 0));
@@ -5738,9 +6144,12 @@ function updateCoinDisplay() {
 }
 
 function triggerDamageVignette() {
+  camShakeIntensity = 0.25;
   const v = document.getElementById('damage-vignette');
-  v.classList.add('hit');
-  setTimeout(() => v.classList.remove('hit'), 180);
+  if (v) {
+    v.classList.add('hit');
+    setTimeout(() => v.classList.remove('hit'), 180);
+  }
 }
 
 function respawnDrone() {
@@ -6310,10 +6719,12 @@ function animate() {
       }
     }
 
-    // ADS Scope Zoom FOV Transition (COMBAT ARENA ONLY)
+    // ADS Scope Zoom FOV Transition + High Speed Sensation Dynamic FOV
     const isAdsActive = (appMode === 'combat' && mouseAim.isAds);
-    const targetFov = isAdsActive ? 42.0 : (cameraDirector.fov || 70.0);
-    camera.fov += (targetFov - camera.fov) * dt * 10.0;
+    const speedRatio = Math.min(1.0, player.vel.length() / 42.0);
+    const speedFovBoost = isAdsActive ? 0 : speedRatio * 8.5;
+    const targetFov = isAdsActive ? 36.0 : ((cameraDirector.fov || 68.0) + speedFovBoost);
+    camera.fov += (targetFov - camera.fov) * dt * 9.0;
     camera.updateProjectionMatrix();
 
     const scopeOverlay = document.getElementById('ads-scope-overlay');
@@ -6347,6 +6758,24 @@ function animate() {
       -Math.sin(player.pitch),
       Math.cos(player.yaw) * Math.cos(player.pitch)
     ).normalize();
+
+    // ── SMART ADS SCOPE AUTO-LOCK & MAGNETISM (Sets crosshair on enemy) ──
+    if (appMode === 'combat' && mouseAim.isAds && currentLockedEnemy && currentLockedEnemy.alive) {
+      const toTarget = currentLead3D.clone().sub(player.pos).normalize();
+      const targetYaw = Math.atan2(toTarget.x, toTarget.z);
+      const targetPitch = -Math.asin(Math.max(-0.95, Math.min(0.95, toTarget.y)));
+
+      let yawDiff = targetYaw - player.yaw;
+      while (yawDiff < -Math.PI) yawDiff += Math.PI * 2;
+      while (yawDiff > Math.PI) yawDiff -= Math.PI * 2;
+
+      const pitchDiff = targetPitch - player.pitch;
+
+      // Smooth aim-assist magnetism: snaps & tracks enemy smoothly
+      const pullSpeed = 5.4 * dt;
+      player.yaw += yawDiff * Math.min(1.0, pullSpeed);
+      player.pitch += pitchDiff * Math.min(1.0, pullSpeed);
+    }
 
     const maxSpeed = mouseAim.isAds ? 22.0 : 42.0;
     const accel = mouseAim.isAds ? 28.0 : 54.0;
@@ -6689,17 +7118,46 @@ function animate() {
   const totalYaw = player.yaw + (cameraDirector.yawAngleOffset || 0);
   const activeDist = Math.max(1.8, cameraDirector.dist || 5.8);
 
-  if (cameraDirector.mode === 'chase') {
+  if (appMode === 'combat' && mouseAim.isAds) {
+    // ── DEDICATED ADS SCOPE OPTIC CAMERA: UNOBSTRUCTED GUNSIGHT ──
     controls.enabled = false;
-    const chaseHeight = 2.0 + Math.sin(pitchRad) * activeDist;
+    const fwd3D = new THREE.Vector3(
+      Math.sin(player.yaw) * Math.cos(player.pitch),
+      -Math.sin(player.pitch),
+      Math.cos(player.yaw) * Math.cos(player.pitch)
+    ).normalize();
+
+    // Position camera just above and slightly forward of drone nose (clean sightline, no body clipping)
+    const adsCamPos = player.pos.clone()
+      .add(new THREE.Vector3(0, 0.44, 0))
+      .addScaledVector(fwd3D, 0.72);
+
+    camera.position.lerp(adsCamPos, 0.30);
+
+    // Look straight ahead along gun bore or directly at locked target lead point
+    let adsLookTarget;
+    if (currentLockedEnemy && currentLockedEnemy.alive) {
+      adsLookTarget = currentLead3D.clone();
+    } else {
+      adsLookTarget = player.pos.clone().add(new THREE.Vector3(0, 0.40, 0)).addScaledVector(fwd3D, 90);
+    }
+    camera.lookAt(adsLookTarget);
+  } else if (cameraDirector.mode === 'chase') {
+    controls.enabled = false;
+    const chaseHeight = 1.9 + Math.sin(pitchRad) * activeDist;
     const hDist = Math.cos(pitchRad) * activeDist;
     const camTargetX = player.pos.x - Math.sin(totalYaw) * hDist;
     const camTargetZ = player.pos.z - Math.cos(totalYaw) * hDist;
     const camTargetY = Math.max(0.6, player.pos.y + chaseHeight);
 
     const targetCamPos = new THREE.Vector3(camTargetX, camTargetY, camTargetZ);
-    camera.position.lerp(targetCamPos, 0.12);
-    camera.lookAt(player.pos.x, player.pos.y + 0.6, player.pos.z);
+    camera.position.lerp(targetCamPos, 0.14);
+
+    // Look ahead of the drone along flight path instead of straight down at its back
+    const lookAheadX = player.pos.x + Math.sin(totalYaw) * 18;
+    const lookAheadY = player.pos.y + 0.8 - Math.sin(player.pitch) * 14;
+    const lookAheadZ = player.pos.z + Math.cos(totalYaw) * 18;
+    camera.lookAt(lookAheadX, lookAheadY, lookAheadZ);
   } else if (cameraDirector.mode === 'action') {
     controls.enabled = false;
     const hDist = Math.max(2.0, activeDist * 0.55);
@@ -6765,6 +7223,14 @@ function animate() {
       controls.target.lerp(player.pos, 0.1);
     }
     controls.update();
+  }
+
+  // Camera Recoil & Combat Impact Shake
+  if (camShakeIntensity > 0.001) {
+    camera.position.x += (Math.random() - 0.5) * camShakeIntensity;
+    camera.position.y += (Math.random() - 0.5) * camShakeIntensity;
+    camera.position.z += (Math.random() - 0.5) * camShakeIntensity;
+    camShakeIntensity = Math.max(0, camShakeIntensity - dt * 0.48);
   }
 
   renderer.render(scene, camera);
@@ -6928,7 +7394,7 @@ window.toggleCodmHud = function() {
           lastAimX = t.clientX;
           lastAimY = t.clientY;
 
-          const sens = mouseAim.isAds ? 0.0032 : 0.0062;
+          const sens = mouseAim.isAds ? 0.0048 : 0.0062;
           player.yaw -= dx * sens;
           player.pitch = Math.max(-0.75, Math.min(0.75, player.pitch - dy * sens * 0.8));
         }
@@ -6959,7 +7425,7 @@ window.toggleCodmHud = function() {
         const dy = e.clientY - lastMouseY;
         lastMouseX = e.clientX;
         lastMouseY = e.clientY;
-        const sens = mouseAim.isAds ? 0.0032 : 0.0062;
+        const sens = mouseAim.isAds ? 0.0048 : 0.0062;
         player.yaw -= dx * sens;
         player.pitch = Math.max(-0.75, Math.min(0.75, player.pitch - dy * sens * 0.8));
       });
@@ -7023,23 +7489,25 @@ window.toggleCodmHud = function() {
     bindFireButton(document.getElementById('codm-hip-fire'));
     bindFireButton(document.getElementById('codm-left-fire'));
 
-    // ── 5. DEDICATED ADS SCOPE TOGGLE BUTTON ──
+    // ── 5. DEDICATED ADS SCOPE TOGGLE BUTTON (Smart Lock-On Optic) ──
     const scopeToggleBtn = document.getElementById('codm-scope-btn');
     if (scopeToggleBtn) {
-      scopeToggleBtn.addEventListener('click', (e) => {
+      const toggleScope = (e) => {
         e.preventDefault();
         adsScopeToggled = !adsScopeToggled;
         mouseAim.isAds = adsScopeToggled;
         scopeToggleBtn.classList.toggle('active', adsScopeToggled);
-        showToast(mouseAim.isAds ? "🎯 ADS Tactical Optic Engaged" : "Standard View");
-        if (navigator.vibrate) navigator.vibrate(12);
-      });
+        showToast(mouseAim.isAds ? "🎯 ADS Smart Lock-On Engaged" : "Standard View");
+        if (navigator.vibrate) navigator.vibrate(18);
+      };
+      scopeToggleBtn.addEventListener('touchstart', toggleScope, { passive: false });
+      scopeToggleBtn.addEventListener('mousedown', toggleScope);
     }
 
     // ── 6. FOX-2 HOMING MISSILE BUTTON ──
     const missileBtn = document.getElementById('codm-missile-btn');
     if (missileBtn) {
-      missileBtn.addEventListener('click', (e) => {
+      const launchMissile = (e) => {
         e.preventDefault();
         if (player.missileCooldown <= 0) {
           fireMissile();
@@ -7047,7 +7515,9 @@ window.toggleCodmHud = function() {
         } else {
           showToast(`Missile reloading (${player.missileCooldown.toFixed(1)}s)`);
         }
-      });
+      };
+      missileBtn.addEventListener('touchstart', launchMissile, { passive: false });
+      missileBtn.addEventListener('mousedown', launchMissile);
     }
 
     // ── 7. THRUSTERS (CLIMB / DIVE) ──
