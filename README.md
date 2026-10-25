@@ -1,10 +1,12 @@
 # ASTRA AEROSPACE — Industrial Drone Explainer & Flight Simulator
 
-An interactive, web-based 3D industrial drone explainer and real-world flight simulator built with **Three.js** and high-precision physics simulation.
+An interactive, web-based 3D industrial drone explainer, real-world flight simulator, and aerial combat arena built with **Three.js** and high-precision physics simulation.
 
-![Astra Aerospace Drone Simulator](https://img.shields.io/badge/Astra%20Aerospace-Industrial%20Simulator-00e5ff?style=for-the-badge)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-drone--explainer.vercel.app-00e5ff?style=for-the-badge&logo=vercel)](https://drone-explainer.vercel.app)
 ![Three.js](https://img.shields.io/badge/Three.js-r128-black?style=for-the-badge&logo=three.js)
-![Vercel](https://img.shields.io/badge/Vercel-Hosted-black?style=for-the-badge&logo=vercel)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+
+🔗 **Live Production URL:** [https://drone-explainer.vercel.app](https://drone-explainer.vercel.app)
 
 ---
 
