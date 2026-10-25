@@ -1,0 +1,2858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ASTRA AEROSPACE — Industrial Drone Explainer, Real-World Flight & Aerial Combat Arena</title>
+<!-- Three.js and OrbitControls from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<style>
+  :root {
+    --bg-dark: #07090e;
+    --surface-glass: rgba(14, 18, 28, 0.82);
+    --surface-elevated: rgba(22, 29, 44, 0.92);
+    --border-subtle: rgba(255, 255, 255, 0.12);
+    --border-porcelain: rgba(238, 232, 250, 0.28);
+    --border-active: rgba(0, 229, 255, 0.7);
+    
+    /* Astra Signature Palette */
+    --astra-lavender: #EEE8FA;
+    --astra-butter: #FFF3D6;
+    --astra-mint: #E6F3EA;
+    --astra-sky: #E8F0FC;
+    --astra-plum: #352A45;
+    
+    --accent-cyan: #00e5ff;
+    --accent-mint: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-rose: #f43f5e;
+    --accent-gold: #fbbf24;
+    --accent-enemy: #ef4444;
+    --accent-friend: #3b82f6;
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
+    
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --font-mono: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── CANVAS VIEWPORT ────────────────────────────────────────── */
+  #webgl-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: block;
+  }
+
+  /* ── MASTER UI OVERLAY CONTAINER ──────────────────────────── */
+  #astra-app {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .interactive {
+    pointer-events: auto;
+  }
+
+  /* Glassmorphism utility */
+  .glass-panel {
+    background: var(--surface-glass);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.65), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* ── TOP HEADER / NAV ─────────────────────────────────────── */
+  header {
+    height: 60px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-subtle);
+    background: rgba(7, 9, 14, 0.85);
+    backdrop-filter: blur(16px);
+    transition: all 0.3s ease;
+  }
+
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .brand-logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--astra-lavender), var(--astra-plum));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 16px rgba(238, 232, 250, 0.25);
+  }
+
+  .brand-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+  .brand-sub {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+  }
+
+  /* Nav Segmented Control */
+  .segmented-tabs {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 3px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .nav-btn {
+    padding: 7px 16px;
+    border-radius: 7px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .nav-btn:hover {
+    color: var(--text-primary);
+  }
+  .nav-btn.active {
+    background: var(--astra-lavender);
+    color: var(--astra-plum);
+    box-shadow: 0 2px 10px rgba(238, 232, 250, 0.3);
+  }
+  .nav-btn.combat-tab.active {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: #ffffff;
+    box-shadow: 0 2px 14px rgba(239, 68, 68, 0.45);
+  }
+
+  .telemetry-badges {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .badge-tag {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--border-subtle);
+  }
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  /* ── MAIN CONTENT WORKSPACE ───────────────────────────────── */
+  #workspace {
+    flex: 1;
+    position: relative;
+    display: grid;
+    grid-template-columns: 310px 1fr 340px;
+    padding: 16px 20px;
+    gap: 18px;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* FULLSCREEN MODE: HIDE SIDEBARS IN FLIGHT & COMBAT MODES */
+  #workspace.flight-mode {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+  #workspace.flight-mode #left-panel,
+  #workspace.flight-mode #right-panel {
+    display: none !important;
+  }
+
+  /* ── LEFT PANEL: HIERARCHY & CAD EXPLORER ─────────────────── */
+  #left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-radius: 14px;
+    padding: 16px;
+    overflow-y: auto;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--astra-sky);
+    font-family: var(--font-mono);
+  }
+
+  .component-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .comp-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .comp-item:hover {
+    background: rgba(238, 232, 250, 0.06);
+    border-color: rgba(238, 232, 250, 0.15);
+  }
+  .comp-item.active {
+    background: rgba(0, 229, 255, 0.09);
+    border-color: var(--accent-cyan);
+    box-shadow: inset 0 0 12px rgba(0, 229, 255, 0.15);
+  }
+  .comp-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+  .comp-item.active .comp-icon {
+    background: var(--accent-cyan);
+    color: #07090e;
+  }
+  .comp-text-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .comp-text-meta {
+    font-size: 0.66rem;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    margin-top: 1px;
+  }
+
+  /* ── CENTER AREA: HUD & COMBAT VIEWPORTS ──────────────────── */
+  #center-hud-view {
+    position: relative;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Crosshair & Pitch Ladder for FPV Mode */
+  #flight-hud-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  #flight-hud-overlay.active {
+    display: flex;
+  }
+
+  .hud-reticle-wrap {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pitch-ladder {
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    pointer-events: none;
+    transition: transform 0.04s linear;
+  }
+
+  /* Speed & Altitude Tapes in Flight Sim */
+  .hud-tape {
+    position: absolute;
+    background: rgba(7, 9, 14, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-porcelain);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .speed-tape { left: 40px; top: 50%; transform: translateY(-50%); text-align: right; }
+  .alt-tape { right: 40px; top: 50%; transform: translateY(-50%); text-align: left; }
+  .tape-val { font-size: 1.6rem; font-weight: 700; color: var(--accent-cyan); text-shadow: 0 0 12px rgba(0,229,255,0.4); }
+  .tape-lbl { font-size: 0.62rem; color: var(--text-tertiary); letter-spacing: 0.12em; }
+
+  /* Compact Real-Time Telemetry Bar for Flight Mode */
+  #flight-osd-bar {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 22px;
+    border-radius: 24px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    pointer-events: auto;
+  }
+  #flight-osd-bar.active {
+    display: flex;
+  }
+  .osd-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .osd-label {
+    color: var(--text-tertiary);
+    font-size: 0.65rem;
+  }
+  .osd-val {
+    color: var(--astra-lavender);
+    font-weight: 700;
+  }
+
+  /* Notification Toast */
+  #toast-notif {
+    position: absolute;
+    top: 68px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    pointer-events: none;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #toast-notif.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* ── COMBAT ARENA HUD ELEMENTS ───────────────────────────── */
+  #combat-hud-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    pointer-events: none;
+  }
+  #combat-hud-overlay.active {
+    display: block;
+  }
+
+  /* Player Health & Shield Bars */
+  .combat-vitals-box {
+    position: absolute;
+    bottom: 24px;
+    left: 30px;
+    width: 260px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: auto;
+  }
+  .bar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .bar-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+  }
+  .meter-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .meter-fill-shield {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #00e5ff, #3b82f6);
+    border-radius: 4px;
+    transition: width 0.15s ease-out;
+  }
+  .meter-fill-hull {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 4px;
+    transition: width 0.15s ease-out;
+  }
+
+  /* Tactical Radar Minimap */
+  .combat-radar-card {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    overflow: hidden;
+    pointer-events: auto;
+    border: 2px solid rgba(0, 229, 255, 0.4);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+  }
+  #radar-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Tactical Weapon & Armory Selector */
+  .combat-armory-dock {
+    position: absolute;
+    bottom: 24px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    pointer-events: auto;
+    font-family: var(--font-mono);
+  }
+  .armory-title {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .weapon-btn {
+    padding: 7px 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    font-size: 0.72rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .weapon-btn.active {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 229, 255, 0.12);
+  }
+
+  /* Killfeed & Radio Chatter Box */
+  .combat-radio-chatter {
+    position: absolute;
+    top: 24px;
+    left: 30px;
+    width: 320px;
+    max-height: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .radio-msg {
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(14, 18, 28, 0.85);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    animation: fadeInMsg 0.3s ease-out;
+  }
+  .radio-msg.kill {
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+  }
+  .radio-msg.coin {
+    border-color: rgba(251, 191, 36, 0.4);
+    color: #fde68a;
+  }
+  @keyframes fadeInMsg {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Floating Damage Vignette when Hit */
+  #damage-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 80px rgba(239, 68, 68, 0);
+    transition: box-shadow 0.15s ease-out;
+  }
+  #damage-vignette.hit {
+    box-shadow: inset 0 0 100px rgba(239, 68, 68, 0.75);
+  }
+
+  /* Floating Score Multiplier popup */
+  #combo-popup {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent-gold);
+    text-shadow: 0 0 18px rgba(251, 191, 36, 0.7);
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #combo-popup.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+
+  /* Flight Controls Legend */
+  #flight-controls-legend {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    gap: 16px;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-size: 0.74rem;
+    pointer-events: auto;
+  }
+  #flight-controls-legend.active {
+    display: flex;
+  }
+  .key-badge {
+    padding: 3px 8px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--astra-butter);
+    font-weight: 700;
+  }
+
+  /* ── RIGHT PANEL: TELEMETRY & SUBSYSTEM DEEP-DIVE ─────────── */
+  #right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-radius: 14px;
+    padding: 16px;
+    overflow-y: auto;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .spec-detail-box {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .spec-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .spec-main-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--astra-lavender);
+  }
+  .spec-tag {
+    font-size: 0.62rem;
+    font-family: var(--font-mono);
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--accent-mint);
+  }
+  .spec-desc {
+    font-size: 0.74rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  .stat-grid-2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-tile {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .stat-tile-key {
+    font-size: 0.62rem;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+  }
+  .stat-tile-val {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+
+  /* Motor Quad RPM Visualizer */
+  .motor-matrix {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .motor-meter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+  }
+  .motor-lbl {
+    width: 36px;
+    color: var(--text-tertiary);
+  }
+  .motor-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .motor-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--astra-lavender));
+    border-radius: 3px;
+    transition: width 0.1s linear;
+  }
+  .motor-val {
+    width: 52px;
+    text-align: right;
+    color: var(--text-secondary);
+  }
+
+  /* ── FOOTER TOOLBAR ── */
+  footer {
+    height: 68px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-subtle);
+    background: rgba(7, 9, 14, 0.85);
+    backdrop-filter: blur(16px);
+  }
+
+  .tool-button-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .action-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .action-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .action-btn:hover {
+    background: rgba(238, 232, 250, 0.08);
+    border-color: var(--border-porcelain);
+    transform: translateY(-1px);
+  }
+  .action-btn.active {
+    background: rgba(0, 229, 255, 0.15);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+  }
+
+  /* Exploded View Slider (Hidden in Flight/Combat Mode) */
+  .slider-unit {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-subtle);
+  }
+  .slider-label {
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .slider-control {
+    width: 140px;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.15);
+    outline: none;
+  }
+  .slider-control::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--astra-lavender);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(238, 232, 250, 0.5);
+  }
+
+  /* Camera Mode Switcher */
+  .cam-btn-group {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 3px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+  }
+  .cam-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+  .cam-btn.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+  }
+
+  /* Hide CAD-only controls in flight/combat modes */
+  body.in-flight .flight-hidden {
+    display: none !important;
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 960px) {
+    #workspace { grid-template-columns: 1fr; }
+    #left-panel, #right-panel { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- WebGL 3D Canvas -->
+<canvas id="webgl-canvas"></canvas>
+
+<!-- Damage Vignette on Screen -->
+<div id="damage-vignette"></div>
+
+<!-- Combo Popup -->
+<div id="combo-popup">+150 COINS</div>
+
+<!-- ASTRA UI LAYER -->
+<div id="astra-app">
+
+  <!-- ── HEADER ── -->
+  <header class="interactive">
+    <div class="brand-group">
+      <div class="brand-logo-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#352A45" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 19 21 12 17 5 21 12 2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">Astra X-4 Valkyrie</div>
+        <div class="brand-sub">Industrial Real-World UAV & Aerial Combat</div>
+      </div>
+    </div>
+
+    <!-- Mode Selector with New Combat Arena -->
+    <div class="segmented-tabs">
+      <button class="nav-btn active" id="tab-inspect" onclick="setAppMode('inspect')">
+        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        CAD Inspector
+      </button>
+      <button class="nav-btn" id="tab-xray" onclick="setAppMode('xray')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Inside X-Ray
+      </button>
+      <button class="nav-btn" id="tab-flight" onclick="setAppMode('flight')">
+        <svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+        Flight Simulator
+      </button>
+      <button class="nav-btn combat-tab" id="tab-combat" onclick="setAppMode('combat')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"/><circle cx="12" cy="12" r="2"/></svg>
+        ⚔️ Combat Arena
+      </button>
+    </div>
+
+    <!-- Status Badges & Live Coin Counter -->
+    <div class="telemetry-badges">
+      <div class="badge-tag" style="background:rgba(251,191,36,0.12); border-color:rgba(251,191,36,0.35); color:var(--accent-gold); font-weight:700">
+        <span style="font-size:0.85rem">🪙</span>
+        <span id="badge-coins-val">350 COINS</span>
+      </div>
+      <div class="badge-tag" style="background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.3); color:var(--accent-mint)">
+        <span class="badge-dot" style="background:var(--accent-mint)"></span>
+        RTK-GPS LOCK (22 SAT)
+      </div>
+    </div>
+  </header>
+
+  <!-- ── WORKSPACE ── -->
+  <main id="workspace">
+    <!-- LEFT PANEL: Subsystem Directory -->
+    <aside id="left-panel" class="glass-panel interactive">
+      <div class="panel-header">
+        <span class="section-label">Assembly Explorer</span>
+        <span style="font-size:0.65rem; color:var(--text-tertiary); font-family:var(--font-mono)">8 Subsystems</span>
+      </div>
+
+      <div class="component-card-list">
+        <div class="comp-item active" onclick="focusComponent('chassis')">
+          <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+          <div><div class="comp-text-title">T700 Carbon Monocoque</div><div class="comp-text-meta">Central Hull & Arm Clamps</div></div>
+        </div>
+        <div class="comp-item" onclick="focusComponent('motors')">
+          <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></div>
+          <div><div class="comp-text-title">2814 900KV BLDC Motors</div><div class="comp-text-meta">4× Outrunner Brushless</div></div>
+        </div>
+        <div class="comp-item" onclick="focusComponent('props')">
+          <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 2 20 20M2 22 22 2"/></svg></div>
+          <div><div class="comp-text-title">13" Aerodynamic Propellers</div><div class="comp-text-meta">Carbon-Reinforced Folding</div></div>
+        </div>
+        <div class="comp-item" onclick="focusComponent('fc')">
+          <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/></svg></div>
+          <div><div class="comp-text-title">Flight Controller H7</div><div class="comp-text-meta">Dual IMU · 1kHz PID Loop</div></div>
+        </div>
+        <div class="comp-item" onclick="focusComponent('esc')">
+          <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="14"/><line x1="10" y1="10" x2="10" y2="14"/></svg></div>
+          <div><div class="comp-text-title">4-in-1 65A BLHeli_32 ESC</div><div class="comp-text-meta">DShot1200 · Active Braking</div></div>
+        </div>
+        <div class="comp-item" onclick="focusComponent('battery')">
+          <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg></div>
+          <div><div class="comp-text-title">6S 8500mAh Solid-State</div><div class="comp-text-meta">22.2V · 188.7Wh Pack</div></div>
+        </div>
+        <div class="comp-item" onclick="focusComponent('gimbal')">
+          <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+          <div><div class="comp-text-title">3-Axis Optical Gimbal</div><div class="comp-text-meta">Sony 1" CMOS 4K60HDR</div></div>
+        </div>
+        <div class="comp-item" onclick="focusComponent('sensors')">
+          <div class="comp-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div><div class="comp-text-title">Omni-LiDAR & Vision Flow</div><div class="comp-text-meta">Ground TOF + 360° Avoidance</div></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER HUD & SIMULATOR OVERLAYS -->
+    <div id="center-hud-view">
+      <!-- Toast notification -->
+      <div id="toast-notif" class="glass-panel" style="background:rgba(14,18,28,0.92); border-color:var(--border-porcelain)">
+        <span style="color:var(--accent-cyan)">●</span>
+        <span id="toast-text">Tactical Combat Systems Online.</span>
+      </div>
+
+      <!-- Real-Time Flight OSD Bar (Top HUD in Flight Mode) -->
+      <div id="flight-osd-bar" class="glass-panel">
+        <div class="osd-item">
+          <span class="osd-label">AIR SPD</span>
+          <span class="osd-val" id="osd-spd-val" style="color:var(--accent-cyan)">0.0 M/S</span>
+        </div>
+        <div class="osd-item">
+          <span class="osd-label">ALT</span>
+          <span class="osd-val" id="osd-alt-val">1.2 M</span>
+        </div>
+        <div class="osd-item">
+          <span class="osd-label">BATT</span>
+          <span class="osd-val" id="osd-bat-val" style="color:var(--accent-mint)">22.8V (98%)</span>
+        </div>
+        <div class="osd-item">
+          <span class="osd-label">ENEMIES</span>
+          <span class="osd-val" id="osd-kills-val" style="color:var(--accent-enemy)">4 ACTIVE</span>
+        </div>
+        <div class="osd-item">
+          <span class="osd-label">COINS</span>
+          <span class="osd-val" id="osd-coins-val" style="color:var(--accent-gold)">350</span>
+        </div>
+        <button onclick="respawnDrone()" class="action-btn" style="padding:4px 12px; font-size:0.68rem; background:rgba(255,255,255,0.08); border-color:var(--border-porcelain)">
+          Respawn [R]
+        </button>
+      </div>
+
+      <!-- FPV Flight HUD overlay -->
+      <div id="flight-hud-overlay">
+        <div class="hud-tape speed-tape">
+          <div class="tape-lbl">AIR SPEED</div>
+          <div class="tape-val" id="hud-spd-val">0.0</div>
+          <div class="tape-lbl">M / S</div>
+        </div>
+
+        <div class="hud-reticle-wrap">
+          <svg width="240" height="240" viewBox="0 0 240 240" style="position:absolute; pointer-events:none">
+            <circle cx="120" cy="120" r="80" stroke="rgba(0, 229, 255, 0.25)" stroke-width="1.5" fill="none" stroke-dasharray="6 8"/>
+            <line x1="94" y1="120" x2="112" y2="120" stroke="var(--accent-cyan)" stroke-width="2.5"/>
+            <line x1="128" y1="120" x2="146" y2="120" stroke="var(--accent-cyan)" stroke-width="2.5"/>
+            <circle cx="120" cy="120" r="3.5" fill="var(--accent-cyan)"/>
+            <circle id="fpv-vector-pip" cx="120" cy="120" r="6" stroke="var(--astra-butter)" stroke-width="2" fill="none"/>
+          </svg>
+
+          <svg id="horizon-pitch-ladder" class="pitch-ladder" viewBox="0 0 220 220">
+            <line x1="20" y1="110" x2="200" y2="110" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2"/>
+            <line x1="65" y1="75" x2="155" y2="75" stroke="rgba(0, 229, 255, 0.6)" stroke-width="1.5"/>
+            <text x="160" y="78" fill="rgba(0,229,255,0.8)" font-size="9" font-family="monospace">+10°</text>
+            <line x1="65" y1="145" x2="155" y2="145" stroke="rgba(0, 229, 255, 0.6)" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <text x="160" y="148" fill="rgba(0,229,255,0.8)" font-size="9" font-family="monospace">-10°</text>
+          </svg>
+        </div>
+
+        <div class="hud-tape alt-tape">
+          <div class="tape-lbl">BARO ALTITUDE</div>
+          <div class="tape-val" id="hud-alt-val">1.2</div>
+          <div class="tape-lbl">METERS AGL</div>
+        </div>
+      </div>
+
+      <!-- ── COMBAT SPECIFIC HUD OVERLAYS ── -->
+      <div id="combat-hud-overlay">
+        <!-- Radio Chatter / Killfeed -->
+        <div class="combat-radio-chatter" id="combat-radio-chatter">
+          <div class="radio-msg">[ASTRA HQ]: "Combat Arena armed. Wingman Squadron deployed."</div>
+          <div class="radio-msg">[WINGMAN-1]: "Bravo 1 in formation, covering your six."</div>
+        </div>
+
+        <!-- Tactical Radar Minimap -->
+        <div class="combat-radar-card glass-panel">
+          <canvas id="radar-canvas" width="170" height="170"></canvas>
+        </div>
+
+        <!-- Player Shield & Hull Integrity -->
+        <div class="combat-vitals-box glass-panel">
+          <div class="bar-row">
+            <div class="bar-label-row">
+              <span style="color:var(--accent-cyan); font-weight:700">SHIELDS</span>
+              <span id="shield-val-text">100 / 100</span>
+            </div>
+            <div class="meter-track">
+              <div class="meter-fill-shield" id="shield-meter"></div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label-row">
+              <span style="color:var(--accent-mint); font-weight:700">HULL ARMOR</span>
+              <span id="hull-val-text">100 / 100</span>
+            </div>
+            <div class="meter-track">
+              <div class="meter-fill-hull" id="hull-meter"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tactical Armory & Upgrades -->
+        <div class="combat-armory-dock glass-panel">
+          <div class="armory-title">
+            <span>ARMORY UPGRADES</span>
+            <span style="color:var(--accent-gold)" id="dock-coins-text">🪙 350</span>
+          </div>
+          <div class="weapon-btn active" id="btn-wpn-laser" onclick="buyOrSelectWeapon('laser')">
+            <span>[1] Dual Pulse Lasers</span>
+            <span style="color:var(--accent-mint)">EQUIPPED</span>
+          </div>
+          <div class="weapon-btn" id="btn-wpn-missile" onclick="buyOrSelectWeapon('missile')">
+            <span>[2] Homing Missiles</span>
+            <span style="color:var(--accent-gold)" id="price-missile">250 COINS</span>
+          </div>
+          <div class="weapon-btn" id="btn-wpn-emp" onclick="buyOrSelectWeapon('emp')">
+            <span>[3] EMP Superweapon</span>
+            <span style="color:var(--accent-gold)" id="price-emp">400 COINS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flight Controls Helper Legend -->
+      <div id="flight-controls-legend" class="glass-panel">
+        <div><span class="key-badge">W</span> <span class="key-badge">S</span> Pitch / Move</div>
+        <div><span class="key-badge">A</span> <span class="key-badge">D</span> Strafe / Turn</div>
+        <div><span class="key-badge">Q</span> <span class="key-badge">E</span> Yaw</div>
+        <div><span class="key-badge">SPACE</span> / <span class="key-badge">SHIFT</span> Altitude</div>
+        <div style="color:var(--accent-rose); font-weight:700"><span class="key-badge">L-CLICK / F</span> Shoot Laser</div>
+        <div style="color:var(--accent-cyan); font-weight:700"><span class="key-badge">R-CLICK / M</span> Missile</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Live Engineering Telemetry & Specs -->
+    <aside id="right-panel" class="glass-panel interactive">
+      <div class="panel-header">
+        <span class="section-label">Engineering Telemetry</span>
+        <span style="font-size:0.65rem; color:var(--accent-mint); font-family:var(--font-mono)">● NOMINAL</span>
+      </div>
+
+      <div class="spec-detail-box" id="component-detail-box">
+        <div class="spec-title-row">
+          <div class="spec-main-title" id="detail-title">Carbon Monocoque</div>
+          <div class="spec-tag" id="detail-tag">AEROSPACE GRADE</div>
+        </div>
+        <div class="spec-desc" id="detail-desc">
+          Toray T700 multidirectional woven carbon fiber composite shell with high-temperature epoxy matrix. CNC anodized 7075 aluminum motor arm clamps ensure zero structural deflection under 12G shock loads.
+        </div>
+      </div>
+
+      <div class="stat-grid-2x2">
+        <div class="stat-tile">
+          <div class="stat-tile-key">Total Thrust</div>
+          <div class="stat-tile-val" id="tel-thrust">0.0 N</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-tile-key">Draw Current</div>
+          <div class="stat-tile-val" id="tel-current">2.8 A</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-tile-key">Flight Time Left</div>
+          <div class="stat-tile-val" id="tel-flighttime">38:40</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-tile-key">Airfield Gate</div>
+          <div class="stat-tile-val" id="tel-score" style="color:var(--astra-butter)">0 / 7</div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div class="section-label" style="font-size:0.62rem">Motor RPM Array (BLHeli DShot)</div>
+        <div class="motor-matrix">
+          <div class="motor-meter-row">
+            <span class="motor-lbl">M1·CW</span>
+            <div class="motor-progress-bar"><div class="motor-fill" id="mbar-1" style="width:25%"></div></div>
+            <span class="motor-val" id="mval-1">2,100</span>
+          </div>
+          <div class="motor-meter-row">
+            <span class="motor-lbl">M2·CCW</span>
+            <div class="motor-progress-bar"><div class="motor-fill" id="mbar-2" style="width:25%"></div></div>
+            <span class="motor-val" id="mval-2">2,100</span>
+          </div>
+          <div class="motor-meter-row">
+            <span class="motor-lbl">M3·CCW</span>
+            <div class="motor-progress-bar"><div class="motor-fill" id="mbar-3" style="width:25%"></div></div>
+            <span class="motor-val" id="mval-3">2,100</span>
+          </div>
+          <div class="motor-meter-row">
+            <span class="motor-lbl">M4·CW</span>
+            <div class="motor-progress-bar"><div class="motor-fill" id="mbar-4" style="width:25%"></div></div>
+            <span class="motor-val" id="mval-4">2,100</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ── FOOTER TOOLBAR ── -->
+  <footer class="interactive">
+    <div class="slider-unit flight-hidden">
+      <span class="slider-label">Assembly Explode</span>
+      <input type="range" id="explode-slider" class="slider-control" min="0" max="1" step="0.005" value="0" oninput="onExplodeInput(this.value)">
+      <span id="explode-pct" style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-secondary); width:32px">0%</span>
+    </div>
+
+    <div class="tool-button-group">
+      <button class="action-btn" id="btn-spin" onclick="toggleSpin()">
+        <svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        Rotors <span id="spin-state-text" style="color:var(--accent-cyan)">ON</span>
+      </button>
+      <button class="action-btn flight-hidden" id="btn-wire" onclick="toggleWireframe()">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        Wireframe
+      </button>
+      <button class="action-btn" onclick="resetDroneView()">
+        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Center Cam
+      </button>
+    </div>
+
+    <div class="cam-btn-group">
+      <button class="cam-btn active" id="cam-orbit" onclick="setCameraMode('orbit')">Orbit</button>
+      <button class="cam-btn" id="cam-chase" onclick="setCameraMode('chase')">Chase</button>
+      <button class="cam-btn" id="cam-fpv" onclick="setCameraMode('fpv')">FPV</button>
+    </div>
+  </footer>
+</div>
+
+<!-- Web Audio Sound Engine with Combat Sound FX -->
+<script>
+class SoundEngine {
+  constructor() {
+    this.ctx = null;
+    this.motorOsc1 = null;
+    this.motorOsc2 = null;
+    this.motorGain = null;
+    this.initialized = false;
+  }
+
+  init() {
+    if (this.initialized) return;
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioContext();
+
+      // Dual Quadrotor Motor Synthesis
+      this.motorOsc1 = this.ctx.createOscillator();
+      this.motorOsc2 = this.ctx.createOscillator();
+      this.motorGain = this.ctx.createGain();
+
+      this.motorOsc1.type = 'sawtooth';
+      this.motorOsc2.type = 'sine';
+
+      this.motorOsc1.frequency.setValueAtTime(110, this.ctx.currentTime);
+      this.motorOsc2.frequency.setValueAtTime(220, this.ctx.currentTime);
+      this.motorGain.gain.setValueAtTime(0.015, this.ctx.currentTime);
+
+      this.motorOsc1.connect(this.motorGain);
+      this.motorOsc2.connect(this.motorGain);
+      this.motorGain.connect(this.ctx.destination);
+
+      this.motorOsc1.start();
+      this.motorOsc2.start();
+      this.initialized = true;
+    } catch (e) {
+      console.warn("Audio Context init pending user gesture", e);
+    }
+  }
+
+  updateRpm(rpmNorm) {
+    if (!this.initialized || !this.ctx) return;
+    const baseFreq = 120 + rpmNorm * 680;
+    this.motorOsc1.frequency.setTargetAtTime(baseFreq, this.ctx.currentTime, 0.05);
+    this.motorOsc2.frequency.setTargetAtTime(baseFreq * 2, this.ctx.currentTime, 0.05);
+    const targetGain = 0.012 + rpmNorm * 0.08;
+    this.motorGain.gain.setTargetAtTime(targetGain, this.ctx.currentTime, 0.05);
+  }
+
+  // Laser Bolt Fire Sound FX
+  playLaserSound() {
+    if (!this.initialized || !this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(1200, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.12);
+  }
+
+  // Missile Launch Sound FX
+  playMissileLaunchSound() {
+    if (!this.initialized || !this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(950, this.ctx.currentTime + 0.35);
+    gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.4);
+  }
+
+  // Explosion Sound FX
+  playExplosionSound() {
+    if (!this.initialized || !this.ctx) return;
+    const bufferSize = this.ctx.sampleRate * 0.5;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.12));
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(450, this.ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.5);
+
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.45, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+    noise.start();
+  }
+
+  // Coin Collection Chime
+  playCoinChime() {
+    if (!this.initialized || !this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(987.77, this.ctx.currentTime); // B5
+    osc.frequency.setValueAtTime(1318.51, this.ctx.currentTime + 0.08); // E6
+    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.3);
+  }
+
+  // Shield Hit Clang
+  playHitSound() {
+    if (!this.initialized || !this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(60, this.ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.15);
+  }
+
+  // Flight Checkpoint Chime
+  playCheckpointChime() {
+    if (!this.initialized || !this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
+    osc.frequency.exponentialRampToValueAtTime(783.99, this.ctx.currentTime + 0.15); // G5
+    gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.45);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.45);
+  }
+}
+
+const audio = new SoundEngine();
+window.addEventListener('click', () => audio.init(), { once: true });
+window.addEventListener('keydown', () => audio.init(), { once: true });
+</script>
+
+<!-- Main Three.js Application Logic -->
+<script>
+// ── APP STATE & DATA ─────────────────────────────────────────
+let appMode = 'inspect'; // 'inspect' | 'xray' | 'flight' | 'combat'
+let cameraMode = 'orbit'; // 'orbit' | 'chase' | 'fpv'
+let isSpinning = true;
+let isWireframe = false;
+let explodeAmount = 0;
+
+// Subsystem Specifications Database
+const SUB_DATA = {
+  chassis: {
+    title: "Toray T700 Carbon Monocoque",
+    tag: "AEROSPACE COMPOSITE",
+    desc: "Molded vacuum-bagged carbon fiber monocoque skeleton. High torsional rigidity isolates sensor IMUs from high-frequency motor vibration while offering 4.5kg payload structural integrity."
+  },
+  motors: {
+    title: "2814 900KV Outrunner Motors",
+    tag: "HIGH-EFFICIENCY BLDC",
+    desc: "Hand-wound 99.9% oxygen-free copper stator coils with high-temperature N52SH neodymium curved magnets. Capable of delivering up to 2.4kg of static thrust per rotor at 24V."
+  },
+  props: {
+    title: "13\" Carbon-Nylon Propellers",
+    tag: "AERODYNAMIC AIRFOIL",
+    desc: "Optimized low-Reynolds-number blade geometry. Dynamically balanced at factory to under 0.02g-mm residual imbalance, minimizing acoustic footprint and maximizing flight duration."
+  },
+  fc: {
+    title: "Dual-IMU STM32H7 Flight Controller",
+    tag: "AVIONICS CORE",
+    desc: "High-performance ARM Cortex-M7 MCU running real-time Kalman filtering and PID control loop at 1,000 Hz. Features isolated pneumatic barometer and redundant 6-axis gyros."
+  },
+  esc: {
+    title: "4-in-1 65A BLHeli_32 ESC",
+    tag: "POWER DISTRIBUTION",
+    desc: "Ultra-low RDS(on) MOSFET array with dedicated hardware PWM timers. Features regenerative active motor braking (damped light) and live telemetry feedback."
+  },
+  battery: {
+    title: "6S 8500mAh Solid-State Pack",
+    tag: "HIGH ENERGY DENSITY",
+    desc: "22.2V nominal voltage solid-electrolyte Li-ion cells delivering 280 Wh/kg specific energy. Smart BMS integrates temperature sensors and real-time cycle health monitoring."
+  },
+  gimbal: {
+    title: "3-Axis Optical 4K Gimbal",
+    tag: "PRECISION PAYLOAD",
+    desc: "Direct-drive magnetic encoder gimbal motors providing 0.005° angular stabilization precision. House a Sony 1-inch 20MP image sensor with mechanically damped vibration dampers."
+  },
+  sensors: {
+    title: "Omni-Directional Vision & LiDAR",
+    tag: "SITUATIONAL AWARENESS",
+    desc: "Quad stereo binocular vision cameras combined with downward time-of-flight (ToF) laser rangefinder enable autonomous indoor navigation and precision landing."
+  }
+};
+
+// ── THREE.JS SETUP ───────────────────────────────────────────
+const canvas = document.getElementById('webgl-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+
+// Real-World Atmospheric Fog
+scene.fog = new THREE.FogExp2(0x9fc5e8, 0.0014);
+scene.background = new THREE.Color(0x9fc5e8);
+
+const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 3000);
+camera.position.set(0, 3.2, 5.8);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.maxDistance = 120;
+controls.minDistance = 0.5;
+controls.target.set(0, 0.45, 0);
+
+// Natural Sunlight & Atmospheric Sky Lighting
+const hemiLight = new THREE.HemisphereLight(0xebf4ff, 0x3d5a3a, 0.95);
+scene.add(hemiLight);
+
+const sunLight = new THREE.DirectionalLight(0xfff7e6, 2.0);
+sunLight.position.set(160, 240, 120);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.width = 2048;
+sunLight.shadow.mapSize.height = 2048;
+sunLight.shadow.camera.near = 10;
+sunLight.shadow.camera.far = 650;
+sunLight.shadow.camera.left = -150;
+sunLight.shadow.camera.right = 150;
+sunLight.shadow.camera.top = 150;
+sunLight.shadow.camera.bottom = -150;
+sunLight.shadow.bias = -0.0004;
+scene.add(sunLight);
+
+// Sky Dome
+const skyGeo = new THREE.SphereGeometry(1800, 32, 16);
+const skyMat = new THREE.ShaderMaterial({
+  uniforms: {
+    topColor: { value: new THREE.Color(0x196eb8) },
+    bottomColor: { value: new THREE.Color(0xcde3f7) },
+    offset: { value: 30 },
+    exponent: { value: 0.65 }
+  },
+  vertexShader: `
+    varying vec3 vWorldPosition;
+    void main() {
+      vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+      vWorldPosition = worldPosition.xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 topColor;
+    uniform vec3 bottomColor;
+    uniform float offset;
+    uniform float exponent;
+    varying vec3 vWorldPosition;
+    void main() {
+      float h = normalize(vWorldPosition + offset).y;
+      gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), 1.0);
+    }
+  `,
+  side: THREE.BackSide
+});
+const sky = new THREE.Mesh(skyGeo, skyMat);
+scene.add(sky);
+
+// ── PROCEDURAL REAL-WORLD PROCEDURAL TEXTURES ────────────────
+function createGrassTexture() {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 512;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#3f6c2c';
+  ctx.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 4000; i++) {
+    const x = Math.random() * 512, y = Math.random() * 512;
+    const r = Math.random() * 8 + 2;
+    const gVal = Math.floor(80 + Math.random() * 50);
+    ctx.fillStyle = `rgb(${Math.floor(gVal * 0.55)}, ${gVal}, ${Math.floor(gVal * 0.28)})`;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(90, 90);
+  return tex;
+}
+
+function createRunwayTexture() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 2048;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#26292e';
+  ctx.fillRect(0, 0, 1024, 2048);
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  for (let i = 0; i < 8000; i++) ctx.fillRect(Math.random() * 1024, Math.random() * 2048, 2, 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(60, 0, 18, 2048);
+  ctx.fillRect(1024 - 78, 0, 18, 2048);
+  for (let y = 120; y < 1920; y += 160) ctx.fillRect(504, y, 16, 90);
+  for (let x = 120; x <= 900; x += 65) {
+    ctx.fillRect(x, 40, 36, 180);
+    ctx.fillRect(x, 2048 - 220, 36, 180);
+  }
+  ctx.font = "bold 130px monospace";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText("24L", 512, 340);
+  ctx.fillText("06R", 512, 1780);
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+
+function createBuildingTexture() {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 512;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#222834';
+  ctx.fillRect(0, 0, 256, 512);
+  const cols = 6, rows = 18, w = 24, h = 18;
+  for (let r = 0; r < rows; r++) {
+    for (let col = 0; col < cols; col++) {
+      const x = 20 + col * 38, y = 20 + r * 26;
+      const grad = ctx.createLinearGradient(x, y, x, y + h);
+      grad.addColorStop(0, '#5b8ebb');
+      grad.addColorStop(1, '#1b344d');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, y, w, h);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(1, 4);
+  return tex;
+}
+
+// ── REAL WORLD 3D ENVIRONMENT ────────────────────────────────
+const realWorld = new THREE.Group();
+scene.add(realWorld);
+
+// Contoured Terrain
+const terrainSize = 2200;
+const terrainSegments = 100;
+const groundGeo = new THREE.PlaneGeometry(terrainSize, terrainSize, terrainSegments, terrainSegments);
+const posAttr = groundGeo.attributes.position;
+
+for (let i = 0; i < posAttr.count; i++) {
+  const x = posAttr.getX(i);
+  const y = posAttr.getY(i);
+  const distFromCenter = Math.sqrt(x * x + y * y);
+  const isAirfield = (Math.abs(x) < 80 && Math.abs(y) < 320);
+
+  if (isAirfield) {
+    posAttr.setZ(i, 0);
+  } else {
+    const hill1 = Math.sin(x * 0.008) * Math.cos(y * 0.008) * 18;
+    const hill2 = Math.sin(x * 0.018 + 1.2) * Math.cos(y * 0.015) * 8;
+    const mountainNorth = (y < -350 ? Math.pow(Math.abs(y + 350) * 0.07, 1.4) : 0);
+    const mountainWest = (x < -400 ? Math.pow(Math.abs(x + 400) * 0.06, 1.4) : 0);
+    const elevation = Math.max(0, (hill1 + hill2 + mountainNorth + mountainWest) * Math.min(1, (distFromCenter - 60) * 0.02));
+    posAttr.setZ(i, elevation);
+  }
+}
+groundGeo.computeVertexNormals();
+
+const grassTex = createGrassTexture();
+const groundMat = new THREE.MeshStandardMaterial({ map: grassTex, roughness: 0.88, metalness: 0.05, flatShading: true });
+const terrain = new THREE.Mesh(groundGeo, groundMat);
+terrain.rotation.x = -Math.PI / 2;
+terrain.receiveShadow = true;
+realWorld.add(terrain);
+
+// Asphalt Runway & Helipad
+const runwayTex = createRunwayTexture();
+const runway = new THREE.Mesh(new THREE.PlaneGeometry(60, 520), new THREE.MeshStandardMaterial({ map: runwayTex, roughness: 0.8, metalness: 0.1 }));
+runway.rotation.x = -Math.PI / 2;
+runway.position.set(0, 0.03, 60);
+runway.receiveShadow = true;
+realWorld.add(runway);
+
+const taxiway = new THREE.Mesh(new THREE.PlaneGeometry(28, 85), new THREE.MeshStandardMaterial({ color: 0x2b2e34, roughness: 0.85 }));
+taxiway.rotation.x = -Math.PI / 2;
+taxiway.position.set(45, 0.032, 0);
+taxiway.rotation.z = Math.PI / 2;
+taxiway.receiveShadow = true;
+realWorld.add(taxiway);
+
+// Helipad
+const helipadCanvas = document.createElement('canvas');
+helipadCanvas.width = 256; helipadCanvas.height = 256;
+const hCtx = helipadCanvas.getContext('2d');
+hCtx.fillStyle = '#1e242d';
+hCtx.fillRect(0, 0, 256, 256);
+hCtx.lineWidth = 14;
+hCtx.strokeStyle = '#f59e0b';
+hCtx.beginPath();
+hCtx.arc(128, 128, 100, 0, Math.PI * 2);
+hCtx.stroke();
+hCtx.fillStyle = '#ffffff';
+hCtx.fillRect(80, 60, 22, 136);
+hCtx.fillRect(154, 60, 22, 136);
+hCtx.fillRect(80, 116, 96, 24);
+
+const helipadTex = new THREE.CanvasTexture(helipadCanvas);
+const helipadMesh = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), new THREE.MeshStandardMaterial({ map: helipadTex, roughness: 0.7 }));
+helipadMesh.rotation.x = -Math.PI / 2;
+helipadMesh.position.set(0, 0.035, 0);
+helipadMesh.receiveShadow = true;
+realWorld.add(helipadMesh);
+
+// Lake
+const lake = new THREE.Mesh(new THREE.PlaneGeometry(450, 320), new THREE.MeshStandardMaterial({ color: 0x1d527a, roughness: 0.1, metalness: 0.9 }));
+lake.rotation.x = -Math.PI / 2;
+lake.position.set(-260, 0.02, 150);
+lake.receiveShadow = true;
+realWorld.add(lake);
+
+// City Skyline
+const bldgTex = createBuildingTexture();
+const cityGroup = new THREE.Group();
+realWorld.add(cityGroup);
+const bldgColors = [0x2c3e50, 0x34495e, 0x243342, 0x1f2a38, 0x2b3846];
+for (let i = 0; i < 36; i++) {
+  const w = 20 + Math.random() * 24;
+  const d = 20 + Math.random() * 24;
+  const h = 55 + Math.random() * 120;
+  const bMesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ map: bldgTex, color: bldgColors[i % bldgColors.length], roughness: 0.25, metalness: 0.75 }));
+  const row = Math.floor(i / 6), col = i % 6;
+  const x = 140 + col * 42 + (Math.random() - 0.5) * 12;
+  const z = -80 + row * 48 + (Math.random() - 0.5) * 12;
+  bMesh.position.set(x, h / 2, z);
+  bMesh.castShadow = true;
+  bMesh.receiveShadow = true;
+  cityGroup.add(bMesh);
+
+  if (h > 95) {
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.4, 20, 8), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+    mast.position.set(x, h + 10, z);
+    cityGroup.add(mast);
+    const beacon = new THREE.Mesh(new THREE.SphereGeometry(1.0, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+    beacon.position.set(x, h + 20, z);
+    cityGroup.add(beacon);
+  }
+}
+
+// Control Tower & Hangars
+const towerShaft = new THREE.Mesh(new THREE.CylinderGeometry(5, 7, 48, 16), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 }));
+towerShaft.position.set(65, 24, -40);
+towerShaft.castShadow = true;
+realWorld.add(towerShaft);
+
+const towerCab = new THREE.Mesh(new THREE.CylinderGeometry(8.5, 6.5, 9, 16), new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.1, metalness: 0.85 }));
+towerCab.position.set(65, 52, -40);
+towerCab.castShadow = true;
+realWorld.add(towerCab);
+
+const radarBar = new THREE.Mesh(new THREE.BoxGeometry(8, 0.9, 1.4), new THREE.MeshStandardMaterial({ color: 0xf59e0b }));
+radarBar.position.set(65, 58, -40);
+realWorld.add(radarBar);
+
+// Wind Turbines
+const turbines = [];
+[-340, -260, -180].forEach((xPos, idx) => {
+  const turbGroup = new THREE.Group();
+  const tower = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 2.4, 75, 16), new THREE.MeshStandardMaterial({ color: 0xf1f5f9 }));
+  tower.position.y = 37.5;
+  turbGroup.add(tower);
+
+  const nacelle = new THREE.Mesh(new THREE.BoxGeometry(3.5, 3.5, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
+  nacelle.position.set(0, 75, 0);
+  turbGroup.add(nacelle);
+
+  const rotorHub = new THREE.Group();
+  rotorHub.position.set(0, 75, 4.2);
+  turbGroup.add(rotorHub);
+
+  for (let b = 0; b < 3; b++) {
+    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.9, 30, 0.3), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+    blade.position.y = 15;
+    const bWrap = new THREE.Group();
+    bWrap.rotation.z = (b * Math.PI * 2) / 3;
+    bWrap.add(blade);
+    rotorHub.add(bWrap);
+  }
+  turbGroup.position.set(xPos, 0, -220 + idx * 60);
+  realWorld.add(turbGroup);
+  turbines.push(rotorHub);
+});
+
+// Trees
+const treeTrunkGeo = new THREE.CylinderGeometry(0.35, 0.55, 4.5, 8);
+const treeFoliageGeo = new THREE.ConeGeometry(3.6, 9, 8);
+const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
+const foliageMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27, roughness: 0.8 });
+const foliageMat2 = new THREE.MeshStandardMaterial({ color: 0x3d7036, roughness: 0.8 });
+
+for (let i = 0; i < 220; i++) {
+  let x = (Math.random() - 0.5) * 950, z = (Math.random() - 0.5) * 950;
+  if (Math.abs(x) < 45 && z > -90 && z < 320) x += (x >= 0 ? 55 : -55);
+  if (x > 100 && x < 400 && z > -110 && z < 250) continue;
+
+  const treeGroup = new THREE.Group();
+  const trunk = new THREE.Mesh(treeTrunkGeo, trunkMat);
+  trunk.position.y = 2.25;
+  treeGroup.add(trunk);
+
+  const foliage = new THREE.Mesh(treeFoliageGeo, (i % 2 === 0 ? foliageMat : foliageMat2));
+  foliage.position.y = 7.5;
+  treeGroup.add(foliage);
+
+  const s = 0.8 + Math.random() * 0.7;
+  treeGroup.scale.set(s, s, s);
+  treeGroup.position.set(x, 0, z);
+  realWorld.add(treeGroup);
+}
+
+// ── COIN COLLECTION SYSTEM ───────────────────────────────────
+const coinsGroup = new THREE.Group();
+scene.add(coinsGroup);
+
+const coinGeo = new THREE.CylinderGeometry(1.4, 1.4, 0.35, 24);
+const coinMat = new THREE.MeshStandardMaterial({
+  color: 0xfbbf24,
+  emissive: 0xd97706,
+  emissiveIntensity: 0.65,
+  metalness: 0.95,
+  roughness: 0.15
+});
+
+const coinList = [];
+// Spawn 28 Golden Energy Coins across challenging airspace
+for (let i = 0; i < 28; i++) {
+  const cMesh = new THREE.Mesh(coinGeo, coinMat);
+  cMesh.rotation.x = Math.PI / 2;
+  // Position over runway, city roofs, lake, hilltops
+  let cx, cy, cz;
+  if (i < 8) {
+    cx = (i % 2 === 0 ? -15 : 15);
+    cy = 8 + i * 4;
+    cz = 30 + i * 45;
+  } else if (i < 18) {
+    cx = 140 + (i - 8) * 25;
+    cy = 40 + Math.random() * 55;
+    cz = -60 + (i - 8) * 25;
+  } else {
+    cx = -180 + (i - 18) * 35;
+    cy = 14 + Math.random() * 25;
+    cz = 80 + (i - 18) * 20;
+  }
+  cMesh.position.set(cx, cy, cz);
+  cMesh.castShadow = true;
+  coinsGroup.add(cMesh);
+  coinList.push({ mesh: cMesh, collected: false, basePos: new THREE.Vector3(cx, cy, cz) });
+}
+
+// ── MULTIPLAYER BOT SWARM & COMBAT DRONES ─────────────────────
+const combatDrones = [];
+const enemyTeam = [];
+const friendTeam = [];
+
+// Drone Model Builder Helper (Builds Friend/Enemy drones)
+function createCombatDroneMesh(isEnemy = true) {
+  const root = new THREE.Group();
+  const primaryColor = isEnemy ? 0x991b1b : 0x1e40af;
+  const accentColor = isEnemy ? 0xef4444 : 0x38bdf8;
+
+  // Body
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(1.1, 0.3, 1.4),
+    new THREE.MeshStandardMaterial({ color: primaryColor, metalness: 0.8, roughness: 0.25 })
+  );
+  body.castShadow = true;
+  root.add(body);
+
+  // Visor / Optics Glow
+  const visor = new THREE.Mesh(
+    new THREE.BoxGeometry(0.8, 0.12, 0.2),
+    new THREE.MeshBasicMaterial({ color: accentColor })
+  );
+  visor.position.set(0, 0.05, 0.72);
+  root.add(visor);
+
+  // 4 Arms & Rotors
+  const armAngles = [Math.PI / 4, 3 * Math.PI / 4, 5 * Math.PI / 4, 7 * Math.PI / 4];
+  const props = [];
+  armAngles.forEach(a => {
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 8), new THREE.MeshStandardMaterial({ color: 0x111827 }));
+    arm.rotation.z = Math.PI / 2;
+    arm.rotation.y = a;
+    arm.position.set(Math.cos(a) * 0.6, 0, Math.sin(a) * 0.6);
+    root.add(arm);
+
+    const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.14, 12), new THREE.MeshStandardMaterial({ color: accentColor, metalness: 0.9 }));
+    motor.position.set(Math.cos(a) * 1.2, 0.08, Math.sin(a) * 1.2);
+    root.add(motor);
+
+    const prop = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.01, 0.08), new THREE.MeshStandardMaterial({ color: 0x374151 }));
+    prop.position.set(Math.cos(a) * 1.2, 0.16, Math.sin(a) * 1.2);
+    root.add(prop);
+    props.push(prop);
+  });
+
+  return { mesh: root, props };
+}
+
+// Spawn Enemy Squad (Red Team - 5 Rogue Drones)
+for (let i = 0; i < 5; i++) {
+  const dObj = createCombatDroneMesh(true);
+  const startX = -120 + i * 65;
+  const startY = 22 + Math.random() * 25;
+  const startZ = 120 + (i % 2 === 0 ? 80 : -40);
+  dObj.mesh.position.set(startX, startY, startZ);
+  scene.add(dObj.mesh);
+
+  const droneState = {
+    id: `ROGUE-0${i + 1}`,
+    isEnemy: true,
+    mesh: dObj.mesh,
+    props: dObj.props,
+    pos: dObj.mesh.position,
+    vel: new THREE.Vector3(0, 0, 0),
+    yaw: Math.random() * Math.PI * 2,
+    hp: 100,
+    maxHp: 100,
+    shield: 50,
+    maxShield: 50,
+    alive: true,
+    target: null,
+    fireTimer: Math.random() * 2,
+    respawnTimer: 0
+  };
+  combatDrones.push(droneState);
+  enemyTeam.push(droneState);
+}
+
+// Spawn Friendly Wingmen (Blue Team - 2 Wingman Escorts)
+for (let i = 0; i < 2; i++) {
+  const dObj = createCombatDroneMesh(false);
+  dObj.mesh.position.set((i === 0 ? -12 : 12), 4, (i === 0 ? -12 : -18));
+  scene.add(dObj.mesh);
+
+  const droneState = {
+    id: `WINGMAN-0${i + 1}`,
+    isEnemy: false,
+    mesh: dObj.mesh,
+    props: dObj.props,
+    pos: dObj.mesh.position,
+    vel: new THREE.Vector3(0, 0, 0),
+    yaw: 0,
+    hp: 120,
+    maxHp: 120,
+    shield: 80,
+    maxShield: 80,
+    alive: true,
+    target: null,
+    fireTimer: 1.0,
+    respawnTimer: 0
+  };
+  combatDrones.push(droneState);
+  friendTeam.push(droneState);
+}
+
+// ── PROJECTILES & WEAPONS ENGINE ─────────────────────────────
+const projectiles = [];
+const laserGeo = new THREE.CylinderGeometry(0.08, 0.08, 2.2, 8);
+laserGeo.rotateX(Math.PI / 2);
+const redLaserMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+const cyanLaserMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+
+const missileGeo = new THREE.CylinderGeometry(0.12, 0.12, 1.4, 8);
+missileGeo.rotateX(Math.PI / 2);
+const missileMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8 });
+
+// Explosions / Debris Particles
+const explosions = [];
+const debrisGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+const expMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+
+function spawnExplosion(pos) {
+  audio.playExplosionSound();
+  for (let i = 0; i < 16; i++) {
+    const pMesh = new THREE.Mesh(debrisGeo, expMat.clone());
+    pMesh.position.copy(pos);
+    scene.add(pMesh);
+    const vel = new THREE.Vector3(
+      (Math.random() - 0.5) * 28,
+      (Math.random() * 22) + 5,
+      (Math.random() - 0.5) * 28
+    );
+    explosions.push({ mesh: pMesh, vel, life: 1.2, maxLife: 1.2 });
+  }
+}
+
+// ── PROCEDURAL DETAILED DRONE MODEL (PLAYER DRONE) ───────────
+const droneMaster = new THREE.Group();
+droneMaster.position.set(0, 0.45, 0);
+scene.add(droneMaster);
+
+const parts = {
+  topCanopy: new THREE.Group(),
+  avionicsStack: new THREE.Group(),
+  chassisBase: new THREE.Group(),
+  batteryPack: new THREE.Group(),
+  gimbalCamera: new THREE.Group(),
+  motors: [],
+  props: []
+};
+
+// Materials
+const matCarbon = new THREE.MeshStandardMaterial({ color: 0x181c24, roughness: 0.38, metalness: 0.65 });
+const matCanopyPorcelain = new THREE.MeshPhysicalMaterial({ color: 0xeee8fa, roughness: 0.18, metalness: 0.1, clearcoat: 0.85, clearcoatRoughness: 0.15 });
+const matMotorAnodized = new THREE.MeshStandardMaterial({ color: 0x00e5ff, roughness: 0.3, metalness: 0.85 });
+const matCopper = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.4, metalness: 0.7 });
+const matGoldPins = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.2, metalness: 0.95 });
+const matLens = new THREE.MeshPhysicalMaterial({ color: 0x001122, roughness: 0.05, transmission: 0.9, thickness: 0.8, ior: 1.55 });
+
+// Chassis & Landing gear
+const bottomPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.62, 0.08, 8), matCarbon);
+parts.chassisBase.add(bottomPlate);
+
+const skidMat = new THREE.MeshStandardMaterial({ color: 0x242d3d, roughness: 0.4, metalness: 0.7 });
+[-0.32, 0.32].forEach(xOff => {
+  const skidTube = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.1, 16), skidMat);
+  skidTube.rotation.z = Math.PI / 2;
+  skidTube.position.set(0, -0.38, xOff);
+  parts.chassisBase.add(skidTube);
+
+  [-0.35, 0.35].forEach(zOff => {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.02, 0.42, 16), skidMat);
+    leg.position.set(zOff, -0.19, xOff);
+    leg.rotation.z = (zOff > 0 ? -1 : 1) * 0.35;
+    parts.chassisBase.add(leg);
+  });
+});
+
+// Arms & Motors
+const armAngles = [Math.PI / 4, 3 * Math.PI / 4, 5 * Math.PI / 4, 7 * Math.PI / 4];
+const armRadius = 1.35;
+
+armAngles.forEach((angle, idx) => {
+  const arm = new THREE.Group();
+  arm.rotation.y = angle;
+
+  const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.045, armRadius, 16), matCarbon);
+  tube.rotation.z = Math.PI / 2;
+  tube.position.x = armRadius / 2;
+  tube.castShadow = true;
+  arm.add(tube);
+
+  const mount = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.06, 16), matCarbon);
+  mount.position.x = armRadius;
+  arm.add(mount);
+  parts.chassisBase.add(arm);
+
+  const motorGroup = new THREE.Group();
+  motorGroup.position.set(Math.cos(angle) * armRadius, 0.04, Math.sin(angle) * armRadius);
+
+  const stator = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.06, 16), matCopper);
+  stator.position.y = 0.03;
+  motorGroup.add(stator);
+
+  const bell = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.08, 16), matMotorAnodized);
+  bell.position.y = 0.08;
+  bell.castShadow = true;
+  motorGroup.add(bell);
+
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.1, 12), matCarbon);
+  shaft.position.y = 0.14;
+  motorGroup.add(shaft);
+
+  parts.motors.push(motorGroup);
+  droneMaster.add(motorGroup);
+
+  const propGroup = new THREE.Group();
+  propGroup.position.copy(motorGroup.position);
+  propGroup.position.y += 0.15;
+
+  const propHub = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.03, 12), matCarbon);
+  propGroup.add(propHub);
+
+  [-1, 1].forEach(dir => {
+    const bladeGeo = new THREE.BoxGeometry(0.65, 0.008, 0.07);
+    bladeGeo.translate(0.32, 0, 0);
+    const blade = new THREE.Mesh(bladeGeo, matCarbon);
+    blade.rotation.y = (dir === 1 ? 0 : Math.PI);
+    blade.rotation.x = (idx % 2 === 0 ? 0.15 : -0.15);
+    propGroup.add(blade);
+  });
+
+  parts.props.push({ group: propGroup, cw: idx % 2 === 0 });
+  droneMaster.add(propGroup);
+});
+
+droneMaster.add(parts.chassisBase);
+
+// Avionics Stack
+const escBoard = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.02, 0.32), new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.4 }));
+escBoard.position.y = 0.06;
+parts.avionicsStack.add(escBoard);
+
+const fcBoard = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.02, 0.3), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 }));
+fcBoard.position.y = 0.14;
+parts.avionicsStack.add(fcBoard);
+
+const mcu = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.015, 0.12), matCarbon);
+mcu.position.set(0, 0.155, 0);
+parts.avionicsStack.add(mcu);
+
+const statusLed = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.01, 0.02), new THREE.MeshBasicMaterial({ color: 0x00e5ff }));
+statusLed.position.set(0.1, 0.155, 0.1);
+parts.avionicsStack.add(statusLed);
+
+droneMaster.add(parts.avionicsStack);
+
+// Battery
+const batteryBox = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.16, 0.65), new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4, metalness: 0.4 }));
+batteryBox.position.set(0, 0.22, 0);
+batteryBox.castShadow = true;
+parts.batteryPack.add(batteryBox);
+
+const xt60 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.1), matGoldPins);
+xt60.position.set(0, 0.22, 0.36);
+parts.batteryPack.add(xt60);
+droneMaster.add(parts.batteryPack);
+
+// Canopy & Wing Laser Cannons
+const canopyShape = new THREE.SphereGeometry(0.5, 32, 16);
+canopyShape.scale(1, 0.38, 1.4);
+const topCanopy = new THREE.Mesh(canopyShape, matCanopyPorcelain);
+topCanopy.position.set(0, 0.3, 0);
+topCanopy.castShadow = true;
+parts.topCanopy.add(topCanopy);
+
+// Dual Wingtip Laser Cannons for Combat
+[-0.48, 0.48].forEach(x => {
+  const cannon = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 12), matMotorAnodized);
+  cannon.rotation.x = Math.PI / 2;
+  cannon.position.set(x, 0.22, 0.3);
+  parts.topCanopy.add(cannon);
+});
+
+const gpsDome = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.04, 16), matCarbon);
+gpsDome.position.set(0, 0.46, -0.2);
+parts.topCanopy.add(gpsDome);
+droneMaster.add(parts.topCanopy);
+
+// Gimbal Camera
+const gimbalArm = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.14, 12), matCarbon);
+gimbalArm.position.set(0, -0.12, 0.35);
+parts.gimbalCamera.add(gimbalArm);
+
+const camBody = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, 0.18), matCarbon);
+camBody.position.set(0, -0.22, 0.38);
+camBody.castShadow = true;
+parts.gimbalCamera.add(camBody);
+
+const lensBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.08, 24), matMotorAnodized);
+lensBarrel.rotation.x = Math.PI / 2;
+lensBarrel.position.set(0, -0.22, 0.48);
+parts.gimbalCamera.add(lensBarrel);
+
+const frontGlass = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.01, 24), matLens);
+frontGlass.rotation.x = Math.PI / 2;
+frontGlass.position.set(0, -0.22, 0.525);
+parts.gimbalCamera.add(frontGlass);
+droneMaster.add(parts.gimbalCamera);
+
+// ── COMBAT & FLIGHT VARIABLES ────────────────────────────────
+const player = {
+  pos: new THREE.Vector3(0, 0.45, 0),
+  vel: new THREE.Vector3(0, 0, 0),
+  yaw: 0,
+  pitch: 0,
+  roll: 0,
+  targetY: 1.2,
+  shield: 100,
+  maxShield: 100,
+  hull: 100,
+  maxHull: 100,
+  coins: 350,
+  kills: 0,
+  score: 0,
+  combo: 1,
+  activeWeapon: 'laser',
+  hasMissiles: true,
+  hasEmp: false,
+  fireCooldown: 0,
+  missileCooldown: 0,
+  shieldRechargeTimer: 0
+};
+
+// Key Listeners & Mouse Shooting
+const keys = {};
+window.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  keys[e.key.toLowerCase()] = true;
+  if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+    e.preventDefault();
+  }
+  if ((e.code === 'KeyR' || e.key === 'r')) {
+    respawnDrone();
+  }
+  if (e.code === 'KeyF' || e.key === 'f') {
+    fireLaser();
+  }
+  if (e.code === 'KeyM' || e.key === 'm') {
+    fireMissile();
+  }
+});
+window.addEventListener('keyup', e => {
+  keys[e.code] = false;
+  keys[e.key.toLowerCase()] = false;
+});
+
+window.addEventListener('mousedown', e => {
+  if (appMode !== 'combat' && appMode !== 'flight') return;
+  if (e.button === 0) fireLaser();
+  if (e.button === 2) {
+    e.preventDefault();
+    fireMissile();
+  }
+});
+window.addEventListener('contextmenu', e => {
+  if (appMode === 'combat' || appMode === 'flight') e.preventDefault();
+});
+
+// Weapon Actions
+function fireLaser(fromDrone = null, targetPos = null) {
+  const isPlayer = !fromDrone;
+  const origin = isPlayer ? player.pos.clone().add(new THREE.Vector3(0, 0.2, 0)) : fromDrone.pos.clone().add(new THREE.Vector3(0, 0.2, 0));
+  const yaw = isPlayer ? player.yaw : fromDrone.yaw;
+
+  let fwdDir;
+  if (targetPos) {
+    fwdDir = targetPos.clone().sub(origin).normalize();
+  } else {
+    fwdDir = new THREE.Vector3(Math.sin(yaw), -player.pitch * 0.8, Math.cos(yaw)).normalize();
+  }
+
+  const pMesh = new THREE.Mesh(laserGeo, (isPlayer || !fromDrone.isEnemy ? cyanLaserMat : redLaserMat));
+  pMesh.position.copy(origin);
+  pMesh.lookAt(origin.clone().add(fwdDir));
+  scene.add(pMesh);
+
+  projectiles.push({
+    mesh: pMesh,
+    vel: fwdDir.clone().multiplyScalar(130), // Fast plasma bolt
+    isPlayer: isPlayer,
+    isEnemy: fromDrone ? fromDrone.isEnemy : false,
+    damage: isPlayer ? 22 : 14,
+    isMissile: false,
+    life: 2.2
+  });
+
+  if (isPlayer) audio.playLaserSound();
+}
+
+function fireMissile() {
+  if (player.missileCooldown > 0) return;
+  player.missileCooldown = 1.6;
+
+  audio.playMissileLaunchSound();
+  const origin = player.pos.clone().add(new THREE.Vector3(0, 0.5, 0));
+  const fwdDir = new THREE.Vector3(Math.sin(player.yaw), 0.2, Math.cos(player.yaw)).normalize();
+
+  const mMesh = new THREE.Mesh(missileGeo, missileMat);
+  mMesh.position.copy(origin);
+  mMesh.lookAt(origin.clone().add(fwdDir));
+  scene.add(mMesh);
+
+  // Find nearest enemy drone in front to lock on
+  let bestTarget = null;
+  let minAngle = 0.8;
+  enemyTeam.forEach(e => {
+    if (!e.alive) return;
+    const toEnemy = e.pos.clone().sub(origin).normalize();
+    const dot = fwdDir.dot(toEnemy);
+    if (dot > 0.6 && (1 - dot) < minAngle) {
+      minAngle = 1 - dot;
+      bestTarget = e;
+    }
+  });
+
+  projectiles.push({
+    mesh: mMesh,
+    vel: fwdDir.clone().multiplyScalar(45),
+    isPlayer: true,
+    isEnemy: false,
+    damage: 85,
+    isMissile: true,
+    target: bestTarget,
+    life: 4.5
+  });
+
+  postRadioMessage(`[MISSILE]: Fox 2 launched! ${bestTarget ? `Locking ${bestTarget.id}` : 'Unguided trajectory.'}`);
+}
+
+function postRadioMessage(msg, type = 'normal') {
+  const box = document.getElementById('combat-radio-chatter');
+  if (!box) return;
+  const el = document.createElement('div');
+  el.className = `radio-msg ${type}`;
+  el.textContent = msg;
+  box.appendChild(el);
+  if (box.children.length > 5) box.removeChild(box.firstChild);
+}
+
+function buyOrSelectWeapon(type) {
+  if (type === 'missile' && player.coins >= 250 && !player.hasMissiles) {
+    player.coins -= 250;
+    player.hasMissiles = true;
+    document.getElementById('price-missile').textContent = 'EQUIPPED';
+    document.getElementById('price-missile').style.color = 'var(--accent-mint)';
+    showToast("Homing Missiles Unlocked!");
+  }
+  updateCoinDisplay();
+}
+
+function updateCoinDisplay() {
+  document.getElementById('badge-coins-val').textContent = `${player.coins} COINS`;
+  document.getElementById('dock-coins-text').textContent = `🪙 ${player.coins}`;
+  document.getElementById('osd-coins-val').textContent = `${player.coins}`;
+}
+
+function triggerDamageVignette() {
+  const v = document.getElementById('damage-vignette');
+  v.classList.add('hit');
+  setTimeout(() => v.classList.remove('hit'), 180);
+}
+
+function respawnDrone() {
+  player.pos.set(0, 1.2, 0);
+  player.vel.set(0, 0, 0);
+  player.yaw = 0;
+  player.pitch = 0;
+  player.roll = 0;
+  player.targetY = 1.2;
+  player.shield = 100;
+  player.hull = 100;
+  updateHealthBars();
+  droneMaster.position.copy(player.pos);
+  droneMaster.rotation.set(0, 0, 0);
+  showToast("Drone repaired & respawned on Helipad.");
+}
+
+function updateHealthBars() {
+  const shieldPct = Math.max(0, (player.shield / player.maxShield) * 100);
+  const hullPct = Math.max(0, (player.hull / player.maxHull) * 100);
+  document.getElementById('shield-meter').style.width = shieldPct + '%';
+  document.getElementById('hull-meter').style.width = hullPct + '%';
+  document.getElementById('shield-val-text').textContent = `${Math.round(player.shield)} / 100`;
+  document.getElementById('hull-val-text').textContent = `${Math.round(player.hull)} / 100`;
+}
+
+// ── APP INTERACTION CONTROLS ─────────────────────────────────
+function setAppMode(mode) {
+  appMode = mode;
+  document.querySelectorAll('.segmented-tabs .nav-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`tab-${mode}`).classList.add('active');
+
+  const workspace = document.getElementById('workspace');
+  const hudOverlay = document.getElementById('flight-hud-overlay');
+  const combatOverlay = document.getElementById('combat-hud-overlay');
+  const controlsLegend = document.getElementById('flight-controls-legend');
+  const osdBar = document.getElementById('flight-osd-bar');
+
+  if (mode === 'combat' || mode === 'flight') {
+    // IMMERSIVE FULL-SCREEN REAL WORLD: HIDE BOTH SIDEBARS!
+    document.body.classList.add('in-flight');
+    workspace.classList.add('flight-mode');
+    hudOverlay.classList.add('active');
+    controlsLegend.classList.add('active');
+    osdBar.classList.add('active');
+    setCameraMode('chase');
+
+    if (mode === 'combat') {
+      combatOverlay.classList.add('active');
+      showToast("Combat Arena Armed! Left-Click to shoot, Right-Click for missiles.");
+    } else {
+      combatOverlay.classList.remove('active');
+      showToast("Flight Simulator Active — Full real-world airspace view!");
+    }
+
+    if (player.pos.y < 1.0) {
+      player.pos.y = 1.5;
+      player.targetY = 1.5;
+    }
+  } else {
+    // RESTORE SIDEBARS FOR CAD INSPECTOR & INSIDE X-RAY
+    document.body.classList.remove('in-flight');
+    workspace.classList.remove('flight-mode');
+    hudOverlay.classList.remove('active');
+    combatOverlay.classList.remove('active');
+    controlsLegend.classList.remove('active');
+    osdBar.classList.remove('active');
+    setCameraMode('orbit');
+  }
+
+  if (mode === 'xray') {
+    applyXRayMode(true);
+    showToast("X-Ray Inside Mode: Inspecting PCB traces & internal power bus.");
+  } else {
+    applyXRayMode(false);
+  }
+}
+
+function applyXRayMode(enabled) {
+  matCanopyPorcelain.transparent = enabled;
+  matCanopyPorcelain.opacity = enabled ? 0.28 : 1.0;
+  matCanopyPorcelain.wireframe = enabled;
+  matCarbon.transparent = enabled;
+  matCarbon.opacity = enabled ? 0.45 : 1.0;
+}
+
+function toggleWireframe() {
+  isWireframe = !isWireframe;
+  matCarbon.wireframe = isWireframe;
+  matCanopyPorcelain.wireframe = isWireframe;
+  document.getElementById('btn-wire').classList.toggle('active', isWireframe);
+  showToast(isWireframe ? "CAD Mesh Wireframe Enabled" : "Shaded Render Restored");
+}
+
+function toggleSpin() {
+  isSpinning = !isSpinning;
+  document.getElementById('spin-state-text').textContent = isSpinning ? 'ON' : 'OFF';
+  document.getElementById('btn-spin').classList.toggle('active', isSpinning);
+}
+
+function setCameraMode(mode) {
+  cameraMode = mode;
+  document.querySelectorAll('.cam-btn-group .cam-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`cam-${mode}`).classList.add('active');
+}
+
+function resetDroneView() {
+  controls.target.copy(droneMaster.position);
+  camera.position.set(droneMaster.position.x, droneMaster.position.y + 2.5, droneMaster.position.z + 5.2);
+  onExplodeInput(0);
+  const slider = document.getElementById('explode-slider');
+  if (slider) slider.value = 0;
+  showToast("Camera & Focus Centered");
+}
+
+function onExplodeInput(val) {
+  explodeAmount = parseFloat(val);
+  document.getElementById('explode-pct').textContent = Math.round(explodeAmount * 100) + '%';
+
+  parts.topCanopy.position.y = explodeAmount * 0.85;
+  parts.batteryPack.position.y = explodeAmount * 0.45;
+  parts.batteryPack.position.z = -explodeAmount * 0.35;
+  parts.avionicsStack.position.y = explodeAmount * 0.2;
+  parts.gimbalCamera.position.y = -explodeAmount * 0.55;
+  parts.gimbalCamera.position.z = explodeAmount * 0.25;
+
+  parts.motors.forEach((m, idx) => {
+    const angle = armAngles[idx];
+    const expDist = explodeAmount * 0.35;
+    m.position.x = Math.cos(angle) * (armRadius + expDist);
+    m.position.z = Math.sin(angle) * (armRadius + expDist);
+    m.position.y = 0.04 + explodeAmount * 0.2;
+    parts.props[idx].group.position.x = m.position.x;
+    parts.props[idx].group.position.z = m.position.z;
+    parts.props[idx].group.position.y = m.position.y + 0.15 + explodeAmount * 0.25;
+  });
+}
+
+function focusComponent(key) {
+  const data = SUB_DATA[key];
+  if (!data) return;
+  document.querySelectorAll('.comp-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('detail-title').textContent = data.title;
+  document.getElementById('detail-tag').textContent = data.tag;
+  document.getElementById('detail-desc').textContent = data.desc;
+  showToast(`Focused: ${data.title}`);
+}
+
+let toastTimer = null;
+function showToast(text) {
+  const toast = document.getElementById('toast-notif');
+  document.getElementById('toast-text').textContent = text;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+// ── TACTICAL RADAR MINIMAP RENDERER ──────────────────────────
+const radarCanvas = document.getElementById('radar-canvas');
+const rCtx = radarCanvas.getContext('2d');
+
+function drawRadar(sweepAngle) {
+  rCtx.clearRect(0, 0, 170, 170);
+  const cx = 85, cy = 85, radius = 75;
+
+  // Radar Grid
+  rCtx.fillStyle = 'rgba(7, 12, 22, 0.85)';
+  rCtx.beginPath();
+  rCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+  rCtx.fill();
+
+  rCtx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+  rCtx.lineWidth = 1;
+  rCtx.beginPath();
+  rCtx.arc(cx, cy, radius * 0.33, 0, Math.PI * 2);
+  rCtx.arc(cx, cy, radius * 0.66, 0, Math.PI * 2);
+  rCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+  rCtx.stroke();
+
+  // Crosshair
+  rCtx.beginPath();
+  rCtx.moveTo(cx, cy - radius); rCtx.lineTo(cx, cy + radius);
+  rCtx.moveTo(cx - radius, cy); rCtx.lineTo(cx + radius, cy);
+  rCtx.stroke();
+
+  // Sweep Line
+  const sx = cx + Math.cos(sweepAngle) * radius;
+  const sy = cy + Math.sin(sweepAngle) * radius;
+  const grad = rCtx.createRadialGradient(cx, cy, 5, cx, cy, radius);
+  grad.addColorStop(0, 'rgba(0, 229, 255, 0.3)');
+  grad.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
+  rCtx.fillStyle = grad;
+  rCtx.beginPath();
+  rCtx.moveTo(cx, cy);
+  rCtx.arc(cx, cy, radius, sweepAngle - 0.4, sweepAngle);
+  rCtx.fill();
+
+  // Radar Scale: 1 radar pixel = 2.5 meters
+  const scale = 0.32;
+
+  // Draw Coins (Gold dots)
+  coinList.forEach(c => {
+    if (c.collected) return;
+    const dx = (c.mesh.position.x - player.pos.x) * scale;
+    const dz = (c.mesh.position.z - player.pos.z) * scale;
+    if (Math.hypot(dx, dz) < radius) {
+      rCtx.fillStyle = '#fbbf24';
+      rCtx.beginPath();
+      rCtx.arc(cx + dx, cy + dz, 2.5, 0, Math.PI * 2);
+      rCtx.fill();
+    }
+  });
+
+  // Draw Combat Swarm Drones
+  combatDrones.forEach(d => {
+    if (!d.alive) return;
+    const dx = (d.pos.x - player.pos.x) * scale;
+    const dz = (d.pos.z - player.pos.z) * scale;
+    if (Math.hypot(dx, dz) < radius) {
+      rCtx.fillStyle = d.isEnemy ? '#ef4444' : '#3b82f6';
+      rCtx.beginPath();
+      if (d.isEnemy) {
+        // Diamond for enemies
+        rCtx.moveTo(cx + dx, cy + dz - 4);
+        rCtx.lineTo(cx + dx + 4, cy + dz);
+        rCtx.lineTo(cx + dx, cy + dz + 4);
+        rCtx.lineTo(cx + dx - 4, cy + dz);
+      } else {
+        // Circle for wingmen
+        rCtx.arc(cx + dx, cy + dz, 3.5, 0, Math.PI * 2);
+      }
+      rCtx.fill();
+    }
+  });
+
+  // Player Center Icon (Cyan Directional Arrow)
+  rCtx.save();
+  rCtx.translate(cx, cy);
+  rCtx.rotate(-player.yaw + Math.PI);
+  rCtx.fillStyle = '#00e5ff';
+  rCtx.beginPath();
+  rCtx.moveTo(0, -6);
+  rCtx.lineTo(4, 5);
+  rCtx.lineTo(0, 2);
+  rCtx.lineTo(-4, 5);
+  rCtx.closePath();
+  rCtx.fill();
+  rCtx.restore();
+}
+
+// ── ANIMATION & SIMULATION LOOP ──────────────────────────────
+let lastTime = performance.now();
+let radarSweep = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const now = performance.now();
+  const dt = Math.min((now - lastTime) / 1000, 0.1);
+  lastTime = now;
+
+  radarSweep = (radarSweep + dt * 2.8) % (Math.PI * 2);
+  if (appMode === 'combat') drawRadar(radarSweep);
+
+  // 1. ROTATE WIND TURBINES & RADAR
+  turbines.forEach(t => t.rotation.z += 0.018);
+  if (radarBar) radarBar.rotation.y += 0.035;
+
+  // 2. COINS ANIMATION & MAGNET ATTRACTION
+  coinList.forEach(c => {
+    if (c.collected) return;
+    c.mesh.rotation.z += dt * 2.5; // Spin coin
+    c.mesh.position.y = c.basePos.y + Math.sin(now * 0.003 + c.basePos.x) * 0.6; // Gentle bob
+
+    // Magnetic Attraction & Pickup
+    const dist = player.pos.distanceTo(c.mesh.position);
+    if (dist < 14.0) {
+      // Pull toward player
+      c.mesh.position.lerp(player.pos, dt * 8.0);
+      if (dist < 2.5) {
+        c.collected = true;
+        scene.remove(c.mesh);
+        player.coins += 50 * player.combo;
+        audio.playCoinChime();
+        updateCoinDisplay();
+        postRadioMessage(`[BOUNTY]: Collected Astra Energy Coin (+${50 * player.combo})!`, 'coin');
+
+        // Show Combo Popup
+        const pop = document.getElementById('combo-popup');
+        pop.textContent = `+${50 * player.combo} COINS!`;
+        pop.classList.add('show');
+        setTimeout(() => pop.classList.remove('show'), 600);
+      }
+    }
+  });
+
+  // 3. FLIGHT & COMBAT PLAYER DYNAMICS
+  if (appMode === 'flight' || appMode === 'combat') {
+    const moveFwd = keys['KeyW'] || keys['w'] || keys['ArrowUp'];
+    const moveBack = keys['KeyS'] || keys['s'] || keys['ArrowDown'];
+    const strafeL = keys['KeyA'] || keys['a'] || keys['ArrowLeft'];
+    const strafeR = keys['KeyD'] || keys['d'] || keys['ArrowRight'];
+    const yawL = keys['KeyQ'] || keys['q'];
+    const yawR = keys['KeyE'] || keys['e'];
+    const climb = keys['Space'] || keys[' '];
+    const descend = keys['ShiftLeft'] || keys['ShiftRight'] || keys['KeyC'] || keys['c'];
+
+    // Cooldown timers
+    if (player.missileCooldown > 0) player.missileCooldown -= dt;
+    if (player.fireCooldown > 0) player.fireCooldown -= dt;
+
+    // Shield Recharge
+    player.shieldRechargeTimer += dt;
+    if (player.shieldRechargeTimer > 3.5 && player.shield < player.maxShield) {
+      player.shield = Math.min(player.maxShield, player.shield + dt * 15.0);
+      updateHealthBars();
+    }
+
+    // Heading
+    const yawSpeed = 2.4;
+    if (yawL) player.yaw += yawSpeed * dt;
+    if (yawR) player.yaw -= yawSpeed * dt;
+
+    const fwdVec = new THREE.Vector3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
+    const rightVec = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+
+    const maxSpeed = 38.0;
+    const accel = 45.0;
+
+    if (moveFwd) player.vel.addScaledVector(fwdVec, accel * dt);
+    if (moveBack) player.vel.addScaledVector(fwdVec, -accel * dt * 0.7);
+    if (strafeL) player.vel.addScaledVector(rightVec, -accel * dt * 0.8);
+    if (strafeR) player.vel.addScaledVector(rightVec, accel * dt * 0.8);
+
+    player.vel.x *= Math.pow(0.2, dt);
+    player.vel.z *= Math.pow(0.2, dt);
+
+    // Altitude hold with climb/descend
+    const climbRate = 18.0;
+    if (climb) player.targetY = Math.min(240, player.targetY + climbRate * dt);
+    else if (descend) player.targetY = Math.max(0.45, player.targetY - climbRate * dt);
+
+    const altError = player.targetY - player.pos.y;
+    player.vel.y += (altError * 8.5 - player.vel.y * 4.5) * dt;
+
+    player.pos.addScaledVector(player.vel, dt);
+
+    if (player.pos.y < 0.45) {
+      player.pos.y = 0.45;
+      player.vel.y = 0;
+      player.targetY = 0.45;
+    }
+
+    const localFwdSpeed = player.vel.dot(fwdVec);
+    const localRightSpeed = player.vel.dot(rightVec);
+    const targetPitch = (localFwdSpeed / maxSpeed) * 0.52;
+    const targetRoll = (-localRightSpeed / maxSpeed) * 0.52;
+
+    player.pitch += (targetPitch - player.pitch) * dt * 6.0;
+    player.roll += (targetRoll - player.roll) * dt * 6.0;
+
+    droneMaster.position.copy(player.pos);
+    droneMaster.rotation.set(0, 0, 0);
+    droneMaster.rotateY(player.yaw);
+    droneMaster.rotateX(player.pitch);
+    droneMaster.rotateZ(player.roll);
+
+    const horizontalSpeed = Math.sqrt(player.vel.x ** 2 + player.vel.z ** 2);
+    document.getElementById('hud-spd-val').textContent = horizontalSpeed.toFixed(1);
+    document.getElementById('hud-alt-val').textContent = Math.max(0, player.pos.y - 0.45).toFixed(1);
+    document.getElementById('osd-spd-val').textContent = `${horizontalSpeed.toFixed(1)} M/S`;
+    document.getElementById('osd-alt-val').textContent = `${Math.max(0, player.pos.y - 0.45).toFixed(1)} M`;
+
+    const ladder = document.getElementById('horizon-pitch-ladder');
+    if (ladder) {
+      ladder.style.transform = `rotate(${-Math.round(player.roll * (180 / Math.PI))}deg) translateY(${Math.round(player.pitch * (180 / Math.PI)) * 2}px)`;
+    }
+  }
+
+  // 4. MULTIPLAYER AI SWARM LOGIC (ENEMY & ALLIED DRONES)
+  if (appMode === 'combat' || appMode === 'flight') {
+    let aliveEnemies = 0;
+
+    combatDrones.forEach(d => {
+      if (!d.alive) {
+        d.respawnTimer += dt;
+        if (d.respawnTimer > 7.0) {
+          d.alive = true;
+          d.hp = d.maxHp;
+          d.shield = d.maxShield;
+          d.pos.set((Math.random() - 0.5) * 300, 25 + Math.random() * 40, (Math.random() - 0.5) * 300);
+          scene.add(d.mesh);
+          postRadioMessage(`[AI RADAR]: ${d.id} re-entered the airspace.`, 'normal');
+        }
+        return;
+      }
+
+      if (d.isEnemy) aliveEnemies++;
+
+      // Spin props
+      d.props.forEach(p => p.rotation.y += 0.4);
+
+      if (d.isEnemy) {
+        // ENEMY BEHAVIOR: Dogfight & Pursue Player / Wingmen
+        const toPlayer = player.pos.clone().sub(d.pos);
+        const dist = toPlayer.length();
+
+        // Turn towards player
+        const targetYaw = Math.atan2(toPlayer.x, toPlayer.z);
+        d.yaw += (targetYaw - d.yaw) * dt * 2.2;
+        d.mesh.rotation.set(0, d.yaw, 0);
+
+        // Fly forward towards player if far, bank if close
+        if (dist > 35) {
+          d.pos.add(toPlayer.normalize().multiplyScalar(dt * 22.0));
+        } else {
+          // Circle dogfight
+          const circleVec = new THREE.Vector3(-toPlayer.z, 0, toPlayer.x).normalize();
+          d.pos.add(circleVec.multiplyScalar(dt * 18.0));
+        }
+
+        // Keep altitude above ground
+        if (d.pos.y < 8) d.pos.y += dt * 6.0;
+
+        // Firing at player
+        d.fireTimer -= dt;
+        if (d.fireTimer <= 0 && dist < 120) {
+          fireLaser(d, player.pos.clone().add(new THREE.Vector3(0, 0.4, 0)));
+          d.fireTimer = 1.6 + Math.random() * 1.2;
+        }
+      } else {
+        // ALLIED WINGMAN BEHAVIOR: Formation Escort & Attack Enemies
+        const escortOffset = (d.id === 'WINGMAN-01' ? new THREE.Vector3(-14, 2, -10) : new THREE.Vector3(14, 2, -10));
+        escortOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+        const targetPos = player.pos.clone().add(escortOffset);
+
+        d.pos.lerp(targetPos, dt * 3.5);
+        d.yaw = player.yaw;
+        d.mesh.rotation.set(0, d.yaw, 0);
+
+        // Find and fire at nearest enemy drone
+        d.fireTimer -= dt;
+        if (d.fireTimer <= 0) {
+          let nearestEnemy = null;
+          let minD = 140;
+          enemyTeam.forEach(e => {
+            if (!e.alive) return;
+            const distE = d.pos.distanceTo(e.pos);
+            if (distE < minD) {
+              minD = distE;
+              nearestEnemy = e;
+            }
+          });
+
+          if (nearestEnemy) {
+            fireLaser(d, nearestEnemy.pos);
+            d.fireTimer = 1.4;
+          }
+        }
+      }
+    });
+
+    document.getElementById('osd-kills-val').textContent = `${aliveEnemies} ACTIVE`;
+  }
+
+  // 5. PROJECTILES & COLLISION DETECTION
+  for (let i = projectiles.length - 1; i >= 0; i--) {
+    const p = projectiles[i];
+    p.life -= dt;
+
+    // Homing missile steering
+    if (p.isMissile && p.target && p.target.alive) {
+      const toT = p.target.pos.clone().sub(p.mesh.position).normalize();
+      p.vel.lerp(toT.multiplyScalar(65), dt * 4.0);
+      p.mesh.lookAt(p.mesh.position.clone().add(p.vel));
+    }
+
+    p.mesh.position.addScaledVector(p.vel, dt);
+
+    let hit = false;
+
+    // Check hit against player
+    if (p.isEnemy) {
+      if (p.mesh.position.distanceTo(player.pos) < 2.8) {
+        hit = true;
+        player.shieldRechargeTimer = 0;
+        audio.playHitSound();
+        triggerDamageVignette();
+
+        if (player.shield > 0) {
+          player.shield = Math.max(0, player.shield - p.damage);
+        } else {
+          player.hull = Math.max(0, player.hull - p.damage);
+        }
+        updateHealthBars();
+
+        if (player.hull <= 0) {
+          spawnExplosion(player.pos);
+          postRadioMessage(`[CRITICAL]: Valkyrie Hull Breached! Self-Repair engaged.`, 'kill');
+          respawnDrone();
+        }
+      }
+    }
+
+    // Check hit against combat drones (Enemies and Wingmen)
+    if (!p.isEnemy) {
+      combatDrones.forEach(d => {
+        if (!d.alive || !d.isEnemy) return;
+        if (p.mesh.position.distanceTo(d.pos) < 3.2) {
+          hit = true;
+          d.hp -= p.damage;
+          audio.playHitSound();
+
+          if (d.hp <= 0) {
+            d.alive = false;
+            scene.remove(d.mesh);
+            spawnExplosion(d.pos);
+            player.kills++;
+            player.coins += 150;
+            updateCoinDisplay();
+            postRadioMessage(`[KILLFEED]: VALKYRIE 💥 destroyed ${d.id} (+150 COINS)`, 'kill');
+
+            // Floating combo popup
+            const pop = document.getElementById('combo-popup');
+            pop.textContent = `TARGET DESTROYED! +150 COINS`;
+            pop.classList.add('show');
+            setTimeout(() => pop.classList.remove('show'), 700);
+          }
+        }
+      });
+    }
+
+    // Ground collision or expire
+    if (hit || p.life <= 0 || p.mesh.position.y < 0.2) {
+      scene.remove(p.mesh);
+      projectiles.splice(i, 1);
+    }
+  }
+
+  // 6. EXPLOSION PARTICLES UPDATE
+  for (let i = explosions.length - 1; i >= 0; i--) {
+    const exp = explosions[i];
+    exp.life -= dt;
+    exp.mesh.position.addScaledVector(exp.vel, dt);
+    exp.vel.y -= 9.8 * dt; // Gravity on debris
+    exp.mesh.scale.multiplyScalar(0.96);
+
+    if (exp.life <= 0) {
+      scene.remove(exp.mesh);
+      explosions.splice(i, 1);
+    }
+  }
+
+  // 7. ROTOR PROPELLERS & AUDIO
+  if (isSpinning || appMode === 'flight' || appMode === 'combat') {
+    const horizontalSpeed = Math.sqrt(player.vel.x ** 2 + player.vel.z ** 2);
+    const baseRpmSpeed = ((appMode === 'flight' || appMode === 'combat') ? (0.35 + (horizontalSpeed / 38.0) * 0.65) : 0.4);
+    parts.props.forEach(p => {
+      p.group.rotation.y += (p.cw ? 1 : -1) * (baseRpmSpeed * 75);
+    });
+
+    audio.updateRpm(baseRpmSpeed);
+
+    const baseVal = Math.round(2200 + baseRpmSpeed * 6800);
+    for (let i = 1; i <= 4; i++) {
+      const wobble = Math.sin(now * 0.01 + i) * 60;
+      const rpm = Math.max(0, Math.round(baseVal + wobble));
+      const pct = Math.min(100, Math.round((rpm / 9500) * 100));
+      const mbar = document.getElementById(`mbar-${i}`);
+      const mval = document.getElementById(`mval-${i}`);
+      if (mbar) mbar.style.width = pct + '%';
+      if (mval) mval.textContent = rpm.toLocaleString();
+    }
+  } else {
+    audio.updateRpm(0);
+  }
+
+  // 8. CAMERA MODES
+  if (cameraMode === 'chase') {
+    controls.enabled = false;
+    const chaseDist = 5.8;
+    const chaseHeight = 2.2;
+    const camTargetX = player.pos.x - Math.sin(player.yaw) * chaseDist;
+    const camTargetZ = player.pos.z - Math.cos(player.yaw) * chaseDist;
+    const camTargetY = player.pos.y + chaseHeight;
+
+    const targetCamPos = new THREE.Vector3(camTargetX, camTargetY, camTargetZ);
+    camera.position.lerp(targetCamPos, 0.12);
+    camera.lookAt(player.pos.x, player.pos.y + 0.6, player.pos.z);
+  } else if (cameraMode === 'fpv') {
+    controls.enabled = false;
+    camera.position.copy(player.pos).add(new THREE.Vector3(0, 0.22, 0).add(new THREE.Vector3(Math.sin(player.yaw) * 0.55, 0, Math.cos(player.yaw) * 0.55)));
+    const lookTarget = player.pos.clone().add(new THREE.Vector3(Math.sin(player.yaw) * 40, -player.pitch * 25, Math.cos(player.yaw) * 40));
+    camera.lookAt(lookTarget);
+  } else {
+    controls.enabled = true;
+    controls.update();
+  }
+
+  renderer.render(scene, camera);
+}
+
+// Window Resize Handler
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Start loop
+animate();
+</script>
+</body>
+</html>
