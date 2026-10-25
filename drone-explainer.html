@@ -643,8 +643,23 @@
     z-index: 40;
     display: none;
   }
-  body.in-flight #combat-reticle-container {
+  body.mode-combat #combat-reticle-container {
     display: block;
+  }
+
+  /* Strict separation between Flight Simulator and Combat Arena */
+  .combat-only {
+    display: flex !important;
+  }
+  body:not(.mode-combat) .combat-only {
+    display: none !important;
+  }
+
+  .flight-only {
+    display: none !important;
+  }
+  body.mode-flight .flight-only {
+    display: flex !important;
   }
 
   /* Center Dynamic Crosshair */
@@ -961,7 +976,7 @@
     display: none;
     transition: all 0.2s;
   }
-  body.in-flight #mouse-aim-indicator {
+  body.mode-combat #mouse-aim-indicator {
     display: block;
   }
   #mouse-aim-indicator.active {
@@ -1677,20 +1692,24 @@
     #left-panel, #right-panel { display: none; }
   }
 
-  /* ── MOBILE TOUCH CONTROLS ──────────────────────────────── */
-  #mobile-controls {
+  /* ── CALL OF DUTY MOBILE (CODM) TACTICAL HUD ──────────────── */
+  #codm-hud {
     display: none;
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 50;
+    z-index: 55;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
   }
-  /* Only show on real touch/mobile devices */
-  body.touch-device.in-flight #mobile-controls {
+  /* Show automatically on real touch devices in flight/combat, or when toggled via desktop button */
+  body.touch-device.in-flight #codm-hud,
+  body.codm-hud-active.in-flight #codm-hud {
     display: block;
   }
   @media (pointer: coarse) {
-    body.in-flight #mobile-controls {
+    body.in-flight #codm-hud {
       display: block;
     }
     body.in-flight #flight-controls-legend {
@@ -1701,147 +1720,467 @@
   body.in-flight footer {
     display: none !important;
   }
-  /* On touch devices, hide the keyboard legend (replaced by touch UI) */
-  body.touch-device #flight-controls-legend {
+  /* On touch devices or when CODM HUD is active, hide the keyboard legend */
+  body.touch-device #flight-controls-legend,
+  body.codm-hud-active #flight-controls-legend {
     display: none !important;
   }
 
-  /* Joystick zones */
-  .joystick-zone {
+  /* Right-Screen Touch Aiming Surface (60% width, authentic CODM / PUBG natural swipe aim) */
+  #codm-aim-touch-zone {
     position: absolute;
-    bottom: 80px;
-    width: 160px;
-    height: 160px;
+    top: 50px;
+    right: 0;
+    bottom: 0;
+    width: 60%;
     pointer-events: auto;
     touch-action: none;
+    z-index: 56;
   }
-  .joystick-zone.left { left: 20px; }
-  .joystick-zone.right { right: 20px; }
 
-  .joystick-base {
+  /* Left Side: CODM Floating / Tactical Virtual Thumbstick */
+  .codm-joystick-wrap {
+    position: absolute;
+    bottom: 45px;
+    left: 45px;
+    width: 175px;
+    height: 175px;
+    pointer-events: auto;
+    touch-action: none;
+    z-index: 58;
+  }
+  .codm-joystick-base {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: radial-gradient(circle, rgba(15, 23, 42, 0.65) 0%, rgba(2, 6, 23, 0.88) 100%);
+    border: 2px solid rgba(0, 229, 255, 0.35);
+    box-shadow: 0 0 24px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.7);
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .joystick-knob {
-    width: 56px;
-    height: 56px;
+  /* Cardinal guide ticks */
+  .codm-joystick-base::before {
+    content: '';
+    position: absolute;
+    width: 82%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(0,229,255,0.45) 0%, transparent 40%, transparent 60%, rgba(0,229,255,0.45) 100%);
+  }
+  .codm-joystick-base::after {
+    content: '';
+    position: absolute;
+    height: 82%;
+    width: 2px;
+    background: linear-gradient(180deg, rgba(0,229,255,0.45) 0%, transparent 40%, transparent 60%, rgba(0,229,255,0.45) 100%);
+  }
+  .codm-joystick-knob {
+    width: 66px;
+    height: 66px;
     border-radius: 50%;
-    background: rgba(0, 229, 255, 0.55);
-    border: 2px solid var(--accent-cyan);
-    box-shadow: 0 0 18px rgba(0, 229, 255, 0.5);
+    background: radial-gradient(circle, rgba(0, 229, 255, 0.85) 0%, rgba(14, 116, 144, 0.95) 100%);
+    border: 2px solid #38bdf8;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.7), inset 0 2px 4px rgba(255, 255, 255, 0.6);
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
-    transition: background 0.1s;
+    transition: transform 0.04s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .joystick-label {
+  .codm-joystick-knob-core {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 10px #ffffff;
+  }
+  /* Sprint Lock Chevron above stick */
+  .codm-sprint-lock {
     position: absolute;
-    bottom: -22px;
-    width: 100%;
-    text-align: center;
+    top: -48px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.6rem;
+    font-family: var(--font-mono);
+    color: var(--accent-cyan);
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    opacity: 0.8;
+    transition: all 0.2s;
+    pointer-events: auto;
+    cursor: pointer;
+    background: rgba(15, 23, 42, 0.7);
+    padding: 3px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 229, 255, 0.35);
+  }
+  .codm-sprint-lock.active {
+    opacity: 1;
+    color: #f59e0b;
+    border-color: #f59e0b;
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.6);
+    background: rgba(245, 158, 11, 0.22);
+  }
+
+  /* Left Claw Quick-Fire Button (above left stick, authentic 3/4 claw CODM setup) */
+  .codm-left-fire {
+    position: absolute;
+    left: 50px;
+    bottom: 245px;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, rgba(15, 23, 42, 0.88) 100%);
+    border: 2px solid rgba(239, 68, 68, 0.75);
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+    z-index: 58;
+    transition: transform 0.08s, box-shadow 0.08s;
+  }
+  .codm-left-fire:active, .codm-left-fire.pressed {
+    transform: scale(0.92);
+    box-shadow: 0 0 24px rgba(239, 68, 68, 0.85);
+    background: rgba(239, 68, 68, 0.65);
+  }
+
+  /* Right Side: CODM Action Cluster */
+  .codm-action-cluster {
+    position: absolute;
+    right: 25px;
+    bottom: 30px;
+    width: 330px;
+    height: 290px;
+    pointer-events: none;
+    z-index: 58;
+  }
+
+  /* 1-Tap ADS Fire Button: Large prominent right button */
+  .codm-ads-fire {
+    position: absolute;
+    right: 30px;
+    bottom: 75px;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.48) 0%, rgba(15, 23, 42, 0.92) 100%);
+    border: 3px solid #f43f5e;
+    box-shadow: 0 0 26px rgba(244, 63, 94, 0.55), inset 0 0 16px rgba(244, 63, 94, 0.35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+    z-index: 59;
+    transition: transform 0.08s, box-shadow 0.08s;
+  }
+  .codm-ads-fire:active, .codm-ads-fire.pressed {
+    transform: scale(0.93);
+    background: radial-gradient(circle, rgba(244, 63, 94, 0.85) 0%, rgba(153, 27, 27, 0.95) 100%);
+    box-shadow: 0 0 36px rgba(244, 63, 94, 0.9);
+  }
+
+  /* Dedicated Hip-Fire Button */
+  .codm-hip-fire {
+    position: absolute;
+    right: 135px;
+    bottom: 130px;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.38) 0%, rgba(15, 23, 42, 0.88) 100%);
+    border: 2px solid #f97316;
+    box-shadow: 0 0 18px rgba(249, 115, 22, 0.35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+    z-index: 59;
+    transition: transform 0.08s;
+  }
+  .codm-hip-fire:active, .codm-hip-fire.pressed {
+    transform: scale(0.92);
+    box-shadow: 0 0 24px rgba(249, 115, 22, 0.75);
+  }
+
+  /* Dedicated ADS Scope Button (sniper optic toggle) */
+  .codm-scope-btn {
+    position: absolute;
+    right: 25px;
+    bottom: 190px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, rgba(15, 23, 42, 0.88) 100%);
+    border: 2px solid var(--accent-mint);
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+    z-index: 59;
+    transition: transform 0.08s, background 0.15s;
+  }
+  .codm-scope-btn.active, .codm-scope-btn.pressed {
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.75) 0%, rgba(6, 78, 59, 0.95) 100%);
+    box-shadow: 0 0 28px rgba(16, 185, 129, 0.85);
+    transform: scale(0.95);
+  }
+
+  /* Scorestreak / Fox-2 Homing Missile Button */
+  .codm-missile-btn {
+    position: absolute;
+    right: 130px;
+    bottom: 45px;
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 229, 255, 0.35) 0%, rgba(15, 23, 42, 0.88) 100%);
+    border: 2px solid var(--accent-cyan);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+    z-index: 59;
+    transition: transform 0.08s;
+  }
+  .codm-missile-btn:active, .codm-missile-btn.pressed {
+    transform: scale(0.92);
+    box-shadow: 0 0 26px rgba(0, 229, 255, 0.85);
+  }
+
+  /* Jump / Ascend Thrusters */
+  .codm-jump-btn {
+    position: absolute;
+    right: 215px;
+    bottom: 100px;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+    z-index: 59;
+    transition: transform 0.08s;
+  }
+  .codm-jump-btn:active, .codm-jump-btn.pressed {
+    transform: scale(0.92);
+    background: rgba(0, 229, 255, 0.3);
+    border-color: var(--accent-cyan);
+  }
+
+  /* Crouch / Descend Thrusters */
+  .codm-crouch-btn {
+    position: absolute;
+    right: 215px;
+    bottom: 35px;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+    z-index: 59;
+    transition: transform 0.08s;
+  }
+  .codm-crouch-btn:active, .codm-crouch-btn.pressed {
+    transform: scale(0.92);
+    background: rgba(0, 229, 255, 0.3);
+    border-color: var(--accent-cyan);
+  }
+
+  /* Reload / Respawn Circular Button */
+  .codm-reload-btn {
+    position: absolute;
+    right: 100px;
+    bottom: 205px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1.5px solid rgba(245, 158, 11, 0.65);
+    color: #fbbf24;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+    z-index: 59;
+    transition: transform 0.08s;
+  }
+  .codm-reload-btn:active, .codm-reload-btn.pressed {
+    transform: scale(0.92);
+    background: rgba(245, 158, 11, 0.3);
+  }
+
+  /* 360° Free-Look Eye Button (floating near center-right) */
+  .codm-eye-btn {
+    position: absolute;
+    right: 180px;
+    bottom: 180px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.82);
+    border: 1.5px solid rgba(148, 163, 184, 0.45);
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+    z-index: 59;
+    transition: transform 0.08s;
+  }
+  .codm-eye-btn:active, .codm-eye-btn.pressed {
+    transform: scale(0.92);
+    background: rgba(0, 229, 255, 0.25);
+    border-color: var(--accent-cyan);
+  }
+
+  /* Camera Director switch pill */
+  .codm-cam-btn {
+    position: absolute;
+    right: 25px;
+    bottom: 260px;
+    width: 62px;
+    height: 34px;
+    border-radius: 17px;
+    background: rgba(15, 23, 42, 0.88);
+    border: 1.5px solid rgba(0, 229, 255, 0.5);
+    color: var(--accent-cyan);
+    font-size: 0.62rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+    z-index: 59;
+  }
+
+  /* Bottom Center: CODM Tactical Weapon Dock */
+  .codm-weapon-dock {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: auto;
+    z-index: 58;
+  }
+  .codm-weapon-card {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    padding: 6px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-width: 135px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  }
+  .codm-weapon-card.active {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 16px rgba(0, 229, 255, 0.45);
+    background: linear-gradient(180deg, rgba(14, 116, 144, 0.4) 0%, rgba(15, 23, 42, 0.95) 100%);
+  }
+  .codm-weapon-name {
     font-size: 0.62rem;
     font-family: var(--font-mono);
     color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    pointer-events: none;
   }
-
-  /* Mobile action buttons */
-  .mobile-action-row {
-    position: absolute;
-    bottom: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 14px;
-    pointer-events: auto;
-  }
-  .mob-btn {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    border: 2px solid var(--border-subtle);
-    background: rgba(14, 18, 28, 0.85);
-    color: var(--text-primary);
-    font-size: 0.7rem;
+  .codm-weapon-status {
+    font-size: 0.85rem;
     font-weight: 700;
     font-family: var(--font-mono);
+    color: #ffffff;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 3px;
-    cursor: pointer;
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-    transition: all 0.1s;
+    gap: 6px;
   }
-  .mob-btn:active, .mob-btn.pressed {
-    transform: scale(0.92);
-  }
-  .mob-btn.fire {
-    border-color: var(--accent-rose);
-    background: rgba(244, 63, 94, 0.2);
-    box-shadow: 0 0 18px rgba(244, 63, 94, 0.35);
-    width: 80px;
-    height: 80px;
-    font-size: 0.78rem;
-  }
-  .mob-btn.missile {
-    border-color: var(--accent-cyan);
-    background: rgba(0, 229, 255, 0.15);
-    box-shadow: 0 0 14px rgba(0, 229, 255, 0.25);
-  }
-  .mob-btn.respawn {
-    border-color: var(--accent-amber);
-    background: rgba(245, 158, 11, 0.15);
-  }
-  .mob-btn .btn-icon { font-size: 1.2rem; }
-  .mob-btn .btn-label { font-size: 0.58rem; letter-spacing: 0.06em; color: var(--text-secondary); }
 
-  /* Altitude buttons (right side, stacked) */
-  .altitude-btns {
-    position: absolute;
-    right: 190px;
-    bottom: 130px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    pointer-events: auto;
-  }
-  .alt-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    background: rgba(14, 18, 28, 0.82);
-    color: var(--astra-lavender);
-    font-size: 1.2rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-    transition: all 0.1s;
-  }
-  .alt-btn:active, .alt-btn.pressed {
-    background: rgba(0, 229, 255, 0.2);
-    border-color: var(--accent-cyan);
-    transform: scale(0.92);
+  /* Responsive scaling for mobile screens */
+  @media (max-width: 768px) {
+    .codm-joystick-wrap {
+      left: 15px;
+      bottom: 25px;
+      width: 145px;
+      height: 145px;
+    }
+    .codm-joystick-knob {
+      width: 54px;
+      height: 54px;
+    }
+    .codm-action-cluster {
+      right: 10px;
+      bottom: 15px;
+      transform: scale(0.9);
+      transform-origin: bottom right;
+    }
+    .codm-left-fire {
+      left: 22px;
+      bottom: 190px;
+      width: 54px;
+      height: 54px;
+    }
+    .codm-weapon-dock {
+      bottom: 10px;
+      gap: 6px;
+      transform: translateX(-50%) scale(0.85);
+    }
   }
 
   /* ── RESPONSIVE HEADER ────────────────────────────────────── */
@@ -2276,6 +2615,9 @@
           <button onclick="respawnDrone()" class="action-btn" style="padding:4px 12px; font-size:0.68rem; background:rgba(255,255,255,0.08); border-color:var(--border-porcelain)">
             Respawn [R]
           </button>
+          <button onclick="toggleCodmHud()" class="action-btn" id="osd-codm-hud-btn" title="Toggle Call of Duty Mobile HUD (Desktop & Touch)" style="padding:4px 10px; font-size:0.68rem; background:rgba(244,63,94,0.18); border-color:#f43f5e; color:#fca5a5; font-weight:700">
+            📱 CODM HUD
+          </button>
         </div>
         <button onclick="openCombatModal()" class="action-btn" style="padding:4px 10px; font-size:0.68rem; background:rgba(239,68,68,0.18); border-color:var(--accent-enemy); color:#fca5a5">
           ⚙️ Setup
@@ -2537,52 +2879,135 @@
         <div style="color:var(--astra-butter); font-weight:700"><span class="key-badge">C</span> Cam</div>
       </div>
 
-      <!-- ── MOBILE TOUCH CONTROLS ── -->
-      <div id="mobile-controls">
-        <!-- Left Joystick: Move (Forward/Back/Strafe) -->
-        <div class="joystick-zone left" id="joy-left-zone">
-          <div class="joystick-base">
-            <div class="joystick-knob" id="joy-left-knob"></div>
+      <!-- ── CALL OF DUTY MOBILE (CODM) TACTICAL HUD ── -->
+      <div id="codm-hud">
+        <!-- Natural Swipe Touch Aiming Zone (Right 60% of viewport) -->
+        <div id="codm-aim-touch-zone" aria-label="Touch Aiming Surface"></div>
+
+        <!-- Left Joystick Zone (Move: Forward / Reverse / Strafe) -->
+        <div class="codm-joystick-wrap" id="codm-joy-zone">
+          <div class="codm-sprint-lock" id="codm-sprint-lock" title="Auto-Sprint Lock">
+            <span>▲</span>
+            <span>SPRINT</span>
           </div>
-          <div class="joystick-label">Move</div>
-        </div>
-
-        <!-- Right Joystick: Yaw (turn left/right) -->
-        <div class="joystick-zone right" id="joy-right-zone">
-          <div class="joystick-base">
-            <div class="joystick-knob" id="joy-right-knob"></div>
+          <div class="codm-joystick-base">
+            <div class="codm-joystick-knob" id="codm-joy-knob">
+              <div class="codm-joystick-knob-core"></div>
+            </div>
           </div>
-          <div class="joystick-label">Yaw / Look</div>
         </div>
 
-        <!-- Altitude buttons (left of right joystick) -->
-        <div class="altitude-btns" id="alt-btns">
-          <button class="alt-btn" id="btn-climb" aria-label="Climb">▲</button>
-          <button class="alt-btn" id="btn-descend" aria-label="Descend">▼</button>
+        <!-- Left-Thumb / Claw Quick-Fire Button (CODM 3-claw setup) -->
+        <div class="codm-left-fire" id="codm-left-fire" title="Left Fire Button">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <line x1="12" y1="3" x2="12" y2="7"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+            <line x1="3" y1="12" x2="7" y2="12"/>
+            <line x1="17" y1="12" x2="21" y2="12"/>
+            <circle cx="12" cy="12" r="2.5" fill="#f43f5e"/>
+          </svg>
         </div>
 
-        <!-- Center action buttons -->
-        <div class="mobile-action-row">
-          <button class="mob-btn respawn" id="mob-respawn-btn" aria-label="Respawn">
-            <span class="btn-icon">↺</span>
-            <span class="btn-label">Respawn</span>
-          </button>
-          <button class="mob-btn" id="mob-ads-btn" aria-label="ADS Scope" style="border-color:var(--accent-mint); color:var(--accent-mint); background:rgba(16,185,129,0.15)">
-            <span class="btn-icon">🎯</span>
-            <span class="btn-label">SCOPE</span>
-          </button>
-          <button class="mob-btn fire" id="mob-fire-btn" aria-label="Fire laser">
-            <span class="btn-icon">🔵</span>
-            <span class="btn-label">LASER</span>
-          </button>
-          <button class="mob-btn missile" id="mob-missile-btn" aria-label="Fire missile">
-            <span class="btn-icon">🚀</span>
-            <span class="btn-label">Missile</span>
-          </button>
-          <button class="mob-btn" id="mob-cam-btn" aria-label="Cycle Camera" style="border-color:var(--accent-cyan); color:var(--accent-cyan); background:rgba(0,229,255,0.12)">
-            <span class="btn-icon">📹</span>
-            <span class="btn-label">CAM</span>
-          </button>
+        <!-- Right Side: CODM Action Cluster -->
+        <div class="codm-action-cluster">
+          <!-- 1-Tap ADS Fire Button (Auto-Scopes & Fires) -->
+          <div class="codm-ads-fire" id="codm-ads-fire" title="1-Tap ADS Fire">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+              <polygon points="12,8 14,14 10,14" fill="#f43f5e" stroke="none"/>
+              <circle cx="12" cy="12" r="2" fill="#ffffff"/>
+            </svg>
+            <span style="font-size:0.56rem; font-family:var(--font-mono); font-weight:800; color:#ffffff; margin-top:1px; letter-spacing:0.05em">ADS FIRE</span>
+          </div>
+
+          <!-- Hip-Fire Button (Tight Spray without scoping) -->
+          <div class="codm-hip-fire" id="codm-hip-fire" title="Hip-Fire">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="8"/>
+              <circle cx="12" cy="12" r="2" fill="#f97316"/>
+              <path d="M4 12h3M17 12h3M12 4v3M12 17v3"/>
+            </svg>
+            <span style="font-size:0.52rem; font-family:var(--font-mono); font-weight:700; color:#fed7aa">HIP</span>
+          </div>
+
+          <!-- Dedicated Scope / Optic Toggle Button -->
+          <div class="codm-scope-btn" id="codm-scope-btn" title="Toggle ADS Sniper Scope">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"/>
+              <line x1="12" y1="3" x2="12" y2="21"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <circle cx="12" cy="12" r="5" stroke-dasharray="2 2"/>
+            </svg>
+            <span style="font-size:0.5rem; font-family:var(--font-mono); font-weight:700; color:#a7f3d0">SCOPE</span>
+          </div>
+
+          <!-- Fox-2 Homing Missile / Scorestreak Launch Button -->
+          <div class="codm-missile-btn" id="codm-missile-btn" title="Fox-2 Homing Missile">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l3 5-3 15-3-15z"/>
+              <path d="M9 14l-4 4 1 2 5-2"/>
+              <path d="M15 14l4 4-1 2-5-2"/>
+            </svg>
+            <span style="font-size:0.52rem; font-family:var(--font-mono); font-weight:700; color:#67e8f9">FOX-2</span>
+          </div>
+
+          <!-- Jump / Ascend Thrusters -->
+          <div class="codm-jump-btn" id="codm-jump-btn" title="Climb / Ascend Thruster">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"/>
+            </svg>
+            <span style="font-size:0.48rem; font-family:var(--font-mono); font-weight:700">CLIMB</span>
+          </div>
+
+          <!-- Crouch / Descend Thrusters -->
+          <div class="codm-crouch-btn" id="codm-crouch-btn" title="Descend / Dive Thruster">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+            <span style="font-size:0.48rem; font-family:var(--font-mono); font-weight:700">DIVE</span>
+          </div>
+
+          <!-- Quick Reload / Respawn -->
+          <div class="codm-reload-btn" id="codm-reload-btn" title="Respawn Drone">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19"/>
+            </svg>
+            <span style="font-size:0.48rem; font-family:var(--font-mono); font-weight:700">RESET</span>
+          </div>
+
+          <!-- 360° Free-Look Eye Button -->
+          <div class="codm-eye-btn" id="codm-eye-btn" title="Free-Look Eye">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </div>
+
+          <!-- Camera Director Quick Toggle -->
+          <div class="codm-cam-btn" id="codm-cam-btn" title="Cycle Camera Angle">
+            <span>📹</span>
+            <span id="codm-cam-lbl">CHASE</span>
+          </div>
+        </div>
+
+        <!-- Bottom Center: CODM Tactical Weapon Dock -->
+        <div class="codm-weapon-dock">
+          <div class="codm-weapon-card active" id="codm-wep-laser" onclick="buyOrSelectWeapon('laser')">
+            <div class="codm-weapon-name">PRIMARY</div>
+            <div class="codm-weapon-status">
+              <span>⚡ PULSE LASER</span>
+              <span style="font-size:0.68rem; color:var(--accent-mint)">READY</span>
+            </div>
+          </div>
+          <div class="codm-weapon-card" id="codm-wep-missile" onclick="buyOrSelectWeapon('missile')">
+            <div class="codm-weapon-name">SECONDARY</div>
+            <div class="codm-weapon-status">
+              <span>🚀 FOX-2 VIPER</span>
+              <span style="font-size:0.68rem; color:var(--accent-cyan)" id="codm-missile-count">2 / 2</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -5325,6 +5750,8 @@ function setCameraMode(mode) {
   // Update Badge in Dock
   const badge = document.getElementById('cam-active-badge');
   if (badge) badge.textContent = mode.toUpperCase();
+  const codmCamLbl = document.getElementById('codm-cam-lbl');
+  if (codmCamLbl) codmCamLbl.textContent = mode.toUpperCase();
 
   // Mode specific setup
   if (mode === 'orbit') {
@@ -6154,8 +6581,18 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ── MOBILE TOUCH JOYSTICK SYSTEM ─────────────────────────────
-(function setupMobileControls() {
+// ── CALL OF DUTY MOBILE (CODM) CONTROLLER SYSTEM ─────────────────
+window.toggleCodmHud = function() {
+  const active = document.body.classList.toggle('codm-hud-active');
+  const btn = document.getElementById('osd-codm-hud-btn');
+  if (btn) {
+    btn.style.background = active ? 'rgba(244,63,94,0.45)' : 'rgba(244,63,94,0.18)';
+    btn.textContent = active ? '📱 CODM HUD [ON]' : '📱 CODM HUD';
+  }
+  showToast(active ? "📱 COD Mobile Tactical HUD Active" : "Desktop Controls Active");
+};
+
+(function setupCodmControls() {
   try {
     const isTouchDevice = () => (
       'ontouchstart' in window ||
@@ -6170,13 +6607,12 @@ window.addEventListener('resize', () => {
       }
     }
     applyTouchClass();
-    // Also detect on first touch (for devices that report touch late)
     window.addEventListener('touchstart', () => {
       document.body.classList.add('touch-device');
       audio.init();
     }, { once: true });
 
-    // Virtual key state driven by joysticks
+    // Virtual key state driven by touch controls
     const vkeys = {
       KeyW: false, KeyS: false, KeyA: false, KeyD: false,
       KeyQ: false, KeyE: false, Space: false, ShiftLeft: false
@@ -6185,123 +6621,240 @@ window.addEventListener('resize', () => {
     function setVKey(key, val) {
       vkeys[key] = val;
       keys[key] = val;
-      // also set the letter key aliases used in the game loop
       const aliases = { KeyW:'w', KeyS:'s', KeyA:'a', KeyD:'d', KeyQ:'q', KeyE:'e' };
       if (aliases[key]) keys[aliases[key]] = val;
     }
 
-    function clearAllVKeys() {
-      Object.keys(vkeys).forEach(k => setVKey(k, false));
-    }
-
-    // ---- Left Joystick (Move: W/S/A/D) ----
-    const leftZone = document.getElementById('joy-left-zone');
-    const leftKnob = document.getElementById('joy-left-knob');
-    if (!leftZone || !leftKnob) return;
-
-    let leftTouch = null;
+    // ── 1. LEFT VIRTUAL THUMBSTICK & SPRINT LOCK ──
+    const joyZone = document.getElementById('codm-joy-zone');
+    const joyKnob = document.getElementById('codm-joy-knob');
+    const sprintLockEl = document.getElementById('codm-sprint-lock');
+    let sprintLockActive = false;
+    let leftTouchId = null;
     let leftOrigin = { x: 0, y: 0 };
-    const DEAD = 12;
-    const MAX_DIST = 55;
+    const DEAD = 10;
+    const MAX_DIST = 58;
 
-    leftZone.addEventListener('touchstart', e => {
-      e.preventDefault();
-      const t = e.changedTouches[0];
-      leftTouch = t.identifier;
-      const rect = leftZone.getBoundingClientRect();
-      leftOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-    }, { passive: false });
+    if (joyZone && joyKnob) {
+      joyZone.addEventListener('touchstart', e => {
+        e.preventDefault();
+        const t = e.changedTouches[0];
+        leftTouchId = t.identifier;
+        const rect = joyZone.getBoundingClientRect();
+        leftOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      }, { passive: false });
 
-    leftZone.addEventListener('touchmove', e => {
-      e.preventDefault();
-      for (const t of e.changedTouches) {
-        if (t.identifier !== leftTouch) continue;
-        const dx = t.clientX - leftOrigin.x;
-        const dy = t.clientY - leftOrigin.y;
-        const dist = Math.min(Math.hypot(dx, dy), MAX_DIST);
-        const angle = Math.atan2(dy, dx);
-        const nx = dist * Math.cos(angle);
-        const ny = dist * Math.sin(angle);
+      joyZone.addEventListener('touchmove', e => {
+        e.preventDefault();
+        for (const t of e.changedTouches) {
+          if (t.identifier !== leftTouchId) continue;
+          const dx = t.clientX - leftOrigin.x;
+          const dy = t.clientY - leftOrigin.y;
+          const dist = Math.min(Math.hypot(dx, dy), MAX_DIST);
+          const angle = Math.atan2(dy, dx);
+          const nx = dist * Math.cos(angle);
+          const ny = dist * Math.sin(angle);
 
-        // Move knob
-        leftKnob.style.transform = `translate(calc(-50% + ${nx}px), calc(-50% + ${ny}px))`;
+          joyKnob.style.transform = `translate(calc(-50% + ${nx}px), calc(-50% + ${ny}px))`;
 
-        // Map to keys
-        setVKey('KeyW', ny < -DEAD);  // up = forward
-        setVKey('KeyS', ny > DEAD);   // down = back
-        setVKey('KeyA', nx < -DEAD);  // left strafe
-        setVKey('KeyD', nx > DEAD);   // right strafe
+          // Sprint Lock threshold: pulling up beyond 42px locks forward afterburners
+          if (ny < -42 && !sprintLockActive) {
+            sprintLockActive = true;
+            if (sprintLockEl) sprintLockEl.classList.add('active');
+            if (navigator.vibrate) navigator.vibrate(25);
+          } else if (ny > 18 && sprintLockActive) {
+            // Pulling backward cancels sprint lock
+            sprintLockActive = false;
+            if (sprintLockEl) sprintLockEl.classList.remove('active');
+          }
+
+          setVKey('KeyW', sprintLockActive || ny < -DEAD);
+          setVKey('KeyS', ny > DEAD);
+          setVKey('KeyA', nx < -DEAD);
+          setVKey('KeyD', nx > DEAD);
+        }
+      }, { passive: false });
+
+      function endLeftStick(e) {
+        for (const t of e.changedTouches) {
+          if (t.identifier !== leftTouchId) continue;
+          leftTouchId = null;
+          joyKnob.style.transform = 'translate(-50%, -50%)';
+          // If sprint lock is engaged, keep KeyW on
+          if (sprintLockActive) {
+            setVKey('KeyW', true);
+            setVKey('KeyS', false);
+            setVKey('KeyA', false);
+            setVKey('KeyD', false);
+          } else {
+            setVKey('KeyW', false);
+            setVKey('KeyS', false);
+            setVKey('KeyA', false);
+            setVKey('KeyD', false);
+          }
+        }
       }
-    }, { passive: false });
+      joyZone.addEventListener('touchend', endLeftStick, { passive: false });
+      joyZone.addEventListener('touchcancel', endLeftStick, { passive: false });
 
-    function endLeftJoy(e) {
-      for (const t of e.changedTouches) {
-        if (t.identifier !== leftTouch) continue;
-        leftTouch = null;
-        leftKnob.style.transform = 'translate(-50%, -50%)';
-        setVKey('KeyW', false);
-        setVKey('KeyS', false);
-        setVKey('KeyA', false);
-        setVKey('KeyD', false);
+      // Direct tap on sprint lock chevron toggles lock
+      if (sprintLockEl) {
+        sprintLockEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          sprintLockActive = !sprintLockActive;
+          sprintLockEl.classList.toggle('active', sprintLockActive);
+          setVKey('KeyW', sprintLockActive);
+          if (navigator.vibrate) navigator.vibrate(15);
+        });
       }
     }
-    leftZone.addEventListener('touchend', endLeftJoy, { passive: false });
-    leftZone.addEventListener('touchcancel', endLeftJoy, { passive: false });
 
-    // ---- Right Joystick (Yaw: Q/E, left-right) ----
-    const rightZone = document.getElementById('joy-right-zone');
-    const rightKnob = document.getElementById('joy-right-knob');
-    if (!rightZone || !rightKnob) return;
+    // ── 2. NATURAL SWIPE TOUCH AIM ZONE (CODM / PUBG Touch Look) ──
+    const aimTouchZone = document.getElementById('codm-aim-touch-zone');
+    let aimTouchId = null;
+    let lastAimX = 0;
+    let lastAimY = 0;
+    let isEyeLooking = false;
 
-    let rightTouch = null;
-    let rightOrigin = { x: 0, y: 0 };
+    if (aimTouchZone) {
+      aimTouchZone.addEventListener('touchstart', e => {
+        const t = e.changedTouches[0];
+        aimTouchId = t.identifier;
+        lastAimX = t.clientX;
+        lastAimY = t.clientY;
+      }, { passive: true });
 
-    rightZone.addEventListener('touchstart', e => {
-      e.preventDefault();
-      const t = e.changedTouches[0];
-      rightTouch = t.identifier;
-      const rect = rightZone.getBoundingClientRect();
-      rightOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-    }, { passive: false });
+      aimTouchZone.addEventListener('touchmove', e => {
+        for (const t of e.changedTouches) {
+          if (t.identifier !== aimTouchId) continue;
+          const dx = t.clientX - lastAimX;
+          const dy = t.clientY - lastAimY;
+          lastAimX = t.clientX;
+          lastAimY = t.clientY;
 
-    rightZone.addEventListener('touchmove', e => {
-      e.preventDefault();
-      for (const t of e.changedTouches) {
-        if (t.identifier !== rightTouch) continue;
-        const dx = t.clientX - rightOrigin.x;
-        const dy = t.clientY - rightOrigin.y;
-        const dist = Math.min(Math.hypot(dx, dy), MAX_DIST);
-        const angle = Math.atan2(dy, dx);
-        const nx = dist * Math.cos(angle);
-        const ny = dist * Math.sin(angle);
-
-        rightKnob.style.transform = `translate(calc(-50% + ${nx}px), calc(-50% + ${ny}px))`;
-
-        // Modern Analog Yaw & Pitch Aiming (PUBG / CoD Mobile style)
-        if (Math.abs(nx) > DEAD) {
-          player.yaw -= (nx / MAX_DIST) * (mouseAim.isAds ? 0.025 : 0.055);
+          const sens = mouseAim.isAds ? 0.0032 : 0.0062;
+          player.yaw -= dx * sens;
+          player.pitch = Math.max(-0.75, Math.min(0.75, player.pitch - dy * sens * 0.8));
         }
-        if (Math.abs(ny) > DEAD) {
-          player.pitch = Math.max(-0.75, Math.min(0.75, player.pitch - (ny / MAX_DIST) * (mouseAim.isAds ? 0.018 : 0.038)));
-        }
-        setVKey('KeyQ', nx < -DEAD);
-        setVKey('KeyE', nx > DEAD);
-      }
-    }, { passive: false });
+      }, { passive: true });
 
-    function endRightJoy(e) {
-      for (const t of e.changedTouches) {
-        if (t.identifier !== rightTouch) continue;
-        rightTouch = null;
-        rightKnob.style.transform = 'translate(-50%, -50%)';
-        setVKey('KeyQ', false);
-        setVKey('KeyE', false);
+      function endAimTouch(e) {
+        for (const t of e.changedTouches) {
+          if (t.identifier !== aimTouchId) continue;
+          aimTouchId = null;
+        }
       }
+      aimTouchZone.addEventListener('touchend', endAimTouch, { passive: true });
+      aimTouchZone.addEventListener('touchcancel', endAimTouch, { passive: true });
+
+      // Desktop Mouse Fallback for Aim Zone when CODM HUD is active
+      let mouseDraggingAim = false;
+      let lastMouseX = 0;
+      let lastMouseY = 0;
+      aimTouchZone.addEventListener('mousedown', e => {
+        if (!document.body.classList.contains('codm-hud-active')) return;
+        mouseDraggingAim = true;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+      });
+      window.addEventListener('mousemove', e => {
+        if (!mouseDraggingAim) return;
+        const dx = e.clientX - lastMouseX;
+        const dy = e.clientY - lastMouseY;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        const sens = mouseAim.isAds ? 0.0032 : 0.0062;
+        player.yaw -= dx * sens;
+        player.pitch = Math.max(-0.75, Math.min(0.75, player.pitch - dy * sens * 0.8));
+      });
+      window.addEventListener('mouseup', () => { mouseDraggingAim = false; });
     }
-    rightZone.addEventListener('touchend', endRightJoy, { passive: false });
-    rightZone.addEventListener('touchcancel', endRightJoy, { passive: false });
 
-    // ---- Altitude Buttons ----
+    // ── 3. 1-TAP ADS FIRE BUTTON (Iconic CODM Mechanics) ──
+    const adsFireBtn = document.getElementById('codm-ads-fire');
+    let adsScopeToggled = false; // Tracks if sniper scope is locked via toggle button
+
+    if (adsFireBtn) {
+      const startAdsFire = (e) => {
+        e.preventDefault();
+        adsFireBtn.classList.add('pressed');
+        mouseAim.isAds = true;
+        mouseAim.isMouseDown = true;
+        fireLaser();
+        mouseAim.continuousFireTimer = 0.115;
+        if (navigator.vibrate) navigator.vibrate(18);
+      };
+      const stopAdsFire = (e) => {
+        e.preventDefault();
+        adsFireBtn.classList.remove('pressed');
+        mouseAim.isMouseDown = false;
+        if (!adsScopeToggled) {
+          mouseAim.isAds = false;
+        }
+      };
+
+      adsFireBtn.addEventListener('touchstart', startAdsFire, { passive: false });
+      adsFireBtn.addEventListener('touchend', stopAdsFire, { passive: false });
+      adsFireBtn.addEventListener('touchcancel', stopAdsFire, { passive: false });
+      adsFireBtn.addEventListener('mousedown', startAdsFire);
+      adsFireBtn.addEventListener('mouseup', stopAdsFire);
+      adsFireBtn.addEventListener('mouseleave', stopAdsFire);
+    }
+
+    // ── 4. HIP-FIRE & LEFT-CLAW QUICK-FIRE BUTTONS ──
+    function bindFireButton(el) {
+      if (!el) return;
+      const start = (e) => {
+        e.preventDefault();
+        el.classList.add('pressed');
+        mouseAim.isMouseDown = true;
+        fireLaser();
+        mouseAim.continuousFireTimer = 0.115;
+        if (navigator.vibrate) navigator.vibrate(15);
+      };
+      const stop = (e) => {
+        e.preventDefault();
+        el.classList.remove('pressed');
+        mouseAim.isMouseDown = false;
+      };
+      el.addEventListener('touchstart', start, { passive: false });
+      el.addEventListener('touchend', stop, { passive: false });
+      el.addEventListener('touchcancel', stop, { passive: false });
+      el.addEventListener('mousedown', start);
+      el.addEventListener('mouseup', stop);
+      el.addEventListener('mouseleave', stop);
+    }
+    bindFireButton(document.getElementById('codm-hip-fire'));
+    bindFireButton(document.getElementById('codm-left-fire'));
+
+    // ── 5. DEDICATED ADS SCOPE TOGGLE BUTTON ──
+    const scopeToggleBtn = document.getElementById('codm-scope-btn');
+    if (scopeToggleBtn) {
+      scopeToggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        adsScopeToggled = !adsScopeToggled;
+        mouseAim.isAds = adsScopeToggled;
+        scopeToggleBtn.classList.toggle('active', adsScopeToggled);
+        showToast(mouseAim.isAds ? "🎯 ADS Tactical Optic Engaged" : "Standard View");
+        if (navigator.vibrate) navigator.vibrate(12);
+      });
+    }
+
+    // ── 6. FOX-2 HOMING MISSILE BUTTON ──
+    const missileBtn = document.getElementById('codm-missile-btn');
+    if (missileBtn) {
+      missileBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (player.missileCooldown <= 0) {
+          fireMissile();
+          if (navigator.vibrate) navigator.vibrate(35);
+        } else {
+          showToast(`Missile reloading (${player.missileCooldown.toFixed(1)}s)`);
+        }
+      });
+    }
+
+    // ── 7. THRUSTERS (CLIMB / DIVE) ──
     function holdBtn(el, keyCode) {
       if (!el) return;
       const start = (e) => { e.preventDefault(); setVKey(keyCode, true); el.classList.add('pressed'); };
@@ -6309,76 +6862,60 @@ window.addEventListener('resize', () => {
       el.addEventListener('touchstart', start, { passive: false });
       el.addEventListener('touchend', stop, { passive: false });
       el.addEventListener('touchcancel', stop, { passive: false });
-      // Mouse fallback
       el.addEventListener('mousedown', start);
       el.addEventListener('mouseup', stop);
       el.addEventListener('mouseleave', stop);
     }
+    holdBtn(document.getElementById('codm-jump-btn'), 'Space');
+    holdBtn(document.getElementById('codm-crouch-btn'), 'ShiftLeft');
 
-    holdBtn(document.getElementById('btn-climb'), 'Space');
-    holdBtn(document.getElementById('btn-descend'), 'ShiftLeft');
-
-    // ---- Action Buttons ----
-    const fireBtn = document.getElementById('mob-fire-btn');
-    const adsBtn = document.getElementById('mob-ads-btn');
-    const missileBtn = document.getElementById('mob-missile-btn');
-    const respawnBtn = document.getElementById('mob-respawn-btn');
-    const camBtn = document.getElementById('mob-cam-btn');
-
-    // Continuous fire while holding mob fire button
-    if (fireBtn) {
-      fireBtn.addEventListener('touchstart', (e) => {
+    // ── 8. RESPAWN / RESET BUTTON ──
+    const reloadBtn = document.getElementById('codm-reload-btn');
+    if (reloadBtn) {
+      reloadBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        fireBtn.classList.add('pressed');
-        mouseAim.isMouseDown = true;
-        fireLaser();
-        mouseAim.continuousFireTimer = 0.115;
-      }, { passive: false });
-
-      const stopFire = (e) => {
-        e.preventDefault();
-        fireBtn.classList.remove('pressed');
-        mouseAim.isMouseDown = false;
-      };
-      fireBtn.addEventListener('touchend', stopFire, { passive: false });
-      fireBtn.addEventListener('touchcancel', stopFire, { passive: false });
-      fireBtn.addEventListener('mousedown', () => { mouseAim.isMouseDown = true; fireLaser(); });
-      fireBtn.addEventListener('mouseup', () => { mouseAim.isMouseDown = false; });
-    }
-
-    // Toggle ADS Precision Scope on mobile
-    if (adsBtn) {
-      adsBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        mouseAim.isAds = !mouseAim.isAds;
-        adsBtn.classList.toggle('pressed', mouseAim.isAds);
-        showToast(mouseAim.isAds ? "🎯 ADS Scope Engaged" : "Standard View");
+        respawnDrone();
+        if (navigator.vibrate) navigator.vibrate(25);
       });
     }
 
-    function tapAction(el, fn) {
-      if (!el) return;
-      el.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        el.classList.add('pressed');
-        fn();
-      }, { passive: false });
-      el.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        setTimeout(() => el.classList.remove('pressed'), 120);
-      }, { passive: false });
-      el.addEventListener('click', fn);
+    // ── 9. FREE-LOOK EYE BUTTON ──
+    const eyeBtn = document.getElementById('codm-eye-btn');
+    if (eyeBtn) {
+      const startEye = (e) => { e.preventDefault(); isEyeLooking = true; eyeBtn.classList.add('pressed'); };
+      const stopEye = (e) => { e.preventDefault(); isEyeLooking = false; eyeBtn.classList.remove('pressed'); };
+      eyeBtn.addEventListener('touchstart', startEye, { passive: false });
+      eyeBtn.addEventListener('touchend', stopEye, { passive: false });
+      eyeBtn.addEventListener('touchcancel', stopEye, { passive: false });
+      eyeBtn.addEventListener('mousedown', startEye);
+      eyeBtn.addEventListener('mouseup', stopEye);
     }
 
-    tapAction(missileBtn, () => {
-      if (appMode === 'combat' || appMode === 'flight') fireMissile();
-    });
-    tapAction(respawnBtn, respawnDrone);
+    // ── 10. CAMERA CYCLE BUTTON ──
+    const camBtn = document.getElementById('codm-cam-btn');
     if (camBtn) {
-      tapAction(camBtn, cycleCameraMode);
+      camBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        cycleCameraMode();
+      });
     }
+
+    // ── 11. WEAPON DOCK COOLDOWN MONITOR ──
+    setInterval(() => {
+      const missileCountEl = document.getElementById('codm-missile-count');
+      if (missileCountEl) {
+        if (player.missileCooldown > 0) {
+          missileCountEl.textContent = `RELOAD (${player.missileCooldown.toFixed(1)}s)`;
+          missileCountEl.style.color = 'var(--accent-amber)';
+        } else {
+          missileCountEl.textContent = '2 / 2 READY';
+          missileCountEl.style.color = 'var(--accent-cyan)';
+        }
+      }
+    }, 150);
+
   } catch (err) {
-    console.error('Mobile controls setup non-fatal error:', err);
+    console.error('CODM controls setup non-fatal error:', err);
   }
 })();
 

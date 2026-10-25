@@ -27,8 +27,22 @@ An interactive, web-based 3D industrial drone explainer, real-world flight simul
   - **Sector 5 (North): Alpine Mountain Ridgeline**: Towering mountain passes (up to 240m elevation), flight canyons, 12 giant wind turbines, and 500+ trees.
 - **Battlefield Perimeter Warning**: Airspace containment zone (2,400m radius) with "LEAVING COMBAT AIRSPACE — TURN BACK" warning banner and countdown.
 
-### 3. 🎯 Modern Combat Aiming, Hitmarkers & Weapon Controls (PUBG / Call of Duty Style)
-- **Pointer-Locked Mouse Aiming & 3D Flight**: Click anywhere on canvas to engage pointer lock; mouse movement directly steers heading (yaw) and elevation (pitch) with smooth aerodynamic bank.
+### 3. 🎯 Modern Combat Aiming, Hitmarkers & Call of Duty Mobile (CODM) Tactical HUD
+- **Authentic Call of Duty Mobile Ergonomics & Layout**:
+  - **Left Virtual Thumbstick**: Floating tactical stick with 4 cardinal guide ticks.
+  - **Sprint Lock Chevron (`▲ SPRINT`)**: Dragging the thumbstick upward engages automatic afterburner sprint lock. Tapping the chevron toggles lock on/off.
+  - **Left-Claw Quick-Fire Trigger**: Dedicated top-left fire trigger for 3-finger or 4-finger claw grip players.
+  - **Natural Swipe Touch Aiming Zone**: The entire right 60% of the display acts as a responsive touch-look surface, dynamically adjusting yaw and elevation with sensitivity scaling.
+  - **1-Tap ADS Fire Button**: Signature CODM feature—holding this button instantly scopes in (ADS 42° FOV sniper optic) and auto-fires continuous laser bursts while allowing tracking aim. Releasing auto-unscopes.
+  - **Dedicated Hip-Fire Button**: Fires tight laser sprays without zooming for wider situational awareness.
+  - **Dedicated Scope Toggle Button**: Toggles the sniper optic and holographic reticle on/off.
+  - **Fox-2 Homing Missile Button**: Launches heat-seeking missiles with live reloading countdown.
+  - **Jump / Climb Thrusters (`▲ CLIMB`) & Slide / Dive Thrusters (`▼ DIVE`)**.
+  - **Quick Reset / Respawn Button (`↺ RESET`)**.
+  - **Free-Look Eye Button (`👁️`)**: Allows looking 360° around the drone without disrupting the flight path.
+  - **Bottom Tactical Weapon Dock**: Dual cards displaying Primary (Pulse Laser) and Secondary (Fox-2 Viper Missiles) with real-time ammunition and recharge status.
+  - **Desktop `📱 CODM HUD` Toggle**: Flight OSD bar includes a one-click button to toggle and test the full CODM HUD on desktop and laptops using mouse touch simulation.
+- **Pointer-Locked Mouse Aiming & 3D Flight**: Click anywhere on canvas to engage desktop pointer lock; mouse movement directly steers heading (yaw) and elevation (pitch) with smooth aerodynamic bank.
 - **ADS Precision Sniper Scope Mode**: Hold Right-Click (or tap mobile `SCOPE` button) to smoothly zoom in from 75° to 42° FOV, displaying a high-contrast holographic optic with digital rangefinder (`RNG: 140M`) and elevation crosshairs.
 - **Predictive Lead Indicator Pip**: Real-time HUD trajectory computer calculates moving target lead based on projectile velocity (`time = dist / 165m/s`), displaying a dynamic pulsing lead pip. Aiming at the lead pip guarantees direct hits!
 - **Tactical 3D Target Lock-on Box**: Automatically tracks the primary enemy in your crosshair with an authentic CoD lock-on bracket, target ID, rangefinder, and live health bar.
@@ -62,21 +76,23 @@ An interactive, web-based 3D industrial drone explainer, real-world flight simul
 
 ## 🎮 Flight & Combat Controls
 
-| Action | Keyboard | Touch / Mouse Controls |
+| Action | Keyboard | Call of Duty Mobile (CODM) Touch Controls |
 | :--- | :--- | :--- |
-| **Aim & Steer** | Mouse (Pointer Lock) / <kbd>Q</kbd> <kbd>E</kbd> | Move Mouse / Right Thumbstick |
-| **Throttle Forward / Airbrake** | <kbd>W</kbd> <kbd>S</kbd> | Left Virtual Joystick |
-| **Bank / Strafe** | <kbd>A</kbd> <kbd>D</kbd> | Left Virtual Joystick |
-| **Climb / Descend** | <kbd>SPACE</kbd> / <kbd>SHIFT</kbd> | Dedicated `▲` / `▼` Altitude Buttons |
-| **Continuous Auto-Lasers** | **Left-Click (Hold)** or <kbd>F</kbd> | `LASER` Action Button |
-| **ADS Precision Sniper Scope** | **Right-Click (Hold)** | `🎯 SCOPE` Action Button |
-| **Homing Missiles** | **Middle-Click** or <kbd>M</kbd> / <kbd>E</kbd> | `MISSILE` Action Button |
-| **Cycle Camera Mode** | <kbd>C</kbd> | `📹 CAM` Button / OSD Dropdown |
-| **Flip Camera 180°** | <kbd>V</kbd> | Camera Director Flip Button |
-| **Direct Camera Modes** | Keys <kbd>1</kbd> – <kbd>8</kbd> | Camera Director Mode Chips |
-| **Invite Friends Link** | `📋 Invite Friends` | OSD Button / Match Setup Modal |
-| **Match Setup Modal** | **⚙️ Match Setup** | OSD Action Button |
-| **Respawn / Center** | <kbd>R</kbd> | `↺ Respawn` Button |
+| **Touch Aim & Look** | Mouse (Pointer Lock) / <kbd>Q</kbd> <kbd>E</kbd> | Swipe anywhere on right 60% of screen |
+| **Throttle / Strafe** | <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> | Left Tactical Joystick |
+| **Auto-Sprint Lock** | <kbd>W</kbd> Afterburner | Drag stick up to `▲ SPRINT` chevron |
+| **Left Claw Quick-Fire** | <kbd>F</kbd> | Top-left crosshair trigger (`codm-left-fire`) |
+| **1-Tap ADS Auto-Fire** | <kbd>Right-Click</kbd> + <kbd>Left-Click</kbd> | Large circular `ADS FIRE` button (scopes & fires) |
+| **Hip-Fire Spray** | <kbd>Left-Click (Hold)</kbd> | Dedicated `HIP` fire button |
+| **ADS Sniper Optic** | <kbd>Right-Click (Toggle)</kbd> | Dedicated `SCOPE` toggle button (42° FOV) |
+| **Fox-2 Homing Missiles** | <kbd>Middle-Click</kbd> or <kbd>M</kbd> / <kbd>E</kbd> | `FOX-2` button (with live cooldown display) |
+| **Ascend / Jump Thrusters** | <kbd>SPACE</kbd> | Tactical `▲ CLIMB` button |
+| **Descend / Crouch Thrusters**| <kbd>SHIFT</kbd> | Tactical `▼ DIVE` button |
+| **Free-Look (360° Cam)** | Hold <kbd>ALT</kbd> | `👁️` Eye button + swipe |
+| **Cycle Camera Mode** | <kbd>C</kbd> | `📹 CAM` button / OSD dropdown |
+| **Tactical Weapon Switch** | Keys <kbd>1</kbd> / <kbd>2</kbd> | Tap Primary / Secondary weapon cards |
+| **Respawn / Reset** | <kbd>R</kbd> | `↺ RESET` circular button |
+| **Toggle Mobile HUD (Desktop)**| — | Top OSD Bar `📱 CODM HUD` button |
 
 ---
 
