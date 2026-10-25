@@ -7,6 +7,8 @@
 <!-- Three.js and OrbitControls from CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<!-- PeerJS for Real-Time P2P WebRTC Multiplayer -->
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   :root {
     --bg-dark: #07090e;
@@ -365,9 +367,13 @@
     border-radius: 50%;
     pointer-events: none;
     transition: transform 0.04s linear;
+    display: none; /* Only show in Cockpit FPV mode to keep game view clean */
+  }
+  body.cam-fpv .pitch-ladder {
+    display: block;
   }
 
-  /* Speed & Altitude Tapes in Flight Sim */
+  /* Speed & Altitude Tapes in Flight Sim (Hidden in game mode to eliminate clutter) */
   .hud-tape {
     position: absolute;
     background: rgba(7, 9, 14, 0.75);
@@ -378,6 +384,9 @@
     font-family: var(--font-mono);
     box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   }
+  body.in-flight .hud-tape {
+    display: none !important; /* Telemetry is cleanly displayed in the top OSD bar */
+  }
   .speed-tape { left: 40px; top: 50%; transform: translateY(-50%); text-align: right; }
   .alt-tape { right: 40px; top: 50%; transform: translateY(-50%); text-align: left; }
   .tape-val { font-size: 1.6rem; font-weight: 700; color: var(--accent-cyan); text-shadow: 0 0 12px rgba(0,229,255,0.4); }
@@ -386,17 +395,18 @@
   /* Compact Real-Time Telemetry Bar for Flight Mode */
   #flight-osd-bar {
     position: absolute;
-    top: 20px;
+    top: 16px;
     left: 50%;
     transform: translateX(-50%);
     display: none;
     align-items: center;
     gap: 16px;
-    padding: 8px 22px;
+    padding: 7px 20px;
     border-radius: 24px;
     font-family: var(--font-mono);
     font-size: 0.72rem;
     pointer-events: auto;
+    z-index: 20;
   }
   #flight-osd-bar.active {
     display: flex;
@@ -415,24 +425,26 @@
     font-weight: 700;
   }
 
-  /* Notification Toast */
+  /* Notification Toast (Positioned at top so it never covers the screen or controls) */
   #toast-notif {
     position: absolute;
-    top: 68px;
+    top: 14px;
     left: 50%;
-    transform: translateX(-50%) translateY(-20px);
+    transform: translateX(-50%) translateY(-35px);
     opacity: 0;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    padding: 8px 20px;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 6px 18px;
     border-radius: 20px;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.03em;
     pointer-events: none;
-    z-index: 100;
+    z-index: 300;
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
   }
   #toast-notif.show {
     transform: translateX(-50%) translateY(0);
@@ -1523,69 +1535,83 @@
     .action-btn { padding: 7px 11px; font-size: 0.7rem; }
   }
 
-  /* Combat HUD mobile repositioning */
+  /* Combat HUD mobile repositioning - Ultra Clean Minimalist HUD */
   @media (max-width: 768px) {
-    #flight-osd-bar {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      scrollbar-width: none;
-      justify-content: flex-start;
-      gap: 10px;
-      padding: 5px 12px;
-      top: 58px;
-      border-radius: 12px;
-      font-size: 0.62rem;
-      width: 95vw;
-      max-width: 95vw;
-    }
-    #flight-osd-bar::-webkit-scrollbar { display: none; }
+    /* Top row: Vitals on Left, Radar on Right */
     .combat-vitals-box {
       bottom: auto;
-      top: 142px;
-      left: 8px;
-      width: 130px;
-      padding: 6px 8px;
+      top: 56px;
+      left: 10px;
+      width: 115px;
+      padding: 6px 10px;
+      gap: 3px;
+      z-index: 25;
     }
+    .combat-vitals-box .meter-track { height: 5px; }
+    .combat-vitals-box .bar-label-row { font-size: 0.52rem; }
+
     .combat-radar-card {
-      top: 100px;
-      right: 8px;
-      width: 95px;
-      height: 95px;
-    }
-    .combat-armory-dock {
+      top: 56px;
+      right: 10px;
       bottom: auto;
-      top: 205px;
-      right: 8px;
-      padding: 5px 8px;
-      max-width: 125px;
+      width: 78px;
+      height: 78px;
+      z-index: 25;
     }
-    .combat-armory-dock .weapon-btn {
-      font-size: 0.55rem;
-      padding: 3px 6px;
+
+    /* Telemetry pill sits cleanly centered below vitals and radar without any overlap */
+    #flight-osd-bar {
+      top: 140px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 12px;
+      gap: 10px;
+      font-size: 0.60rem;
+      border-radius: 18px;
+      white-space: nowrap;
+      overflow: hidden;
+      justify-content: center;
+      max-width: 90vw;
+      z-index: 25;
+      background: rgba(14, 18, 28, 0.78);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     }
-    .armory-title {
-      font-size: 0.56rem;
+    .osd-desktop-tools {
+      display: none !important;
+    }
+
+    /* Hide static unnecessary clutter in game mode on mobile */
+    .combat-armory-dock {
+      display: none !important;
+    }
+    #camera-director-dock {
+      display: none !important;
     }
     .combat-radio-chatter {
-      display: none;
+      display: none !important;
     }
-    /* Flight HUD tapes - reduce size on mobile */
-    .hud-tape { padding: 4px 8px; }
-    .tape-val { font-size: 0.95rem; }
-    .speed-tape { left: 4px; }
-    .alt-tape { right: 4px; }
-    .hud-reticle-wrap { width: 170px; height: 170px; }
+    .hud-tape {
+      display: none !important;
+    }
+    .joystick-label {
+      display: none !important;
+    }
+    .hud-reticle-wrap {
+      width: 140px;
+      height: 140px;
+    }
   }
 
   @media (max-width: 480px) {
-    .combat-radar-card { width: 90px; height: 90px; }
-    .combat-vitals-box { width: 130px; }
+    .combat-radar-card { width: 72px; height: 72px; }
+    .combat-vitals-box { width: 105px; padding: 5px 8px; }
     .joystick-zone { width: 130px; height: 130px; bottom: 75px; }
     .joystick-knob { width: 44px; height: 44px; }
     .altitude-btns { bottom: 135px; }
     .alt-btn { width: 42px; height: 42px; font-size: 1.0rem; }
     .mob-btn { width: 56px; height: 56px; font-size: 0.65rem; }
     .mob-btn.fire { width: 70px; height: 70px; }
+    #flight-osd-bar { top: 140px; font-size: 0.58rem; padding: 4px 10px; gap: 8px; }
   }
 </style>
 </head>
@@ -1611,22 +1637,57 @@
       <div class="modal-close-btn" onclick="closeCombatModal()">✕</div>
     </div>
 
-    <!-- Mode Selector: Friends vs Single -->
+    <!-- Mode Selector: Online Friends vs Solo AI -->
     <div>
-      <div class="option-group-label">Mode</div>
+      <div class="option-group-label">Match Mode</div>
       <div class="choice-grid">
-        <div class="choice-card active" id="mode-choice-friends" onclick="selectMatchMode('friends')" style="padding:12px; text-align:center;">
+        <div class="choice-card active" id="mode-choice-friends" onclick="selectMatchMode('friends')" style="padding:10px; text-align:center;">
           <div class="choice-title" style="justify-content:center;">
-            <span style="color:var(--accent-friend)">👥</span>
-            Play with Friends
+            <span style="color:var(--accent-cyan)">🌐</span>
+            Play Online with Friends
           </div>
         </div>
-        <div class="choice-card" id="mode-choice-single" onclick="selectMatchMode('single')" style="padding:12px; text-align:center;">
+        <div class="choice-card" id="mode-choice-single" onclick="selectMatchMode('single')" style="padding:10px; text-align:center;">
           <div class="choice-title" style="justify-content:center;">
-            <span style="color:var(--accent-cyan)">👤</span>
-            Single Player
+            <span style="color:var(--text-secondary)">🤖</span>
+            Solo vs AI Bots
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Real-Time Multiplayer Room & Link Section -->
+    <div id="multiplayer-room-panel" style="background:rgba(255,255,255,0.03); border:1px solid var(--border-porcelain); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-family:var(--font-mono); font-size:0.68rem; color:var(--text-tertiary); letter-spacing:0.06em;">LIVE MULTIPLAYER SESSION</span>
+        <span id="mp-status-pill" style="font-family:var(--font-mono); font-size:0.62rem; padding:2px 8px; border-radius:12px; background:rgba(16,185,129,0.15); color:var(--accent-mint); border:1px solid rgba(16,185,129,0.3)">
+          ● READY TO FLY
+        </span>
+      </div>
+
+      <!-- Room Code & 1-Click Copy Invite Link -->
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div style="flex:1; background:rgba(7,9,14,0.85); border:1px solid var(--border-porcelain); border-radius:8px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-secondary);">ROOM:</span>
+          <span id="mp-room-code-display" style="font-family:var(--font-mono); font-size:0.95rem; font-weight:700; color:var(--accent-cyan); letter-spacing:0.08em;">SKY-842</span>
+        </div>
+        <button onclick="copyMultiplayerInviteLink()" class="action-btn" id="btn-copy-link" style="padding:9px 14px; font-size:0.72rem; background:rgba(0,229,255,0.16); border-color:var(--accent-cyan); color:var(--accent-cyan); font-weight:700; white-space:nowrap;">
+          📋 Copy Invite Link
+        </button>
+      </div>
+
+      <!-- Join a Friend's Room Input -->
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="text" id="mp-join-input" placeholder="Paste friend's link or enter code (e.g. SKY-842)..." style="flex:1; background:rgba(7,9,14,0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:7px 10px; font-family:var(--font-mono); font-size:0.7rem; color:#fff; outline:none;" />
+        <button onclick="joinRoomFromInput()" class="action-btn" style="padding:7px 14px; font-size:0.7rem; background:rgba(255,255,255,0.08); border-color:var(--border-porcelain); color:#fff; white-space:nowrap;">
+          Join Flight
+        </button>
+      </div>
+
+      <!-- Player Callsign & Connected Wingmen Counter -->
+      <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:0.65rem; color:var(--text-tertiary);">
+        <span>Callsign: <input type="text" id="mp-callsign-input" value="Ace-1" onchange="updatePlayerCallsign(this.value)" style="background:transparent; border:none; border-bottom:1px dashed var(--accent-cyan); color:var(--accent-cyan); font-family:var(--font-mono); font-size:0.68rem; width:80px; text-align:center; outline:none;" /></span>
+        <span id="mp-players-count" style="color:var(--astra-butter);">1 Pilot Connected</span>
       </div>
     </div>
 
@@ -1792,10 +1853,6 @@
           <span class="osd-val" id="osd-alt-val">1.2 M</span>
         </div>
         <div class="osd-item">
-          <span class="osd-label">BATT</span>
-          <span class="osd-val" id="osd-bat-val" style="color:var(--accent-mint)">22.8V (98%)</span>
-        </div>
-        <div class="osd-item">
           <span class="osd-label">ENEMIES</span>
           <span class="osd-val" id="osd-kills-val" style="color:var(--accent-enemy)">5 ACTIVE</span>
         </div>
@@ -1803,30 +1860,39 @@
           <span class="osd-label">COINS</span>
           <span class="osd-val" id="osd-coins-val" style="color:var(--accent-gold)">350</span>
         </div>
-        <button class="action-btn" id="osd-sound-btn" onclick="toggleMasterSound()" title="Toggle Master Audio [U]" style="padding:4px 10px; font-size:0.68rem; background:rgba(16,185,129,0.15); border-color:var(--accent-mint); color:var(--accent-mint)">
-          🔊 Sound: ON
-        </button>
-        <div class="osd-item" style="border-left:1px solid rgba(255,255,255,0.12); padding-left:10px;">
-          <span class="osd-label">CAM</span>
-          <select id="osd-cam-select" onchange="setCameraMode(this.value)" class="osd-cam-select" title="Switch Camera Mode [C]">
-            <option value="chase">Chase [1]</option>
-            <option value="fpv">FPV Cockpit [2]</option>
-            <option value="action">Action Cam [3]</option>
-            <option value="topdown">Top-Down [4]</option>
-            <option value="side">Wingman [5]</option>
-            <option value="reverse">Nose In [6]</option>
-            <option value="cinematic">Cinematic [7]</option>
-            <option value="orbit">Free Orbit [8]</option>
-          </select>
+        <div class="osd-desktop-tools" style="display:flex; align-items:center; gap:8px;">
+          <div class="osd-item">
+            <span class="osd-label">BATT</span>
+            <span class="osd-val" id="osd-bat-val" style="color:var(--accent-mint)">22.8V</span>
+          </div>
+          <button class="action-btn" id="osd-sound-btn" onclick="toggleMasterSound()" title="Toggle Master Audio [U]" style="padding:4px 10px; font-size:0.68rem; background:rgba(16,185,129,0.15); border-color:var(--accent-mint); color:var(--accent-mint)">
+            🔊 Sound
+          </button>
+          <div class="osd-item" style="border-left:1px solid rgba(255,255,255,0.12); padding-left:10px;">
+            <span class="osd-label">CAM</span>
+            <select id="osd-cam-select" onchange="setCameraMode(this.value)" class="osd-cam-select" title="Switch Camera Mode [C]">
+              <option value="chase">Chase [1]</option>
+              <option value="fpv">FPV Cockpit [2]</option>
+              <option value="action">Action Cam [3]</option>
+              <option value="topdown">Top-Down [4]</option>
+              <option value="side">Wingman [5]</option>
+              <option value="reverse">Nose In [6]</option>
+              <option value="cinematic">Cinematic [7]</option>
+              <option value="orbit">Free Orbit [8]</option>
+            </select>
+          </div>
+          <button onclick="toggleCameraDock()" class="action-btn" id="osd-cam-deck-btn" title="Toggle Camera Director Dock" style="padding:4px 10px; font-size:0.68rem; background:rgba(0,229,255,0.12); border-color:var(--accent-cyan); color:var(--accent-cyan)">
+            📹 Director
+          </button>
+          <button onclick="copyMultiplayerInviteLink()" class="action-btn" id="osd-invite-btn" title="Copy Invite Link to send to friends" style="padding:4px 10px; font-size:0.68rem; background:rgba(0,229,255,0.14); border-color:var(--accent-cyan); color:var(--accent-cyan); font-weight:700">
+            📋 Invite Friends
+          </button>
+          <button onclick="respawnDrone()" class="action-btn" style="padding:4px 12px; font-size:0.68rem; background:rgba(255,255,255,0.08); border-color:var(--border-porcelain)">
+            Respawn [R]
+          </button>
         </div>
-        <button onclick="toggleCameraDock()" class="action-btn" id="osd-cam-deck-btn" title="Toggle Camera Director Dock" style="padding:4px 10px; font-size:0.68rem; background:rgba(0,229,255,0.12); border-color:var(--accent-cyan); color:var(--accent-cyan)">
-          📹 Director
-        </button>
-        <button onclick="openCombatModal()" class="action-btn" style="padding:4px 12px; font-size:0.68rem; background:rgba(239,68,68,0.18); border-color:var(--accent-enemy); color:#fca5a5">
-          ⚙️ Match Setup
-        </button>
-        <button onclick="respawnDrone()" class="action-btn" style="padding:4px 12px; font-size:0.68rem; background:rgba(255,255,255,0.08); border-color:var(--border-porcelain)">
-          Respawn [R]
+        <button onclick="openCombatModal()" class="action-btn" style="padding:4px 10px; font-size:0.68rem; background:rgba(239,68,68,0.18); border-color:var(--accent-enemy); color:#fca5a5">
+          ⚙️ Setup
         </button>
       </div>
 
@@ -3529,6 +3595,7 @@ function setCameraMode(mode) {
   if (!CAMERA_MODES_ORDER.includes(mode)) mode = 'chase';
   cameraDirector.mode = mode;
   cameraMode = mode; // keep legacy sync
+  document.body.classList.toggle('cam-fpv', mode === 'fpv');
 
   // Update UI chips
   document.querySelectorAll('.cam-mode-chip').forEach(c => c.classList.remove('active'));
