@@ -1,4 +1,4 @@
-# ASTRA AEROSPACE — Industrial Drone Explainer & Flight Simulator
+# ASTRA AEROSPACE — Industrial Drone Explainer, Flight Simulator & Combat Arena
 
 An interactive, web-based 3D industrial drone explainer, real-world flight simulator, and aerial combat arena built with **Three.js** and high-precision physics simulation.
 
@@ -12,68 +12,83 @@ An interactive, web-based 3D industrial drone explainer, real-world flight simul
 
 ## 🌟 Key Features
 
-- **High-Fidelity 3D Drone Model**:
-  - Carbon fiber frame with matte coating and realistic structural arms
-  - High-torque brushless motors with spinning propeller discs and dynamic lift particles
-  - 3-axis stabilized 4K gimbal camera with dual-lens optical system & protective sensor ring
-  - LiDAR puck sensor, GPS mast with illuminated status rings, and dual battery bays
-  - Full lighting system: Navigation LEDs (Red port, Green stbd, White tail strobe), searchlights, and battery indicator bars
-- **Interactive Explainer & Hotspots**:
-  - Interactive clickable hotspots for key sub-systems (Propulsion, Avionics & LiDAR, Camera Gimbal, Power System)
-  - Detailed technical breakdowns and specifications for each subsystem
-  - Subsystem highlight & inspection modes with smooth camera focus transitions
-- **Real-World Flight Physics Simulator**:
-  - Realistic quadcopter flight dynamics (Pitch, Roll, Yaw, Collective Thrust)
-  - Inertia, aerodynamic drag, angular momentum, and ground collision detection
-  - Keyboard & interactive HUD controls (Throttle, Steering, Hover Lock, Return-To-Home)
-  - Dynamic wind vector simulation with configurable speed and turbulence
-  - Altitude, velocity, climb rate, and compass instrumentation overlays
-- **Modern Industrial UI**:
-  - Dark-mode glassmorphic HUD with telemetry displays and flight graphs
-  - Responsive design optimized for desktop and mobile displays
-  - Zero build step required — runs directly in modern browsers via vanilla HTML5, CSS3, and Three.js
+### 1. 🔍 High-Fidelity CAD & Inside X-Ray Inspector
+- **Aerospace Grade Composite Modeling**: Toray T700 carbon fiber frame, CNC aluminum motor clamps, and high-temperature neodymium outrunner BLDC motors.
+- **0–100% Exploded View Slider**: Smoothly slides the top canopy, battery pack, avionics stack, gimbal camera, and motor arms outward along mechanical axes.
+- **Inside X-Ray Mode**: Renders a translucent composite canopy revealing the internal STM32H7 flight controller, dual IMUs, 4-in-1 ESC, capacitor bank, and solid-state battery cells.
+- **Interactive Component Hotspots**: Deep technical specs for Chassis, Avionics, Motors, Propellers, Battery, and LiDAR.
+
+### 2. ✈️ 6-DOF Real-World Airspace Flight Simulator
+- **Expansive Real-World Airspace**: Procedural sculpted terrain with rolling mountains, a 520-meter active runway with painted thresholds, airport terminal, control tower with rotating radar dish, 36 downtown glass skyscrapers, 220+ 3D trees, wind turbines, and flyable 3D cloud banks.
+- **Smooth 6-DOF Flight Dynamics**: Direct heading-based velocity vectors, bank tilting, yaw turns, and an automatic barometric altitude-hold spring-damper.
+- **Clean Full-Screen View**: Sidebars automatically collapse during flight into an aerospace telemetry OSD bar (Airspeed, Altitude, Battery, Health).
+
+### 3. ⚔️ Aerial Combat Arena & Match Setup
+- **Match Deployment Modal**:
+  - **Play with Friends (Squad Co-Op)**: Deploy alongside 2 Allied Wingmen (*Viper-2* & *Ghost-4*) flying in echelon formation, assisting with laser fire and tactical radio transmissions.
+  - **Single Player (Solo Ace)**: Take on the hostile drone swarm alone.
+- **Audio & Radio Controls**:
+  - Master Sound & Weapon FX (`ON` / `OFF`) via procedural Web Audio synthesizer.
+  - Tactical Radio Chatter & killfeed alerts (`ON` / `OFF`).
+- **Swarm Threat Levels**: Cadet (3 enemies), Veteran (5 enemies), or Incursion (8 enemies).
+- **Weapons & Armory**: Dual Pulse Lasers, Homing Missiles with exhaust trails, EMP blast wave, and magnetic coin collection (+50 / +150 combo popups).
+
+### 4. 📹 Camera Director & Angle Controls Dock
+- **8 Dynamic Camera Modes**:
+  1. **Chase** (3rd-Person Tactical with heading lag)
+  2. **FPV Cockpit** (First-person nose gimbal view with horizon tilt)
+  3. **Action Cam** (Aggressive close-tail follow cam)
+  4. **Top-Down Recon** (32m satellite bird's-eye view)
+  5. **Wingman Cam** (Profile side flight view)
+  6. **Front Reverse** (Nose-in looking back at the drone)
+  7. **Cinematic 360°** (Continuous smooth orbit showcase)
+  8. **Free Orbit** (360° manual mouse/touch orbit & zoom anytime)
+- **7 Angle Presets**: Rear (0°), Front (180°), Port (-90°), Starboard (+90°), Top (85°), ISO (3/4), Underbelly (-35°), plus instant **Flip 180°** (`V`).
+- **Live Sliders**: Distance / Zoom (`2m` - `22m`), Vertical Tilt (`-35°` - `+35°`), and FOV (`45°` - `95°`).
 
 ---
 
-## 🎮 Flight Controls
+## 🎮 Flight & Combat Controls
 
-| Action | Keyboard | HUD Controls |
+| Action | Keyboard | Touch / Mouse Controls |
 | :--- | :--- | :--- |
-| **Throttle Up (Climb)** | `W` or `Arrow Up` | Dedicated Vertical Slider / Button |
-| **Throttle Down (Descent)** | `S` or `Arrow Down` | Dedicated Vertical Slider / Button |
-| **Yaw Left (Rotate Left)** | `A` or `Arrow Left` | Rudder Slider / Left Pad |
-| **Yaw Right (Rotate Right)**| `D` or `Arrow Right`| Rudder Slider / Right Pad |
-| **Pitch & Roll (Translate)**| `I` / `K` / `J` / `L` | Virtual Joystick Pad |
-| **Hover Lock (Auto-Level)**| `Space` | "Hover Lock" Toggle |
-| **Return to Home (RTH)** | `H` | "RTH" Button |
-| **Toggle Explainer / Flight Mode** | UI Switcher | Mode Selector Bar |
+| **Cruise / Move** | <kbd>W</kbd> <kbd>S</kbd> | Left Virtual Joystick |
+| **Strafe / Turn** | <kbd>A</kbd> <kbd>D</kbd> | Left Virtual Joystick |
+| **Yaw / Heading** | <kbd>Q</kbd> <kbd>E</kbd> | Right Virtual Joystick |
+| **Climb / Descend** | <kbd>SPACE</kbd> / <kbd>SHIFT</kbd> | Dedicated `▲` / `▼` Altitude Buttons |
+| **Dual Pulse Lasers** | **Left-Click** or <kbd>F</kbd> | `LASER` Action Button |
+| **Homing Missiles** | **Right-Click** or <kbd>M</kbd> | `MISSILE` Action Button |
+| **Cycle Camera Mode** | <kbd>C</kbd> | `📹 CAM` Button / OSD Dropdown |
+| **Flip Camera 180°** | <kbd>V</kbd> | Camera Director Flip Button |
+| **Direct Camera Modes** | Keys <kbd>1</kbd> – <kbd>8</kbd> | Camera Director Mode Chips |
+| **Match Setup Modal** | **⚙️ Match Setup** | OSD Action Button |
+| **Respawn / Center** | <kbd>R</kbd> | `↺ Respawn` Button |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Local Preview
-Simply open `index.html` in any modern web browser, or use a local HTTP server:
+Simply open `index.html` or `drone-explainer.html` in any modern web browser:
 
 ```bash
 # Using Python
 python -m http.server 3000
 
-# Using Node.js npx
+# Using Node.js
 npx serve .
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the simulator.
+Open [http://localhost:3000](http://localhost:3000) to launch the simulation.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Three.js** (WebGL 3D Rendering)
-- **OrbitControls** (Camera inspection manipulation)
-- **HTML5 & CSS3 Custom Properties** (Futuristic aerospace glassmorphic UI)
-- **Vanilla JavaScript** (Physics engine, vector math, telemetry computation)
-- **Vercel** (Cloud deployment & edge CDN hosting)
+- **Three.js** (WebGL 3D Rendering & Shaders)
+- **Web Audio API** (Procedural multi-oscillator turbine engine, laser plasma, missile thruster & explosion synthesizer)
+- **Vanilla HTML5 & CSS3** (Astra porcelain glassmorphism design system)
+- **Vercel** (Cloud deployment & global edge CDN)
 
 ---
 

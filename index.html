@@ -624,6 +624,237 @@
     font-weight: 700;
   }
 
+  /* 📹 CAMERA DIRECTOR & ANGLE CONTROLS DOCK 📹 */
+  #camera-director-dock {
+    position: absolute;
+    bottom: 84px;
+    left: 24px;
+    z-index: 250;
+    width: 330px;
+    max-width: 90vw;
+    background: rgba(14, 18, 28, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-porcelain);
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 24px rgba(0, 229, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    pointer-events: auto;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #camera-director-dock.minimized .dock-body {
+    display: none;
+  }
+  #camera-director-dock.minimized {
+    width: auto;
+    padding: 8px 14px;
+    border-radius: 24px;
+    bottom: 24px;
+  }
+  .dock-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .dock-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text-primary);
+  }
+  .dock-badge {
+    padding: 2px 7px;
+    font-size: 0.60rem;
+    font-family: var(--font-mono);
+    border-radius: 6px;
+    background: rgba(0, 229, 255, 0.15);
+    color: var(--accent-cyan);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    text-transform: uppercase;
+  }
+  .dock-toggle-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .dock-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+  }
+  .dock-body {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+  .dock-section-title {
+    font-size: 0.62rem;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .cam-grid-modes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+  .cam-mode-chip {
+    padding: 5px 3px;
+    border-radius: 7px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    font-size: 0.63rem;
+    font-family: var(--font-mono);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.18s;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cam-mode-chip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+  .cam-mode-chip.active {
+    background: rgba(0, 229, 255, 0.18);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+  }
+  .cam-grid-angles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+  .cam-angle-chip {
+    padding: 5px 3px;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-tertiary);
+    font-size: 0.60rem;
+    font-family: var(--font-mono);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.18s;
+    user-select: none;
+  }
+  .cam-angle-chip:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+  }
+  .cam-angle-chip.active {
+    background: rgba(238, 232, 250, 0.18);
+    border-color: var(--astra-lavender);
+    color: var(--astra-lavender);
+    font-weight: 700;
+  }
+  .cam-slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .cam-slider-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.62rem;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+  }
+  .cam-slider-header span.val {
+    color: var(--astra-butter);
+    font-weight: 700;
+  }
+  .cam-slider {
+    width: 100%;
+    height: 4px;
+    accent-color: var(--accent-cyan);
+    cursor: pointer;
+  }
+  .dock-quick-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .dock-quick-btn {
+    flex: 1;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 0.64rem;
+    font-family: var(--font-mono);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-porcelain);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .dock-quick-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+  }
+  .dock-hotkey-hint {
+    font-size: 0.58rem;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    padding-top: 6px;
+  }
+  .osd-cam-select {
+    background: rgba(7, 9, 14, 0.85);
+    border: 1px solid var(--border-porcelain);
+    border-radius: 6px;
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    padding: 3px 6px;
+    cursor: pointer;
+    outline: none;
+  }
+  .osd-cam-select option {
+    background: #0e121c;
+    color: #fff;
+  }
+  @media (max-width: 768px) {
+    #camera-director-dock {
+      bottom: auto;
+      top: 68px;
+      left: 10px;
+      width: 290px;
+      font-size: 0.65rem;
+    }
+  }
+
   /* ── COMBAT ARENA SETUP POPUP MODAL CARD ───────────────────── */
   #combat-setup-modal {
     position: fixed;
@@ -1057,8 +1288,13 @@
     pointer-events: none;
     z-index: 50;
   }
-  body.in-flight #mobile-controls {
+  /* Only show on real touch/mobile devices */
+  body.touch-device.in-flight #mobile-controls {
     display: block;
+  }
+  /* On touch devices, hide the keyboard legend (replaced by touch UI) */
+  body.touch-device #flight-controls-legend {
+    display: none !important;
   }
 
   /* Joystick zones */
@@ -1286,10 +1522,6 @@
       top: 64px;
       border-radius: 12px;
       font-size: 0.65rem;
-    }
-    /* Controls legend - hide on mobile (replaced by touch UI) */
-    #flight-controls-legend {
-      display: none !important;
     }
   }
 
@@ -1519,12 +1751,116 @@
           <span class="osd-label">COINS</span>
           <span class="osd-val" id="osd-coins-val" style="color:var(--accent-gold)">350</span>
         </div>
+        <div class="osd-item" style="border-left:1px solid rgba(255,255,255,0.12); padding-left:10px;">
+          <span class="osd-label">CAM</span>
+          <select id="osd-cam-select" onchange="setCameraMode(this.value)" class="osd-cam-select" title="Switch Camera Mode [C]">
+            <option value="chase">Chase [1]</option>
+            <option value="fpv">FPV Cockpit [2]</option>
+            <option value="action">Action Cam [3]</option>
+            <option value="topdown">Top-Down [4]</option>
+            <option value="side">Wingman [5]</option>
+            <option value="reverse">Nose In [6]</option>
+            <option value="cinematic">Cinematic [7]</option>
+            <option value="orbit">Free Orbit [8]</option>
+          </select>
+        </div>
+        <button onclick="toggleCameraDock()" class="action-btn" id="osd-cam-deck-btn" title="Toggle Camera Director Dock" style="padding:4px 10px; font-size:0.68rem; background:rgba(0,229,255,0.12); border-color:var(--accent-cyan); color:var(--accent-cyan)">
+          📹 Director
+        </button>
         <button onclick="openCombatModal()" class="action-btn" style="padding:4px 12px; font-size:0.68rem; background:rgba(239,68,68,0.18); border-color:var(--accent-enemy); color:#fca5a5">
           ⚙️ Match Setup
         </button>
         <button onclick="respawnDrone()" class="action-btn" style="padding:4px 12px; font-size:0.68rem; background:rgba(255,255,255,0.08); border-color:var(--border-porcelain)">
           Respawn [R]
         </button>
+      </div>
+
+      <!-- 📹 Floating Camera Director & Angle Controls Dock 📹 -->
+      <div id="camera-director-dock" class="interactive">
+        <div class="dock-header" onclick="toggleCameraDock()">
+          <div class="dock-title-wrap">
+            <span>📹 Camera Director</span>
+            <span class="dock-badge" id="cam-active-badge">CHASE</span>
+          </div>
+          <div class="dock-toggle-btn" id="dock-toggle-btn" title="Collapse / Expand">−</div >
+        </div>
+
+        <div class="dock-body">
+          <!-- Modes Section -->
+          <div>
+            <div class="dock-section-title">
+              <span>Camera Modes</span>
+              <span style="color:var(--accent-cyan)">[C] Cycle · [1-8]</span>
+            </div>
+            <div class="cam-grid-modes">
+              <div class="cam-mode-chip active" id="chip-chase" onclick="setCameraMode('chase')">Chase</div>
+              <div class="cam-mode-chip" id="chip-fpv" onclick="setCameraMode('fpv')">FPV</div>
+              <div class="cam-mode-chip" id="chip-action" onclick="setCameraMode('action')">Action</div>
+              <div class="cam-mode-chip" id="chip-topdown" onclick="setCameraMode('topdown')">Top-Down</div>
+              <div class="cam-mode-chip" id="chip-side" onclick="setCameraMode('side')">Wingman</div>
+              <div class="cam-mode-chip" id="chip-reverse" onclick="setCameraMode('reverse')">Front</div>
+              <div class="cam-mode-chip" id="chip-cinematic" onclick="setCameraMode('cinematic')">Cinema</div>
+              <div class="cam-mode-chip" id="chip-orbit" onclick="setCameraMode('orbit')">Free Orbit</div>
+            </div>
+          </div>
+
+          <!-- Angles Section -->
+          <div>
+            <div class="dock-section-title">
+              <span>View Angle Presets</span>
+              <span style="color:var(--astra-lavender)">[V] Flip 180°</span>
+            </div>
+            <div class="cam-grid-angles">
+              <div class="cam-angle-chip active" id="chip-angle-rear" onclick="setCameraAngle('rear')">Rear 0°</div>
+              <div class="cam-angle-chip" id="chip-angle-front" onclick="setCameraAngle('front')">Front 180°</div>
+              <div class="cam-angle-chip" id="chip-angle-left" onclick="setCameraAngle('left')">Port -90°</div>
+              <div class="cam-angle-chip" id="chip-angle-right" onclick="setCameraAngle('right')">Stbd +90°</div>
+              <div class="cam-angle-chip" id="chip-angle-top" onclick="setCameraAngle('top')">Top 85°</div>
+              <div class="cam-angle-chip" id="chip-angle-iso" onclick="setCameraAngle('iso')">ISO 3/4</div>
+              <div class="cam-angle-chip" id="chip-angle-under" onclick="setCameraAngle('under')">Belly -35°</div>
+              <div class="cam-angle-chip" onclick="flipCameraAngle()">Flip [V]</div>
+            </div>
+          </div>
+
+          <!-- Adjustments Sliders -->
+          <div class="cam-slider-row">
+            <div class="cam-slider-header">
+              <span>Distance / Zoom</span>
+              <span class="val" id="cam-dist-val">5.8 m</span>
+            </div>
+            <input type="range" class="cam-slider" id="cam-dist-slider" min="2" max="22" step="0.5" value="5.8" oninput="setCameraDist(this.value)">
+          </div>
+
+          <div class="cam-slider-row">
+            <div class="cam-slider-header">
+              <span>Vertical Tilt Angle</span>
+              <span class="val" id="cam-pitch-val">0°</span>
+            </div>
+            <input type="range" class="cam-slider" id="cam-pitch-slider" min="-35" max="35" step="1" value="0" oninput="setCameraPitch(this.value)">
+          </div>
+
+          <div class="cam-slider-row">
+            <div class="cam-slider-header">
+              <span>Field of View (FOV)</span>
+              <span class="val" id="cam-fov-val">65°</span>
+            </div>
+            <input type="range" class="cam-slider" id="cam-fov-slider" min="45" max="95" step="1" value="65" oninput="setCameraFOV(this.value)">
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="dock-quick-actions">
+            <button class="dock-quick-btn" onclick="flipCameraAngle()">
+              🔄 Flip 180° [V]
+            </button>
+            <button class="dock-quick-btn" onclick="resetCameraDefaults()">
+              🎯 Reset Cam
+            </button>
+          </div>
+
+          <div class="dock-hotkey-hint">
+            Hotkeys: [C] Cycle Cam · [V] Flip 180° · [1-8] Direct Mode
+          </div>
+        </div>
       </div>
 
       <!-- FPV Flight HUD overlay -->
@@ -1622,6 +1958,8 @@
         <div><span class="key-badge">A</span> <span class="key-badge">D</span> Strafe / Turn</div>
         <div><span class="key-badge">Q</span> <span class="key-badge">E</span> Yaw</div>
         <div><span class="key-badge">SPACE</span> / <span class="key-badge">SHIFT</span> Altitude</div>
+        <div style="color:var(--accent-cyan); font-weight:700"><span class="key-badge">C</span> Cam Mode</div>
+        <div style="color:var(--astra-lavender); font-weight:700"><span class="key-badge">V</span> Flip Angle</div>
         <div style="color:var(--accent-rose); font-weight:700"><span class="key-badge">L-CLICK / F</span> Shoot Laser</div>
         <div style="color:var(--accent-cyan); font-weight:700"><span class="key-badge">R-CLICK / M</span> Missile</div>
       </div>
@@ -1718,6 +2056,10 @@
       <button class="cam-btn active" id="cam-orbit" onclick="setCameraMode('orbit')">Orbit</button>
       <button class="cam-btn" id="cam-chase" onclick="setCameraMode('chase')">Chase</button>
       <button class="cam-btn" id="cam-fpv" onclick="setCameraMode('fpv')">FPV</button>
+      <button class="cam-btn" id="cam-action" onclick="setCameraMode('action')">Action</button>
+      <button class="cam-btn" id="cam-topdown" onclick="setCameraMode('topdown')">Top</button>
+      <button class="cam-btn" id="cam-cinematic" onclick="setCameraMode('cinematic')">Cinema</button>
+      <button class="cam-btn" onclick="toggleCameraDock()" title="Open Full Camera Director" style="color:var(--accent-cyan); font-weight:700">📹 Angles</button>
     </div>
   </footer>
 </div>
@@ -2667,6 +3009,20 @@ window.addEventListener('keydown', e => {
   if (e.code === 'KeyM' || e.key === 'm') {
     fireMissile();
   }
+  if (e.code === 'KeyC' || e.key === 'c') {
+    cycleCameraMode();
+  }
+  if (e.code === 'KeyV' || e.key === 'v') {
+    flipCameraAngle();
+  }
+  if (e.code === 'Digit1') setCameraMode('chase');
+  if (e.code === 'Digit2') setCameraMode('fpv');
+  if (e.code === 'Digit3') setCameraMode('action');
+  if (e.code === 'Digit4') setCameraMode('topdown');
+  if (e.code === 'Digit5') setCameraMode('side');
+  if (e.code === 'Digit6') setCameraMode('reverse');
+  if (e.code === 'Digit7') setCameraMode('cinematic');
+  if (e.code === 'Digit8') setCameraMode('orbit');
 });
 window.addEventListener('keyup', e => {
   keys[e.code] = false;
@@ -2967,10 +3323,196 @@ function toggleSpin() {
   document.getElementById('btn-spin').classList.toggle('active', isSpinning);
 }
 
+// 📹 CAMERA DIRECTOR STATE & ADVANCED CONTROLS 📹
+const cameraDirector = {
+  mode: 'chase', // 'chase', 'fpv', 'action', 'topdown', 'side', 'reverse', 'cinematic', 'orbit'
+  dist: 5.8,
+  pitchOffset: 0, // degrees: -35 to +35
+  yawAngleOffset: 0, // radians: 0, Math.PI, Math.PI/2, etc.
+  fov: 65,
+  cinematicAngle: 0,
+  isMinimized: false,
+  presetAngle: 'rear'
+};
+
+const CAMERA_MODES_ORDER = ['chase', 'fpv', 'action', 'topdown', 'side', 'reverse', 'cinematic', 'orbit'];
+
 function setCameraMode(mode) {
-  cameraMode = mode;
+  if (!CAMERA_MODES_ORDER.includes(mode)) mode = 'chase';
+  cameraDirector.mode = mode;
+  cameraMode = mode; // keep legacy sync
+
+  // Update UI chips
+  document.querySelectorAll('.cam-mode-chip').forEach(c => c.classList.remove('active'));
+  const activeChip = document.getElementById(`chip-${mode}`);
+  if (activeChip) activeChip.classList.add('active');
+
+  // Update CAD footer buttons
   document.querySelectorAll('.cam-btn-group .cam-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(`cam-${mode}`).classList.add('active');
+  const footBtn = document.getElementById(`cam-${mode}`);
+  if (footBtn) footBtn.classList.add('active');
+
+  // Update OSD dropdown
+  const osdSel = document.getElementById('osd-cam-select');
+  if (osdSel) osdSel.value = mode;
+
+  // Update Badge in Dock
+  const badge = document.getElementById('cam-active-badge');
+  if (badge) badge.textContent = mode.toUpperCase();
+
+  // Mode specific setup
+  if (mode === 'orbit') {
+    controls.enabled = true;
+    if (appMode === 'flight' || appMode === 'combat') {
+      controls.target.copy(player.pos);
+    } else {
+      controls.target.copy(droneMaster.position);
+    }
+  } else {
+    controls.enabled = false;
+  }
+
+  // Adjust default distances per mode
+  if (mode === 'action') {
+    cameraDirector.dist = 3.2;
+  } else if (mode === 'topdown') {
+    cameraDirector.dist = 32.0;
+  } else if (mode === 'fpv') {
+    cameraDirector.dist = 0.6;
+  } else if (mode === 'chase' || mode === 'side' || mode === 'reverse' || mode === 'cinematic') {
+    if (cameraDirector.dist < 4.0 || cameraDirector.dist > 18.0) cameraDirector.dist = 5.8;
+  }
+
+  // Update slider UI
+  const slider = document.getElementById('cam-dist-slider');
+  if (slider) slider.value = cameraDirector.dist;
+  const distVal = document.getElementById('cam-dist-val');
+  if (distVal) distVal.textContent = cameraDirector.dist.toFixed(1) + ' m';
+
+  showToast(`Camera: ${mode.toUpperCase()} MODE`);
+}
+
+function cycleCameraMode() {
+  const curIdx = CAMERA_MODES_ORDER.indexOf(cameraDirector.mode);
+  const nextIdx = (curIdx + 1) % CAMERA_MODES_ORDER.length;
+  setCameraMode(CAMERA_MODES_ORDER[nextIdx]);
+}
+
+function setCameraAngle(preset) {
+  cameraDirector.presetAngle = preset;
+  document.querySelectorAll('.cam-angle-chip').forEach(c => c.classList.remove('active'));
+  const chip = document.getElementById(`chip-angle-${preset}`);
+  if (chip) chip.classList.add('active');
+
+  if (preset === 'rear') {
+    cameraDirector.yawAngleOffset = 0;
+    cameraDirector.pitchOffset = 0;
+  } else if (preset === 'front') {
+    cameraDirector.yawAngleOffset = Math.PI;
+    cameraDirector.pitchOffset = 0;
+  } else if (preset === 'left') {
+    cameraDirector.yawAngleOffset = -Math.PI / 2;
+    cameraDirector.pitchOffset = 0;
+  } else if (preset === 'right') {
+    cameraDirector.yawAngleOffset = Math.PI / 2;
+    cameraDirector.pitchOffset = 0;
+  } else if (preset === 'top') {
+    cameraDirector.pitchOffset = 32;
+  } else if (preset === 'iso') {
+    cameraDirector.yawAngleOffset = Math.PI * 0.25;
+    cameraDirector.pitchOffset = 18;
+  } else if (preset === 'under') {
+    cameraDirector.pitchOffset = -22;
+  }
+
+  // Sync sliders
+  const pitchSlider = document.getElementById('cam-pitch-slider');
+  if (pitchSlider) pitchSlider.value = cameraDirector.pitchOffset;
+  const pitchVal = document.getElementById('cam-pitch-val');
+  if (pitchVal) pitchVal.textContent = Math.round(cameraDirector.pitchOffset) + '°';
+
+  // If in CAD mode, snap OrbitControls camera angle directly
+  if (appMode === 'inspect' || appMode === 'xray') {
+    const r = 5.2;
+    if (preset === 'top') {
+      camera.position.set(0, 6.0, 0.05);
+    } else if (preset === 'front') {
+      camera.position.set(0, 0.4, r);
+    } else if (preset === 'rear') {
+      camera.position.set(0, 0.4, -r);
+    } else if (preset === 'left') {
+      camera.position.set(-r, 0.4, 0);
+    } else if (preset === 'right') {
+      camera.position.set(r, 0.4, 0);
+    } else if (preset === 'iso') {
+      camera.position.set(3.8, 2.6, 3.8);
+    } else if (preset === 'under') {
+      camera.position.set(0, -3.2, 2.5);
+    }
+    controls.target.copy(droneMaster.position);
+    controls.update();
+  }
+
+  showToast(`View Angle: ${preset.toUpperCase()}`);
+}
+
+function flipCameraAngle() {
+  if (Math.abs(cameraDirector.yawAngleOffset - Math.PI) < 0.1) {
+    setCameraAngle('rear');
+  } else {
+    setCameraAngle('front');
+  }
+}
+
+function setCameraDist(val) {
+  cameraDirector.dist = parseFloat(val);
+  const el = document.getElementById('cam-dist-val');
+  if (el) el.textContent = cameraDirector.dist.toFixed(1) + ' m';
+}
+
+function setCameraPitch(val) {
+  cameraDirector.pitchOffset = parseFloat(val);
+  const el = document.getElementById('cam-pitch-val');
+  if (el) el.textContent = Math.round(cameraDirector.pitchOffset) + '°';
+}
+
+function setCameraFOV(val) {
+  cameraDirector.fov = parseFloat(val);
+  camera.fov = cameraDirector.fov;
+  camera.updateProjectionMatrix();
+  const el = document.getElementById('cam-fov-val');
+  if (el) el.textContent = Math.round(cameraDirector.fov) + '°';
+}
+
+function resetCameraDefaults() {
+  cameraDirector.dist = 5.8;
+  cameraDirector.pitchOffset = 0;
+  cameraDirector.yawAngleOffset = 0;
+  cameraDirector.fov = 65;
+  setCameraFOV(65);
+  setCameraAngle('rear');
+  setCameraMode('chase');
+
+  const distSlider = document.getElementById('cam-dist-slider');
+  if (distSlider) distSlider.value = 5.8;
+  const distVal = document.getElementById('cam-dist-val');
+  if (distVal) distVal.textContent = '5.8 m';
+
+  const pitchSlider = document.getElementById('cam-pitch-slider');
+  if (pitchSlider) pitchSlider.value = 0;
+  const pitchVal = document.getElementById('cam-pitch-val');
+  if (pitchVal) pitchVal.textContent = '0°';
+
+  showToast("Camera Reset to Defaults");
+}
+
+function toggleCameraDock() {
+  const dock = document.getElementById('camera-director-dock');
+  if (!dock) return;
+  cameraDirector.isMinimized = !cameraDirector.isMinimized;
+  dock.classList.toggle('minimized', cameraDirector.isMinimized);
+  const btn = document.getElementById('dock-toggle-btn');
+  if (btn) btn.textContent = cameraDirector.isMinimized ? '+' : '−';
 }
 
 function resetDroneView() {
@@ -3161,7 +3703,7 @@ function animate() {
     const yawL = keys['KeyQ'] || keys['q'];
     const yawR = keys['KeyE'] || keys['e'];
     const climb = keys['Space'] || keys[' '];
-    const descend = keys['ShiftLeft'] || keys['ShiftRight'] || keys['KeyC'] || keys['c'];
+    const descend = keys['ShiftLeft'] || keys['ShiftRight'] || keys['ControlLeft'] || keys['ControlRight'] || keys['KeyZ'] || keys['z'];
 
     if (player.missileCooldown > 0) player.missileCooldown -= dt;
     if (player.fireCooldown > 0) player.fireCooldown -= dt;
@@ -3415,25 +3957,86 @@ function animate() {
     audio.updateRpm(0);
   }
 
-  // 8. CAMERA MODES
-  if (cameraMode === 'chase') {
+  // 8. ADVANCED CAMERA DIRECTOR MODES & ANGLES
+  const pitchRad = ((cameraDirector.pitchOffset || 0) * Math.PI) / 180;
+  const totalYaw = player.yaw + (cameraDirector.yawAngleOffset || 0);
+  const activeDist = Math.max(1.8, cameraDirector.dist || 5.8);
+
+  if (cameraDirector.mode === 'chase') {
     controls.enabled = false;
-    const chaseDist = 5.8;
-    const chaseHeight = 2.2;
-    const camTargetX = player.pos.x - Math.sin(player.yaw) * chaseDist;
-    const camTargetZ = player.pos.z - Math.cos(player.yaw) * chaseDist;
-    const camTargetY = player.pos.y + chaseHeight;
+    const chaseHeight = 2.0 + Math.sin(pitchRad) * activeDist;
+    const hDist = Math.cos(pitchRad) * activeDist;
+    const camTargetX = player.pos.x - Math.sin(totalYaw) * hDist;
+    const camTargetZ = player.pos.z - Math.cos(totalYaw) * hDist;
+    const camTargetY = Math.max(0.6, player.pos.y + chaseHeight);
 
     const targetCamPos = new THREE.Vector3(camTargetX, camTargetY, camTargetZ);
     camera.position.lerp(targetCamPos, 0.12);
     camera.lookAt(player.pos.x, player.pos.y + 0.6, player.pos.z);
-  } else if (cameraMode === 'fpv') {
+  } else if (cameraDirector.mode === 'action') {
     controls.enabled = false;
-    camera.position.copy(player.pos).add(new THREE.Vector3(0, 0.22, 0).add(new THREE.Vector3(Math.sin(player.yaw) * 0.55, 0, Math.cos(player.yaw) * 0.55)));
-    const lookTarget = player.pos.clone().add(new THREE.Vector3(Math.sin(player.yaw) * 40, -player.pitch * 25, Math.cos(player.yaw) * 40));
+    const hDist = Math.max(2.0, activeDist * 0.55);
+    const chaseHeight = 1.0 + Math.sin(pitchRad) * hDist;
+    const camTargetX = player.pos.x - Math.sin(totalYaw) * hDist;
+    const camTargetZ = player.pos.z - Math.cos(totalYaw) * hDist;
+    const camTargetY = Math.max(0.4, player.pos.y + chaseHeight);
+
+    const targetCamPos = new THREE.Vector3(camTargetX, camTargetY, camTargetZ);
+    camera.position.lerp(targetCamPos, 0.22);
+    camera.lookAt(player.pos.x, player.pos.y + 0.4, player.pos.z);
+  } else if (cameraDirector.mode === 'fpv') {
+    controls.enabled = false;
+    const forwardVec = new THREE.Vector3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
+    camera.position.copy(player.pos).add(new THREE.Vector3(0, 0.22, 0)).addScaledVector(forwardVec, 0.55);
+    const lookPitch = -player.pitch * 25 + pitchRad * 15;
+    const lookTarget = player.pos.clone().add(new THREE.Vector3(
+      Math.sin(player.yaw) * 45,
+      lookPitch * 1.5,
+      Math.cos(player.yaw) * 45
+    ));
     camera.lookAt(lookTarget);
+  } else if (cameraDirector.mode === 'topdown') {
+    controls.enabled = false;
+    const topAlt = Math.max(16, activeDist * 2.2);
+    const targetCamPos = new THREE.Vector3(player.pos.x, player.pos.y + topAlt, player.pos.z + 0.001);
+    camera.position.lerp(targetCamPos, 0.15);
+    camera.lookAt(player.pos.x, player.pos.y, player.pos.z);
+  } else if (cameraDirector.mode === 'side') {
+    controls.enabled = false;
+    const sideVec = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+    const sideDist = activeDist * 0.9;
+    const targetCamPos = player.pos.clone()
+      .addScaledVector(sideVec, sideDist)
+      .add(new THREE.Vector3(0, 1.2 + Math.sin(pitchRad) * 3, 0));
+    camera.position.lerp(targetCamPos, 0.12);
+    camera.lookAt(player.pos.x, player.pos.y + 0.4, player.pos.z);
+  } else if (cameraDirector.mode === 'reverse') {
+    controls.enabled = false;
+    const hDist = activeDist;
+    const targetCamPos = new THREE.Vector3(
+      player.pos.x + Math.sin(player.yaw) * hDist,
+      player.pos.y + 1.2 + Math.sin(pitchRad) * 3,
+      player.pos.z + Math.cos(player.yaw) * hDist
+    );
+    camera.position.lerp(targetCamPos, 0.12);
+    camera.lookAt(player.pos.x, player.pos.y + 0.4, player.pos.z);
+  } else if (cameraDirector.mode === 'cinematic') {
+    controls.enabled = false;
+    cameraDirector.cinematicAngle += dt * 0.45;
+    const orbitR = Math.max(4.5, activeDist);
+    const targetCamPos = new THREE.Vector3(
+      player.pos.x + Math.sin(cameraDirector.cinematicAngle) * orbitR,
+      player.pos.y + 1.8 + Math.sin(cameraDirector.cinematicAngle * 0.6) * 1.2,
+      player.pos.z + Math.cos(cameraDirector.cinematicAngle) * orbitR
+    );
+    camera.position.lerp(targetCamPos, 0.08);
+    camera.lookAt(player.pos.x, player.pos.y + 0.5, player.pos.z);
   } else {
+    // 'orbit' Free Orbit mode
     controls.enabled = true;
+    if (appMode === 'flight' || appMode === 'combat') {
+      controls.target.lerp(player.pos, 0.1);
+    }
     controls.update();
   }
 
@@ -3451,8 +4054,18 @@ window.addEventListener('resize', () => {
 (function setupMobileControls() {
   const isTouchDevice = () => ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
-  // Init audio on touch too
-  window.addEventListener('touchstart', () => audio.init(), { once: true });
+  // Mark body as touch device so CSS can gate the mobile UI
+  function applyTouchClass() {
+    if (isTouchDevice()) {
+      document.body.classList.add('touch-device');
+    }
+  }
+  applyTouchClass();
+  // Also detect on first touch (for devices that report touch late)
+  window.addEventListener('touchstart', () => {
+    document.body.classList.add('touch-device');
+    audio.init();
+  }, { once: true });
 
   // Virtual key state driven by joysticks
   const vkeys = {
@@ -3611,6 +4224,10 @@ window.addEventListener('resize', () => {
     if (appMode === 'combat' || appMode === 'flight') fireMissile();
   });
   tapAction(respawnBtn, respawnDrone);
+  const camBtn = document.getElementById('mob-cam-btn');
+  if (camBtn) {
+    tapAction(camBtn, cycleCameraMode);
+  }
 })();
 
 // Start loop
@@ -3654,6 +4271,10 @@ animate();
     <button class="mob-btn missile" id="mob-missile-btn" aria-label="Fire missile">
       <span class="btn-icon">🚀</span>
       <span class="btn-label">Missile</span>
+    </button>
+    <button class="mob-btn" id="mob-cam-btn" aria-label="Cycle Camera" style="border-color:var(--accent-cyan); color:var(--accent-cyan); background:rgba(0,229,255,0.12)">
+      <span class="btn-icon">📹</span>
+      <span class="btn-label">CAM</span>
     </button>
   </div>
 </div>
