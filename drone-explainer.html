@@ -648,18 +648,16 @@
   }
 
   /* Strict separation between Flight Simulator and Combat Arena */
-  .combat-only {
-    display: flex !important;
-  }
-  body:not(.mode-combat) .combat-only {
+  body:not(.mode-combat) .combat-only,
+  body:not(.mode-combat) #combat-reticle-container,
+  body:not(.mode-combat) #mouse-aim-indicator,
+  body:not(.mode-combat) #scope-viewfinder-overlay,
+  body:not(.mode-combat) #combat-hud-overlay {
     display: none !important;
   }
 
-  .flight-only {
+  body:not(.mode-flight) .flight-only {
     display: none !important;
-  }
-  body.mode-flight .flight-only {
-    display: flex !important;
   }
 
   /* Center Dynamic Crosshair */
@@ -2306,7 +2304,7 @@
   }
 </style>
 </head>
-<body>
+<body class="mode-inspect">
 
 <!-- WebGL 3D Canvas -->
 <canvas id="webgl-canvas"></canvas>
@@ -2570,13 +2568,21 @@
           <span class="osd-label">ALT</span>
           <span class="osd-val" id="osd-alt-val">1.2 M</span>
         </div>
-        <div class="osd-item">
+        <div class="osd-item combat-only" id="osd-enemies-box">
           <span class="osd-label">ENEMIES</span>
           <span class="osd-val" id="osd-kills-val" style="color:var(--accent-enemy)">5 ACTIVE</span>
         </div>
-        <div class="osd-item">
+        <div class="osd-item combat-only" id="osd-coins-box">
           <span class="osd-label">COINS</span>
           <span class="osd-val" id="osd-coins-val" style="color:var(--accent-gold)">350</span>
+        </div>
+        <div class="osd-item flight-only" id="osd-flight-status-box">
+          <span class="osd-label">MODE</span>
+          <span class="osd-val" style="color:var(--accent-mint)">PEACEFUL CRUISE</span>
+        </div>
+        <div class="osd-item flight-only" id="osd-heading-box">
+          <span class="osd-label">HEADING</span>
+          <span class="osd-val" id="osd-hdg-val" style="color:var(--accent-cyan)">360° N</span>
         </div>
         <!-- Online Friends Multiplayer Squad Pill (Always visible on Mobile & Desktop) -->
         <div id="osd-multiplayer-badge" onclick="shareNativeInviteLink()" title="Tap to invite wingmen or share room link" style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,229,255,0.16); border:1px solid rgba(0,229,255,0.45); border-radius:14px; padding:3px 9px; cursor:pointer; user-select:none;">
@@ -2615,11 +2621,11 @@
           <button onclick="respawnDrone()" class="action-btn" style="padding:4px 12px; font-size:0.68rem; background:rgba(255,255,255,0.08); border-color:var(--border-porcelain)">
             Respawn [R]
           </button>
-          <button onclick="toggleCodmHud()" class="action-btn" id="osd-codm-hud-btn" title="Toggle Call of Duty Mobile HUD (Desktop & Touch)" style="padding:4px 10px; font-size:0.68rem; background:rgba(244,63,94,0.18); border-color:#f43f5e; color:#fca5a5; font-weight:700">
+          <button onclick="toggleCodmHud()" class="action-btn combat-only" id="osd-codm-hud-btn" title="Toggle Call of Duty Mobile HUD (Desktop & Touch)" style="padding:4px 10px; font-size:0.68rem; background:rgba(244,63,94,0.18); border-color:#f43f5e; color:#fca5a5; font-weight:700">
             📱 CODM HUD
           </button>
         </div>
-        <button onclick="openCombatModal()" class="action-btn" style="padding:4px 10px; font-size:0.68rem; background:rgba(239,68,68,0.18); border-color:var(--accent-enemy); color:#fca5a5">
+        <button onclick="openCombatModal()" id="osd-combat-setup-btn" class="action-btn combat-only" style="padding:4px 10px; font-size:0.68rem; background:rgba(239,68,68,0.18); border-color:var(--accent-enemy); color:#fca5a5">
           ⚙️ Setup
         </button>
       </div>
@@ -2898,7 +2904,7 @@
         </div>
 
         <!-- Left-Thumb / Claw Quick-Fire Button (CODM 3-claw setup) -->
-        <div class="codm-left-fire" id="codm-left-fire" title="Left Fire Button">
+        <div class="codm-left-fire combat-only" id="codm-left-fire" title="Left Fire Button">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="9"/>
             <line x1="12" y1="3" x2="12" y2="7"/>
@@ -2912,7 +2918,7 @@
         <!-- Right Side: CODM Action Cluster -->
         <div class="codm-action-cluster">
           <!-- 1-Tap ADS Fire Button (Auto-Scopes & Fires) -->
-          <div class="codm-ads-fire" id="codm-ads-fire" title="1-Tap ADS Fire">
+          <div class="codm-ads-fire combat-only" id="codm-ads-fire" title="1-Tap ADS Fire">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/>
               <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
@@ -2923,7 +2929,7 @@
           </div>
 
           <!-- Hip-Fire Button (Tight Spray without scoping) -->
-          <div class="codm-hip-fire" id="codm-hip-fire" title="Hip-Fire">
+          <div class="codm-hip-fire combat-only" id="codm-hip-fire" title="Hip-Fire">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="8"/>
               <circle cx="12" cy="12" r="2" fill="#f97316"/>
@@ -2933,7 +2939,7 @@
           </div>
 
           <!-- Dedicated Scope / Optic Toggle Button -->
-          <div class="codm-scope-btn" id="codm-scope-btn" title="Toggle ADS Sniper Scope">
+          <div class="codm-scope-btn combat-only" id="codm-scope-btn" title="Toggle ADS Sniper Scope">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="9"/>
               <line x1="12" y1="3" x2="12" y2="21"/>
@@ -2944,7 +2950,7 @@
           </div>
 
           <!-- Fox-2 Homing Missile / Scorestreak Launch Button -->
-          <div class="codm-missile-btn" id="codm-missile-btn" title="Fox-2 Homing Missile">
+          <div class="codm-missile-btn combat-only" id="codm-missile-btn" title="Fox-2 Homing Missile">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 2l3 5-3 15-3-15z"/>
               <path d="M9 14l-4 4 1 2 5-2"/>
@@ -2993,7 +2999,7 @@
         </div>
 
         <!-- Bottom Center: CODM Tactical Weapon Dock -->
-        <div class="codm-weapon-dock">
+        <div class="codm-weapon-dock combat-only">
           <div class="codm-weapon-card active" id="codm-wep-laser" onclick="buyOrSelectWeapon('laser')">
             <div class="codm-weapon-name">PRIMARY</div>
             <div class="codm-weapon-status">
@@ -4053,14 +4059,13 @@ function createCombatDroneMesh(isEnemy = true) {
   return { mesh: root, props };
 }
 
-// Spawn Enemy Squad (Up to 8 Rogue Drones based on difficulty)
+// Spawn Enemy Squad (Up to 8 Rogue Drones - Only active in Combat Arena)
 for (let i = 0; i < 8; i++) {
   const dObj = createCombatDroneMesh(true);
   const startX = -140 + i * 45;
   const startY = 22 + Math.random() * 25;
   const startZ = 120 + (i % 2 === 0 ? 80 : -40);
   dObj.mesh.position.set(startX, startY, startZ);
-  scene.add(dObj.mesh);
 
   const droneState = {
     id: `ROGUE-0${i + 1}`,
@@ -4074,21 +4079,19 @@ for (let i = 0; i < 8; i++) {
     maxHp: 100,
     shield: 50,
     maxShield: 50,
-    alive: (i < 5), // Default to 5 enemies for Veteran
+    alive: false, // Inactive by default - ONLY added to scene in Combat Arena
     target: null,
     fireTimer: Math.random() * 2,
     respawnTimer: 0
   };
   combatDrones.push(droneState);
   enemyTeam.push(droneState);
-  if (!droneState.alive) scene.remove(dObj.mesh);
 }
 
-// Spawn Friendly Wingmen (Blue Team - 2 Wingman Escorts)
+// Spawn Friendly Wingmen (Blue Team - 2 Wingman Escorts - Only active in Combat Arena)
 for (let i = 0; i < 2; i++) {
   const dObj = createCombatDroneMesh(false);
   dObj.mesh.position.set((i === 0 ? -12 : 12), 4, (i === 0 ? -12 : -18));
-  scene.add(dObj.mesh);
 
   const droneState = {
     id: `WINGMAN-0${i + 1}`,
@@ -4102,7 +4105,7 @@ for (let i = 0; i < 2; i++) {
     maxHp: 120,
     shield: 80,
     maxShield: 80,
-    alive: true,
+    alive: false, // Inactive by default - ONLY added to scene in Combat Arena
     target: null,
     fireTimer: 1.0,
     respawnTimer: 0
@@ -4359,10 +4362,10 @@ window.addEventListener('keydown', e => {
     respawnDrone();
   }
   if (e.code === 'KeyF' || e.key === 'f') {
-    fireLaser();
+    if (appMode === 'combat') fireLaser();
   }
-  if (e.code === 'KeyM' || e.key === 'm' || e.code === 'KeyE' || e.key === 'e') {
-    fireMissile();
+  if (e.code === 'KeyM' || e.key === 'm') {
+    if (appMode === 'combat') fireMissile();
   }
   if (e.code === 'KeyC' || e.key === 'c') {
     cycleCameraMode();
@@ -4425,16 +4428,22 @@ window.addEventListener('mousedown', (e) => {
   if (modal && modal.classList.contains('active')) return;
   if (e.target.closest('.interactive') || e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) return;
 
-  if (e.button === 0) { // Left Click: Fire Laser & engage continuous auto-stream
-    mouseAim.isMouseDown = true;
-    fireLaser();
-    mouseAim.continuousFireTimer = 0.115;
-  } else if (e.button === 2) { // Right Click: ADS Precision Scope Zoom
+  if (e.button === 0) { // Left Click: Fire Laser (Combat Only)
+    if (appMode === 'combat') {
+      mouseAim.isMouseDown = true;
+      fireLaser();
+      mouseAim.continuousFireTimer = 0.115;
+    }
+  } else if (e.button === 2) { // Right Click: ADS Scope (Combat Only)
     e.preventDefault();
-    mouseAim.isAds = true;
-  } else if (e.button === 1) { // Middle Click: Homing Missile
+    if (appMode === 'combat') {
+      mouseAim.isAds = true;
+    }
+  } else if (e.button === 1) { // Middle Click: Homing Missile (Combat Only)
     e.preventDefault();
-    fireMissile();
+    if (appMode === 'combat') {
+      fireMissile();
+    }
   }
 });
 
@@ -5322,7 +5331,7 @@ function distPointToSegment(pt, a, b) {
 }
 
 function updateTacticalTargeting(dt) {
-  if (appMode !== 'combat' && appMode !== 'flight') {
+  if (appMode !== 'combat') {
     hideTargetHUD();
     return;
   }
@@ -5473,6 +5482,7 @@ function spawnDamageNumber(pos3D, amount, isCrit = false) {
 
 // ── WEAPON ACTIONS (SMART LASER CONVERGENCE & HOMING MISSILE) ──
 function fireLaser(fromDrone = null, targetPos = null) {
+  if (appMode !== 'combat') return;
   const isPlayer = !fromDrone;
   const origin = isPlayer ? player.pos.clone().add(new THREE.Vector3(0, 0.2, 0)) : fromDrone.pos.clone().add(new THREE.Vector3(0, 0.2, 0));
   const yaw = isPlayer ? player.yaw : fromDrone.yaw;
@@ -5526,6 +5536,7 @@ function fireLaser(fromDrone = null, targetPos = null) {
 }
 
 function fireMissile() {
+  if (appMode !== 'combat') return;
   if (player.missileCooldown > 0) return;
   player.missileCooldown = 1.4;
 
@@ -5635,7 +5646,12 @@ function updateHealthBars() {
 function setAppMode(mode) {
   appMode = mode;
   document.querySelectorAll('.segmented-tabs .nav-btn').forEach(btn => btn.classList.remove('active'));
-  document.getElementById(`tab-${mode}`).classList.add('active');
+  const tabBtn = document.getElementById(`tab-${mode}`);
+  if (tabBtn) tabBtn.classList.add('active');
+
+  // Maintain clean body mode classes
+  document.body.classList.remove('mode-combat', 'mode-flight', 'mode-inspect', 'mode-xray');
+  document.body.classList.add(`mode-${mode}`);
 
   const workspace = document.getElementById('workspace');
   const hudOverlay = document.getElementById('flight-hud-overlay');
@@ -5643,26 +5659,57 @@ function setAppMode(mode) {
   const controlsLegend = document.getElementById('flight-controls-legend');
   const osdBar = document.getElementById('flight-osd-bar');
 
-  if (mode === 'combat' || mode === 'flight') {
+  if (mode === 'combat') {
     document.body.classList.add('in-flight');
     workspace.classList.add('flight-mode');
     hudOverlay.classList.add('active');
     controlsLegend.classList.add('active');
     osdBar.classList.add('active');
+    combatOverlay.classList.add('active');
     setCameraMode('chase');
-
-    if (mode === 'combat') {
-      combatOverlay.classList.add('active');
-      openCombatModal(); // POPUP CARD APPEARS AUTOMATICALLY ON COMBAT ARENA
-    } else {
-      combatOverlay.classList.remove('active');
-      showToast("Flight Simulator Active — Full real-world airspace view!");
-    }
+    openCombatModal(); // Combat setup modal
 
     if (player.pos.y < 1.0) {
       player.pos.y = 1.5;
       player.targetY = 1.5;
     }
+  } else if (mode === 'flight') {
+    document.body.classList.add('in-flight');
+    workspace.classList.add('flight-mode');
+    hudOverlay.classList.add('active');
+    controlsLegend.classList.add('active');
+    osdBar.classList.add('active');
+    combatOverlay.classList.remove('active');
+    setCameraMode('chase');
+    closeCombatModal();
+    hideTargetHUD();
+
+    // REMOVE ALL ROGUE ENEMY DRONES & BOT WINGMEN IN FLIGHT SIMULATOR!
+    enemyTeam.forEach(d => {
+      d.alive = false;
+      scene.remove(d.mesh);
+    });
+    friendTeam.forEach(d => {
+      d.alive = false;
+      scene.remove(d.mesh);
+    });
+
+    // Remove all projectiles
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+      scene.remove(projectiles[i].mesh);
+    }
+    projectiles.length = 0;
+
+    // Reset health to 100% full
+    player.hull = 100;
+    player.shield = 100;
+    updateHealthBars();
+
+    if (player.pos.y < 1.0) {
+      player.pos.y = 1.5;
+      player.targetY = 1.5;
+    }
+    showToast("Flight Simulator Active — Peaceful free flight & exploration (No enemies)!");
   } else {
     document.body.classList.remove('in-flight');
     workspace.classList.remove('flight-mode');
@@ -5670,6 +5717,15 @@ function setAppMode(mode) {
     combatOverlay.classList.remove('active');
     controlsLegend.classList.remove('active');
     osdBar.classList.remove('active');
+    closeCombatModal();
+    hideTargetHUD();
+
+    // Remove all combat drones & projectiles
+    enemyTeam.forEach(d => { d.alive = false; scene.remove(d.mesh); });
+    friendTeam.forEach(d => { d.alive = false; scene.remove(d.mesh); });
+    for (let i = projectiles.length - 1; i >= 0; i--) { scene.remove(projectiles[i].mesh); }
+    projectiles.length = 0;
+
     setCameraMode('orbit');
   }
 
@@ -6120,8 +6176,8 @@ function animate() {
     const climb = keys['Space'] || keys[' '];
     const descend = keys['ShiftLeft'] || keys['ShiftRight'] || keys['ControlLeft'] || keys['ControlRight'] || keys['KeyZ'] || keys['z'];
 
-    // Continuous full-auto laser cannon fire
-    if (mouseAim.isMouseDown || keys['KeyF'] || keys['f']) {
+    // Continuous full-auto laser cannon fire (COMBAT ARENA ONLY)
+    if (appMode === 'combat' && (mouseAim.isMouseDown || keys['KeyF'] || keys['f'])) {
       mouseAim.continuousFireTimer -= dt;
       if (mouseAim.continuousFireTimer <= 0) {
         fireLaser();
@@ -6129,18 +6185,19 @@ function animate() {
       }
     }
 
-    // ADS Scope Zoom FOV Transition
-    const targetFov = mouseAim.isAds ? 42.0 : (cameraDirector.fov || 70.0);
+    // ADS Scope Zoom FOV Transition (COMBAT ARENA ONLY)
+    const isAdsActive = (appMode === 'combat' && mouseAim.isAds);
+    const targetFov = isAdsActive ? 42.0 : (cameraDirector.fov || 70.0);
     camera.fov += (targetFov - camera.fov) * dt * 10.0;
     camera.updateProjectionMatrix();
 
     const scopeOverlay = document.getElementById('ads-scope-overlay');
-    if (scopeOverlay) scopeOverlay.classList.toggle('active', mouseAim.isAds);
+    if (scopeOverlay) scopeOverlay.classList.toggle('active', isAdsActive);
 
     const crosshairEl = document.getElementById('reticle-crosshair');
     if (crosshairEl) {
-      crosshairEl.classList.toggle('ads', mouseAim.isAds);
-      crosshairEl.classList.toggle('firing', mouseAim.isMouseDown);
+      crosshairEl.classList.toggle('ads', isAdsActive);
+      crosshairEl.classList.toggle('firing', appMode === 'combat' && mouseAim.isMouseDown);
     }
 
     if (player.missileCooldown > 0) player.missileCooldown -= dt;
@@ -6210,13 +6267,22 @@ function animate() {
     document.getElementById('osd-spd-val').textContent = `${horizontalSpeed.toFixed(1)} M/S`;
     document.getElementById('osd-alt-val').textContent = `${Math.max(0, player.pos.y - 0.45).toFixed(1)} M`;
 
+    // Flight Simulator Compass Heading
+    const deg = Math.round(((player.yaw % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI));
+    const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const compDir = dirs[Math.round(deg / 45) % 8];
+    const hdgEl = document.getElementById('osd-hdg-val');
+    if (hdgEl) hdgEl.textContent = `${deg.toString().padStart(3, '0')}° ${compDir}`;
+
     const ladder = document.getElementById('horizon-pitch-ladder');
     if (ladder) {
       ladder.style.transform = `rotate(${-Math.round(player.roll * (180 / Math.PI))}deg) translateY(${Math.round(player.pitch * (180 / Math.PI)) * 2}px)`;
     }
 
-    // Update Tactical HUD Target Box & Lead Prediction Pip
-    updateTacticalTargeting(dt);
+    // Update Tactical HUD Target Box & Lead Prediction Pip (Combat Arena Only)
+    if (appMode === 'combat') {
+      updateTacticalTargeting(dt);
+    }
 
     // Airspace Perimeter Boundary Warning (2,400m radius)
     const distFromOrigin = Math.hypot(player.pos.x, player.pos.z);
@@ -6249,9 +6315,8 @@ function animate() {
     }
   }
 
-  // 4. MULTIPLAYER AI SWARM & REMOTE PILOTS LOGIC
+  // 4. MULTIPLAYER REMOTE HUMAN FORMATION (Flight & Combat)
   if (appMode === 'combat' || appMode === 'flight') {
-    // 4.1 Smooth Interpolation for Remote Human Friends
     if (window.mpEngine && window.mpEngine.remotePlayers) {
       window.mpEngine.remotePlayers.forEach(rp => {
         rp.mesh.position.lerp(rp.targetPos, 0.22);
@@ -6264,13 +6329,16 @@ function animate() {
         rp.props.forEach(p => p.rotation.y += 0.45);
       });
     }
+  }
 
+  // 4.2 AI COMBAT SWARM & ENEMY SQUAD (STRICTLY COMBAT ARENA GAME MODE ONLY)
+  if (appMode === 'combat') {
     let aliveEnemies = 0;
 
     combatDrones.forEach(d => {
       if (!d.alive) {
         d.respawnTimer += dt;
-        if (d.respawnTimer > 7.0 && appMode === 'combat') {
+        if (d.respawnTimer > 7.0) {
           d.alive = true;
           d.hp = d.maxHp;
           d.shield = d.maxShield;
@@ -6338,7 +6406,8 @@ function animate() {
       }
     });
 
-    document.getElementById('osd-kills-val').textContent = `${aliveEnemies} ACTIVE`;
+    const killsEl = document.getElementById('osd-kills-val');
+    if (killsEl) killsEl.textContent = `${aliveEnemies} ACTIVE`;
   }
 
   // 5. PROJECTILES & COLLISION DETECTION (Anti-Tunneling Line Segment Raycast)
@@ -6357,7 +6426,7 @@ function animate() {
     const nextP = p.mesh.position.clone();
     let hit = false;
 
-    if (p.isEnemy || p.isRemotePeer) {
+    if (appMode === 'combat' && (p.isEnemy || p.isRemotePeer)) {
       const distToPlayer = distPointToSegment(player.pos, currentP, nextP);
       if (distToPlayer < 4.2) {
         hit = true;
