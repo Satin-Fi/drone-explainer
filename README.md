@@ -23,10 +23,17 @@ An interactive, web-based 3D industrial drone explainer, real-world flight simul
 - **Smooth 6-DOF Flight Dynamics**: Direct heading-based velocity vectors, bank tilting, yaw turns, and an automatic barometric altitude-hold spring-damper.
 - **Clean Full-Screen View**: Sidebars automatically collapse during flight into an aerospace telemetry OSD bar (Airspeed, Altitude, Battery, Health).
 
-### 3. ⚔️ Aerial Combat Arena & Match Setup
+### 3. ⚔️ Aerial Combat Arena & Real-Time Multiplayer
+- **Real-Time WebRTC P2P Multiplayer (PeerJS)**:
+  - **Invite Link Sharing**: Generate unique room codes (e.g. `SKY-842`) and copy an instant shareable URL (`https://drone-explainer.vercel.app/?room=SKY-842`).
+  - **Auto-Join Link Detection**: Friends opening the invite link automatically join the airspace and connect to your flight formation.
+  - **3D Remote Drone Synchronization**: High-frequency (~25Hz) smooth position/rotation interpolation, spinning propellers, and synchronized weapon fire.
+  - **3D Overhead Nametags**: Floating illuminated HUD callsign and dynamic health badges (`⚡ Ace-1 [100%]`).
+  - **Tactical Radar Tracking**: Friends appear on the minimap as illuminated cyan blips with callsign labels.
+  - **Co-op Swarm & PvP Dogfighting**: Team up against rogue AI drone waves or battle your friends in an intense aerial dogfight with laser and missile hit detection.
 - **Match Deployment Modal**:
-  - **Play with Friends (Squad Co-Op)**: Deploy alongside 2 Allied Wingmen (*Viper-2* & *Ghost-4*) flying in echelon formation, assisting with laser fire and tactical radio transmissions.
-  - **Single Player (Solo Ace)**: Take on the hostile drone swarm alone.
+  - **Play Online with Friends**: Live session management, 1-click invite link copy, and pilot callsign customization.
+  - **Single Player (Solo Ace)**: Take on the hostile rogue swarm solo.
 - **Audio & Radio Controls**:
   - Master Sound & Weapon FX (`ON` / `OFF`) via procedural Web Audio synthesizer.
   - Tactical Radio Chatter & killfeed alerts (`ON` / `OFF`).
@@ -61,6 +68,7 @@ An interactive, web-based 3D industrial drone explainer, real-world flight simul
 | **Cycle Camera Mode** | <kbd>C</kbd> | `📹 CAM` Button / OSD Dropdown |
 | **Flip Camera 180°** | <kbd>V</kbd> | Camera Director Flip Button |
 | **Direct Camera Modes** | Keys <kbd>1</kbd> – <kbd>8</kbd> | Camera Director Mode Chips |
+| **Invite Friends Link** | `📋 Invite Friends` | OSD Button / Match Setup Modal |
 | **Match Setup Modal** | **⚙️ Match Setup** | OSD Action Button |
 | **Respawn / Center** | <kbd>R</kbd> | `↺ Respawn` Button |
 
